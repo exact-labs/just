@@ -34,4 +34,13 @@
 			core.opSync('op_sleep', ms);
 		},
 	};
+
+	globalThis.os = {
+		release: () => {
+			return core.opAsync('op_release').slice(0, -1);
+		},
+		platform: () => {
+			return core.opAsync('op_platform').slice(0, -1);
+		},
+	};
 })(globalThis);

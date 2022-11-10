@@ -1,9 +1,11 @@
+mod os;
+
 use colored::Colorize;
 use deno_core::error::AnyError;
 use deno_core::op;
 use deno_core::Extension;
 use duration_string::DurationString;
-use std::{env, rc::Rc, thread, time::Instant};
+use std::{env, process, rc::Rc, thread, time::Instant};
 
 #[op]
 fn op_stdout(msg: String) -> Result<(), AnyError> {
@@ -51,6 +53,8 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             op_read_file::decl(),
             op_write_file::decl(),
             op_remove_file::decl(),
+            os::op_release::decl(),
+            os::op_platform::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
@@ -72,8 +76,15 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = match args.len() {
+        1 => {
+            eprintln!("{}", "Please specify a script to run.".yellow());
+            process::exit(0x0100);
+        }
         2 => args[1].split(".").collect::<Vec<_>>().join("."),
-        _ => panic!("Invalid Parameters"),
+        _ => {
+            eprintln!("{}", "Too many arguments.".red());
+            process::exit(0x0100);
+        }
     };
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()

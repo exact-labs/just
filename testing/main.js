@@ -2,6 +2,9 @@ import { hello } from './hello.js';
 
 hello();
 console.error('this is a error');
+console.log(os.release());
+console.log(os.platform());
+
 //
 // const path = './log.txt';
 // try {
