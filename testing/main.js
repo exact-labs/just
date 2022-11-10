@@ -13,7 +13,7 @@ console.log(os.freemem());
 console.log(os.totalmem());
 
 // format demo
-console.log(`${core.humanBytes(os.freemem())}/${core.humanBytes(os.totalmem())}`);
+console.log(`${os.freemem().parseBytes()}/${os.totalmem().parseBytes()}`);
 
 try {
 	const contents = await core.readFile(path);

@@ -18,6 +18,15 @@
 			.join(' ');
 	};
 
+	Object.defineProperty(String.prototype, 'parseBytes', {
+		value(decimals = 2) {
+			if (!+this) return '0B';
+			const c = 0 > decimals ? 0 : decimals,
+				d = Math.floor(Math.log(this) / Math.log(1024));
+			return `${parseFloat((this / Math.pow(1024, d)).toFixed(c))}${['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][d]}`;
+		},
+	});
+
 	globalThis.__dirname = core.opSync('op_dirname');
 
 	globalThis.console = {
@@ -47,14 +56,6 @@
 		},
 		sleep: (ms) => {
 			core.opSync('op_sleep', ms);
-		},
-		humanBytes: (bytes, decimals = 2) => {
-			if (!+bytes) return '0 Bytes';
-			const k = 1024;
-			const dm = decimals < 0 ? 0 : decimals;
-			const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-			const i = Math.floor(Math.log(bytes) / Math.log(k));
-			return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))}${sizes[i]}`;
 		},
 	};
 
