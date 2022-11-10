@@ -1,0 +1,10 @@
+{
+  "eablokker.tabsSidebar.config.customKindGroupsOrder" : [
+    "rust",
+    "javascript"
+  ],
+  "eablokker.tabsSidebar.config.customTabOrder" : [
+    "\/Users\/themackabu\/Developer\/rust\/js_runtime\/src\/main.rs",
+    "\/Users\/themackabu\/Developer\/rust\/js_runtime\/src\/runtime.js"
+  ]
+}
