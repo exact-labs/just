@@ -11,6 +11,7 @@ console.log(os.release());
 console.log(os.platform());
 console.log(os.freemem());
 console.log(os.totalmem());
+console.log(os.loadavg());
 
 // format demo
 console.log(`${os.freemem().parseBytes()}/${os.totalmem().parseBytes()}`);
@@ -22,21 +23,21 @@ try {
 	console.error('Unable to read file', path, err);
 }
 
+process.env.set('DEBUG', 'no');
 console.log(process.env.get('DEBUG'));
-console.log(process.env.toObject());
 
-// if (process.env.get('DEBUG')) {
-// 	// writing
-// 	await core.writeFile(path, 'Hello World');
-// 	const contents = await core.readFile(path);
-// 	console.log('read:', path, 'contents:', contents);
-//
-// 	// removing
-// 	console.log('Removing file', path);
-// 	core.removeFile(path);
-// 	console.log('File removed');
-//
-// 	// sleep
-// 	await sleep('2s');
-// 	console.clear();
-// }
+if (process.env.get('DEBUG') == 'yes') {
+	// writing
+	await core.writeFile(path, 'Hello World');
+	const contents = await core.readFile(path);
+	console.log('read:', path, 'contents:', contents);
+
+	// removing
+	console.log('Removing file', path);
+	core.removeFile(path);
+	console.log('File removed');
+
+	// sleep
+	await sleep('2s');
+	console.clear();
+}

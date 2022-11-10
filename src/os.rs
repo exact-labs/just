@@ -1,6 +1,4 @@
-use deno_core::error::AnyError;
 use deno_core::op;
-use std::collections::HashMap;
 use std::{env, process};
 use sysinfo::{System, SystemExt};
 
@@ -10,8 +8,8 @@ pub fn op_env_get(var: String) -> String {
 }
 
 #[op]
-fn op_env_object() -> Result<HashMap<String, String>, AnyError> {
-    Ok(env::vars().collect())
+pub fn op_env_set(key: String, var: String) {
+    env::set_var(key, var);
 }
 
 #[op]
@@ -88,8 +86,12 @@ pub fn op_totalmem() -> String {
 }
 
 #[op]
-pub fn loadavg() -> String {
-    return format!("{}", System::new_all().total_memory());
+pub fn op_loadavg() -> String {
+    let load_avg = System::new_all().load_average();
+    return format!(
+        "[{}, {}, {}]",
+        load_avg.one, load_avg.five, load_avg.fifteen
+    );
 }
 
 #[op]

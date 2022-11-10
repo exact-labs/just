@@ -73,6 +73,9 @@
 		totalmem: () => {
 			return ops.op_totalmem();
 		},
+		loadavg: () => {
+			return ops.op_loadavg();
+		},
 		exit: (code) => {
 			return ops.op_exit(code);
 		},
@@ -83,8 +86,8 @@
 			get: (value) => {
 				return ops.op_env_get(value);
 			},
-			toObject: () => {
-				return ops.op_env_object();
+			set: (key, value) => {
+				ops.op_env_set(key, value);
 			},
 		},
 	};
