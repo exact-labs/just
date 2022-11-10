@@ -1,4 +1,6 @@
-console.log('Hello');
+import { hello } from './hello.js';
+
+hello();
 // console.error('Boom!');
 //
 // const path = './log.txt';

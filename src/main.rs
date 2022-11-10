@@ -1,8 +1,8 @@
+use deno_core::error::AnyError;
 use deno_core::op;
 use deno_core::Extension;
-use deno_core::error::AnyError;
-use std::{thread, env, rc::Rc};
 use duration_string::DurationString;
+use std::{env, rc::Rc, thread, time::Instant};
 
 #[op]
 async fn op_read_file(path: String) -> Result<String, AnyError> {
@@ -57,15 +57,18 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = match args.len() {
-         2 => args[1].split(".").collect::<Vec<_>>().join("."),
-         _ => panic!("to many params"),
-     };
-    
+        2 => args[1].split(".").collect::<Vec<_>>().join("."),
+        _ => panic!("Invalid Parameters"),
+    };
+    println!("finished: {}.js", filename);
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
+    let start = Instant::now();
     if let Err(error) = runtime.block_on(exec(&*format!("{}.js", filename))) {
         eprintln!("error: {}", error);
+    } else {
+        println!("done: {:?}", start.elapsed())
     }
 }
