@@ -1,19 +1,22 @@
 ((globalThis) => {
 	const core = Deno.core;
 
-	function argsToMessage(...args) {
-		return args.map((arg) => JSON.stringify(arg)).join(' ');
-	}
+	const fmt = (...args) => {
+		return args
+			.map((arg) => JSON.stringify(arg))
+			.join(' ')
+			.slice(1, -1);
+	};
 
 	globalThis.console = {
 		log: (...args) => {
-			core.print(`[out]: ${argsToMessage(...args)}\n`, false);
+			core.opSync('op_stdout', fmt(...args));
 		},
 		error: (...args) => {
-			core.print(`[err]: ${argsToMessage(...args)}\n`, true);
+			core.opSync('op_stderr', fmt(...args));
 		},
 		clear: () => {
-			core.print('\033[2J\033[1;1H', false);
+			core.opSync('op_stdout', '\033[2J\033[1;1H');
 		},
 	};
 

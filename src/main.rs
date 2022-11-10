@@ -1,8 +1,27 @@
+use colored::Colorize;
 use deno_core::error::AnyError;
 use deno_core::op;
 use deno_core::Extension;
 use duration_string::DurationString;
 use std::{env, rc::Rc, thread, time::Instant};
+
+#[op]
+fn op_stdout(msg: String) -> Result<(), AnyError> {
+    println!("{}", msg);
+    Ok(())
+}
+
+#[op]
+fn op_stderr(msg: String) -> Result<(), AnyError> {
+    eprintln!("{}", format!("{}", msg).red());
+    Ok(())
+}
+
+#[op]
+fn op_sleep(ms: String) -> Result<(), AnyError> {
+    thread::sleep(DurationString::from_string(ms).unwrap().into());
+    Ok(())
+}
 
 #[op]
 async fn op_read_file(path: String) -> Result<String, AnyError> {
@@ -22,20 +41,16 @@ fn op_remove_file(path: String) -> Result<(), AnyError> {
     Ok(())
 }
 
-#[op]
-fn op_sleep(ms: String) -> Result<(), AnyError> {
-    thread::sleep(DurationString::from_string(ms).unwrap().into());
-    Ok(())
-}
-
 async fn exec(file_path: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_path)?;
     let runjs_extension = Extension::builder()
         .ops(vec![
+            op_stdout::decl(),
+            op_stderr::decl(),
+            op_sleep::decl(),
             op_read_file::decl(),
             op_write_file::decl(),
             op_remove_file::decl(),
-            op_sleep::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
@@ -43,9 +58,9 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
         extensions: vec![runjs_extension],
         ..Default::default()
     });
-    const RUNTIME_JAVASCRIPT_CORE: &str = include_str!("./runtime.js");
+    const RUNTIME_JAVASCRIPT_CORE: &str = include_str!("./runtime/main.js");
     js_runtime
-        .execute_script("[runjs:runtime.js]", RUNTIME_JAVASCRIPT_CORE)
+        .execute_script("[exec:runtime.js]", RUNTIME_JAVASCRIPT_CORE)
         .unwrap();
 
     let mod_id = js_runtime.load_main_module(&main_module, None).await?;
@@ -60,7 +75,6 @@ fn main() {
         2 => args[1].split(".").collect::<Vec<_>>().join("."),
         _ => panic!("Invalid Parameters"),
     };
-    println!("finished: {}.js", filename);
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -69,6 +83,10 @@ fn main() {
     if let Err(error) = runtime.block_on(exec(&*format!("{}.js", filename))) {
         eprintln!("error: {}", error);
     } else {
-        println!("done: {:?}", start.elapsed())
+        println!(
+            "\n{} took {}",
+            format!("{}.js", filename).white(),
+            format!("{:.2?}", start.elapsed()).yellow()
+        )
     }
 }

@@ -1,7 +1,7 @@
 import { hello } from './hello.js';
 
 hello();
-// console.error('Boom!');
+console.error('this is a error');
 //
 // const path = './log.txt';
 // try {
