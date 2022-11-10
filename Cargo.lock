@@ -54,6 +54,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
 
 [[package]]
+name = "core_js"
+version = "0.1.1"
+dependencies = [
+ "deno_core",
+ "duration-string",
+ "tokio",
+]
+
+[[package]]
 name = "deno_core"
 version = "0.142.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -457,15 +466,6 @@ name = "regex-syntax"
 version = "0.6.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
-
-[[package]]
-name = "runjs"
-version = "0.1.0"
-dependencies = [
- "deno_core",
- "duration-string",
- "tokio",
-]
 
 [[package]]
 name = "rustc_version"

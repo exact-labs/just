@@ -28,7 +28,7 @@ fn op_sleep(ms: String) -> Result<(), AnyError> {
     Ok(())
 }
 
-async fn run_js(file_path: &str) -> Result<(), AnyError> {
+async fn exec(file_path: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_path)?;
     let runjs_extension = Extension::builder()
         .ops(vec![
@@ -57,17 +57,15 @@ async fn run_js(file_path: &str) -> Result<(), AnyError> {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = match args.len() {
-         2 => args[1].split(".").collect::<Vec<_>>(),
+         2 => args[1].split(".").collect::<Vec<_>>().join("."),
          _ => panic!("to many params"),
      };
     
-    println!("{}.js", filename.split_last().unwrap().1.join("."));
-   
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
-    if let Err(error) = runtime.block_on(run_js("./example.js")) {
+    if let Err(error) = runtime.block_on(exec(&*format!("{}.js", filename))) {
         eprintln!("error: {}", error);
     }
 }
