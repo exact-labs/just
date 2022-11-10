@@ -1,8 +1,11 @@
 import { hello } from './hello.js';
 
+const module = await import(pkg('test'));
+
 const path = `${__dirname}/testing/demo.txt`;
 
 hello();
+// test();
 
 console.info('this is a notice');
 console.error('this is a error');
@@ -17,9 +20,6 @@ console.log(os.loadavg());
 
 // format demo
 console.log(`${os.freemem().parseBytes()}/${os.totalmem().parseBytes()}`);
-
-// @ demo
-console.log(__modules);
 
 try {
 	const contents = await fs.readFile(path);

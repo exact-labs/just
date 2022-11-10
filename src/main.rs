@@ -162,12 +162,12 @@ fn main() {
         .build()
         .unwrap();
     let start = Instant::now();
-    if let Err(error) = runtime.block_on(exec(&*format!("{}.js", filename))) {
+    if let Err(error) = runtime.block_on(exec(&*format!("{}.{}", filename, "js"))) {
         eprintln!("error: {}", error);
     } else {
         println!(
             "\n{} took {}",
-            format!("{}.js", filename).white(),
+            format!("{}.{}", filename, "js").white(),
             format!("{:.2?}", start.elapsed()).yellow()
         )
     }

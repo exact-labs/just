@@ -28,7 +28,7 @@
 		},
 	});
 
-	globalThis.__modules = ops.op_packages_dir();
+	globalThis.pkg = (file) => ops.op_packages_dir() + `/${file}/index.js`;
 	globalThis.__dirname = ops.op_dirname();
 	globalThis.sleep = (ms) => ops.op_sleep(ms);
 
