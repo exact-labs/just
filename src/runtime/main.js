@@ -3,14 +3,29 @@
 
 	const fmt = (...args) => {
 		return args
-			.map((arg) => JSON.stringify(arg))
-			.join(' ')
-			.slice(1, -1);
+			.map((arg) =>
+				JSON.stringify(arg)
+					.replace(/\\n/g, '\n')
+					.replace(/\\'/g, "'")
+					.replace(/\\"/g, '"')
+					.replace(/\\&/g, '&')
+					.replace(/\\r/g, '\r')
+					.replace(/\\t/g, '\t')
+					.replace(/\\b/g, '\b')
+					.replace(/\\f/g, '\f')
+					.slice(1, arg.length + 1)
+			)
+			.join(' ');
 	};
+
+	globalThis.__dirname = core.opSync('op_dirname');
 
 	globalThis.console = {
 		log: (...args) => {
 			core.opSync('op_stdout', fmt(...args));
+		},
+		info: (...args) => {
+			core.opSync('op_info', fmt(...args));
 		},
 		error: (...args) => {
 			core.opSync('op_stderr', fmt(...args));
@@ -37,10 +52,10 @@
 
 	globalThis.os = {
 		release: () => {
-			return core.opAsync('op_release').slice(0, -1);
+			return core.opSync('op_release');
 		},
 		platform: () => {
-			return core.opAsync('op_platform').slice(0, -1);
+			return core.opSync('op_platform');
 		},
 	};
 })(globalThis);

@@ -1,26 +1,32 @@
 import { hello } from './hello.js';
 
+const path = `${__dirname}/testing/demo.txt`;
+
 hello();
+
+console.info('this is a notice');
 console.error('this is a error');
+console.log(__dirname);
 console.log(os.release());
 console.log(os.platform());
 
-//
-// const path = './log.txt';
-// try {
-// 	const contents = await core.readFile(path);
-// 	console.log('Read from a file', contents);
-// } catch (err) {
-// 	console.error('Unable to read file', path, err);
-// }
-//
-// await core.writeFile(path, 'I can write to a file.');
+try {
+	const contents = await core.readFile(path);
+	console.log('read', path, '\n' + contents);
+} catch (err) {
+	console.error('Unable to read file', path, err);
+}
+
+// dont write
+// await core.writeFile(path, 'Hello World');
 // const contents = await core.readFile(path);
-// console.log('Read from a file', path, 'contents:', contents);
+// console.log('read:', path, 'contents:', contents);
+
+// keep file
 // console.log('Removing file', path);
 // core.removeFile(path);
 // console.log('File removed');
-//
+
+// debugging sake
 // await core.sleep('2s');
-//
 // console.clear();

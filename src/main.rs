@@ -9,13 +9,19 @@ use std::{env, process, rc::Rc, thread, time::Instant};
 
 #[op]
 fn op_stdout(msg: String) -> Result<(), AnyError> {
-    println!("{}", msg);
+    print!("{}\n", msg);
     Ok(())
 }
 
 #[op]
 fn op_stderr(msg: String) -> Result<(), AnyError> {
-    eprintln!("{}", format!("{}", msg).red());
+    eprint!("{}\n", format!("{}", msg).red());
+    Ok(())
+}
+
+#[op]
+fn op_info(msg: String) -> Result<(), AnyError> {
+    print!("{}\n", format!("{}", msg).cyan());
     Ok(())
 }
 
@@ -49,12 +55,14 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
         .ops(vec![
             op_stdout::decl(),
             op_stderr::decl(),
+            op_info::decl(),
             op_sleep::decl(),
             op_read_file::decl(),
             op_write_file::decl(),
             op_remove_file::decl(),
             os::op_release::decl(),
             os::op_platform::decl(),
+            os::op_dirname::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
