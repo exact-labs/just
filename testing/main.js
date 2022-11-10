@@ -9,6 +9,11 @@ console.error('this is a error');
 console.log(__dirname);
 console.log(os.release());
 console.log(os.platform());
+console.log(os.freemem());
+console.log(os.totalmem());
+
+// format demo
+console.log(`${core.humanBytes(os.freemem())}/${core.humanBytes(os.totalmem())}`);
 
 try {
 	const contents = await core.readFile(path);

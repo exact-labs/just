@@ -62,6 +62,8 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             op_remove_file::decl(),
             os::op_release::decl(),
             os::op_platform::decl(),
+            os::op_freemem::decl(),
+            os::op_totalmem::decl(),
             os::op_dirname::decl(),
         ])
         .build();

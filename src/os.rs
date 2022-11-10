@@ -1,5 +1,6 @@
 use deno_core::op;
 use std::env;
+use sysinfo::{System, SystemExt};
 
 #[op]
 pub fn op_release() -> String {
@@ -62,6 +63,16 @@ pub fn op_release() -> String {
 #[op]
 pub fn op_platform() -> String {
     return format!("{}", env::consts::OS);
+}
+
+#[op]
+pub fn op_freemem() -> String {
+    return format!("{}", System::new_all().used_memory());
+}
+
+#[op]
+pub fn op_totalmem() -> String {
+    return format!("{}", System::new_all().total_memory());
 }
 
 #[op]
