@@ -1,6 +1,18 @@
+use deno_core::error::AnyError;
 use deno_core::op;
-use std::env;
+use std::collections::HashMap;
+use std::{env, process};
 use sysinfo::{System, SystemExt};
+
+#[op]
+pub fn op_env_get(var: String) -> String {
+    return env::var(var).unwrap_or("none".to_string());
+}
+
+#[op]
+fn op_env_object() -> Result<HashMap<String, String>, AnyError> {
+    Ok(env::vars().collect())
+}
 
 #[op]
 pub fn op_release() -> String {
@@ -76,7 +88,17 @@ pub fn op_totalmem() -> String {
 }
 
 #[op]
+pub fn loadavg() -> String {
+    return format!("{}", System::new_all().total_memory());
+}
+
+#[op]
 pub fn op_dirname() -> String {
     let dir = env::current_dir().unwrap();
     return format!("{}", dir.display());
+}
+
+#[op]
+pub fn op_exit(code: i32) {
+    process::exit(code);
 }

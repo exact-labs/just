@@ -22,16 +22,21 @@ try {
 	console.error('Unable to read file', path, err);
 }
 
-// dont write
-// await core.writeFile(path, 'Hello World');
-// const contents = await core.readFile(path);
-// console.log('read:', path, 'contents:', contents);
+console.log(process.env.get('DEBUG'));
+console.log(process.env.toObject());
 
-// keep file
-// console.log('Removing file', path);
-// core.removeFile(path);
-// console.log('File removed');
-
-// debugging sake
-// await core.sleep('2s');
-// console.clear();
+// if (process.env.get('DEBUG')) {
+// 	// writing
+// 	await core.writeFile(path, 'Hello World');
+// 	const contents = await core.readFile(path);
+// 	console.log('read:', path, 'contents:', contents);
+//
+// 	// removing
+// 	console.log('Removing file', path);
+// 	core.removeFile(path);
+// 	console.log('File removed');
+//
+// 	// sleep
+// 	await sleep('2s');
+// 	console.clear();
+// }

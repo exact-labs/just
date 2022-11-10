@@ -60,11 +60,14 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             op_read_file::decl(),
             op_write_file::decl(),
             op_remove_file::decl(),
+            os::op_env_get::decl(),
+            os::op_env_object::decl(),
             os::op_release::decl(),
             os::op_platform::decl(),
             os::op_freemem::decl(),
             os::op_totalmem::decl(),
             os::op_dirname::decl(),
+            os::op_exit::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {

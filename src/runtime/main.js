@@ -1,5 +1,6 @@
 ((globalThis) => {
 	const core = Deno.core;
+	const ops = core.ops;
 
 	const fmt = (...args) => {
 		return args
@@ -27,20 +28,23 @@
 		},
 	});
 
-	globalThis.__dirname = core.opSync('op_dirname');
+	globalThis.__dirname = ops.op_dirname();
+	globalThis.sleep = (ms) => {
+		ops.op_sleep(ms);
+	};
 
 	globalThis.console = {
 		log: (...args) => {
-			core.opSync('op_stdout', fmt(...args));
+			ops.op_stdout(fmt(...args));
 		},
 		info: (...args) => {
-			core.opSync('op_info', fmt(...args));
+			ops.op_info(fmt(...args));
 		},
 		error: (...args) => {
-			core.opSync('op_stderr', fmt(...args));
+			ops.op_stderr(fmt(...args));
 		},
 		clear: () => {
-			core.opSync('op_stdout', '\033[2J\033[1;1H');
+			ops.op_stdout('\033[2J\033[1;1H');
 		},
 	};
 
@@ -52,25 +56,36 @@
 			return core.opAsync('op_write_file', path, contents);
 		},
 		removeFile: (path) => {
-			return core.opSync('op_remove_file', path);
-		},
-		sleep: (ms) => {
-			core.opSync('op_sleep', ms);
+			return ops.op_remove_file(path);
 		},
 	};
 
 	globalThis.os = {
 		release: () => {
-			return core.opSync('op_release');
+			return ops.op_release();
 		},
 		platform: () => {
-			return core.opSync('op_platform');
+			return ops.op_platform();
 		},
 		freemem: () => {
-			return core.opSync('op_freemem');
+			return ops.op_freemem();
 		},
 		totalmem: () => {
-			return core.opSync('op_totalmem');
+			return ops.op_totalmem();
+		},
+		exit: (code) => {
+			return ops.op_exit(code);
+		},
+	};
+
+	globalThis.process = {
+		env: {
+			get: (value) => {
+				return ops.op_env_get(value);
+			},
+			toObject: () => {
+				return ops.op_env_object();
+			},
 		},
 	};
 })(globalThis);
