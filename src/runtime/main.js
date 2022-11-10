@@ -1,6 +1,6 @@
 ((globalThis) => {
-	const core = Deno.core;
-	const ops = core.ops;
+	const { core } = Deno;
+	const { ops } = core;
 
 	const fmt = (...args) => {
 		return args
@@ -28,10 +28,9 @@
 		},
 	});
 
+	globalThis.__modules = ops.op_packages_dir();
 	globalThis.__dirname = ops.op_dirname();
-	globalThis.sleep = (ms) => {
-		ops.op_sleep(ms);
-	};
+	globalThis.sleep = (ms) => ops.op_sleep(ms);
 
 	globalThis.console = {
 		log: (...args) => {
@@ -48,47 +47,35 @@
 		},
 	};
 
-	globalThis.core = {
-		readFile: (path) => {
-			return core.opAsync('op_read_file', path);
-		},
-		writeFile: (path, contents) => {
-			return core.opAsync('op_write_file', path, contents);
-		},
-		removeFile: (path) => {
-			return ops.op_remove_file(path);
-		},
+	globalThis.fs = {
+		readFile: (path) => core.opAsync('op_read_file', path),
+		writeFile: (path, contents) => core.opAsync('op_write_file', path, contents),
+		removeFile: (path) => ops.op_remove_file(path),
 	};
 
 	globalThis.os = {
-		release: () => {
-			return ops.op_release();
-		},
-		platform: () => {
-			return ops.op_platform();
-		},
-		freemem: () => {
-			return ops.op_freemem();
-		},
-		totalmem: () => {
-			return ops.op_totalmem();
-		},
-		loadavg: () => {
-			return ops.op_loadavg();
-		},
-		exit: (code) => {
-			return ops.op_exit(code);
-		},
+		release: () => ops.op_release(),
+		platform: () => ops.op_platform(),
+		machine: () => ops.op_machine(),
+		uptime: () => ops.op_uptime(),
+		freemem: () => ops.op_freemem(),
+		totalmem: () => ops.op_totalmem(),
+		loadavg: () => ops.op_loadavg(),
+		exit: (code) => ops.op_exit(code),
 	};
 
 	globalThis.process = {
 		env: {
-			get: (value) => {
-				return ops.op_env_get(value);
-			},
-			set: (key, value) => {
-				ops.op_env_set(key, value);
-			},
+			args: () => ops.op_env(),
+			get: (value) => ops.op_env_get(value),
+			set: (key, value) => ops.op_env_set(key, value),
 		},
+		cwd: () => ops.op_dirname(),
+	};
+
+	globalThis.core = {
+		encode: (text) => ops.op_encode(text),
+		encode_fast: (text) => ops.op_encode_fast(text),
+		escape: (text) => ops.op_escape(text),
 	};
 })(globalThis);

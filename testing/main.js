@@ -9,6 +9,8 @@ console.error('this is a error');
 console.log(__dirname);
 console.log(os.release());
 console.log(os.platform());
+console.log(os.machine());
+console.log(os.uptime());
 console.log(os.freemem());
 console.log(os.totalmem());
 console.log(os.loadavg());
@@ -16,8 +18,11 @@ console.log(os.loadavg());
 // format demo
 console.log(`${os.freemem().parseBytes()}/${os.totalmem().parseBytes()}`);
 
+// @ demo
+console.log(__modules);
+
 try {
-	const contents = await core.readFile(path);
+	const contents = await fs.readFile(path);
 	console.log('read', path, '\n' + contents);
 } catch (err) {
 	console.error('Unable to read file', path, err);
@@ -28,13 +33,13 @@ console.log(process.env.get('DEBUG'));
 
 if (process.env.get('DEBUG') == 'yes') {
 	// writing
-	await core.writeFile(path, 'Hello World');
-	const contents = await core.readFile(path);
+	await fs.writeFile(path, 'Hello World');
+	const contents = await fs.readFile(path);
 	console.log('read:', path, 'contents:', contents);
 
 	// removing
 	console.log('Removing file', path);
-	core.removeFile(path);
+	fs.removeFile(path);
 	console.log('File removed');
 
 	// sleep
