@@ -104,6 +104,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "duration-string"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed54458e2c14ff3f2241c0ad1c199ae9674c4e050104ad8dc0803415331bf932"
+
+[[package]]
 name = "either"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -457,6 +463,7 @@ name = "runjs"
 version = "0.1.0"
 dependencies = [
  "deno_core",
+ "duration-string",
  "tokio",
 ]
 

@@ -2,6 +2,8 @@ use deno_core::op;
 use deno_core::Extension;
 use deno_core::error::AnyError;
 use std::rc::Rc;
+use std::{thread};
+use duration_string::DurationString;
 
 #[op]
 async fn op_read_file(path: String) -> Result<String, AnyError> {
@@ -21,6 +23,12 @@ fn op_remove_file(path: String) -> Result<(), AnyError> {
     Ok(())
 }
 
+#[op]
+fn op_sleep(ms: String) -> Result<(), AnyError> {
+    thread::sleep(DurationString::from_string(ms).unwrap().into());
+    Ok(())
+}
+
 async fn run_js(file_path: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_path)?;
     let runjs_extension = Extension::builder()
@@ -28,6 +36,7 @@ async fn run_js(file_path: &str) -> Result<(), AnyError> {
             op_read_file::decl(),
             op_write_file::decl(),
             op_remove_file::decl(),
+            op_sleep::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {

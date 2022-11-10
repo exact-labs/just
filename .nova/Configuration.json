@@ -1,10 +1,13 @@
 {
   "eablokker.tabsSidebar.config.customKindGroupsOrder" : [
     "rust",
-    "javascript"
+    "javascript",
+    "toml"
   ],
   "eablokker.tabsSidebar.config.customTabOrder" : [
     "\/Users\/themackabu\/Developer\/rust\/js_runtime\/src\/main.rs",
+    "\/Users\/themackabu\/Developer\/rust\/js_runtime\/Cargo.toml",
+    "\/Users\/themackabu\/Developer\/rust\/js_runtime\/example.js",
     "\/Users\/themackabu\/Developer\/rust\/js_runtime\/src\/runtime.js"
   ]
 }

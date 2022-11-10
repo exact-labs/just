@@ -13,7 +13,7 @@
 			core.print(`[err]: ${argsToMessage(...args)}\n`, true);
 		},
 		clear: () => {
-			core.print('\033[2J\033[1;1H', true);
+			core.print('\033[2J\033[1;1H', false);
 		},
 	};
 
@@ -26,6 +26,9 @@
 		},
 		removeFile: (path) => {
 			return core.opSync('op_remove_file', path);
+		},
+		sleep: (ms) => {
+			core.opSync('op_sleep', ms);
 		},
 	};
 })(globalThis);
