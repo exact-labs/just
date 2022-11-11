@@ -1,7 +1,7 @@
 import { hello } from './hello.js';
 
 const { test } = await import(pkg('test'));
-const path = `${__dirname}/testing/demo.txt`;
+const path = `${__dirname}/demo.txt`;
 
 // imports
 core.print('\x1b[35mconsole.log (import) \x1b[0m');
