@@ -97,6 +97,11 @@ pub fn op_uptime() -> String {
 }
 
 #[op]
+pub fn op_cpus() -> String {
+    return format!("{}", System::new_all().cpus().len());
+}
+
+#[op]
 pub fn op_freemem() -> String {
     return format!("{}", System::new_all().used_memory());
 }

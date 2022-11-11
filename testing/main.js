@@ -1,11 +1,10 @@
 import { hello } from './hello.js';
 
-const module = await import(pkg('test'));
-
+const { test } = await import(pkg('test'));
 const path = `${__dirname}/testing/demo.txt`;
 
 hello();
-// test();
+test();
 
 console.info('this is a notice');
 console.error('this is a error');
@@ -15,6 +14,7 @@ console.log(os.platform());
 console.log(os.homedir());
 console.log(os.hostname());
 console.log(os.machine());
+console.log(os.cpus());
 console.log(os.uptime());
 console.log(os.freemem());
 console.log(os.totalmem());
@@ -32,6 +32,8 @@ try {
 
 process.env.set('DEBUG', 'no');
 console.log(process.env.get('DEBUG'));
+
+fetch('https://httpbin.org/ip').then((data) => console.log(data));
 
 if (process.env.get('DEBUG') == 'yes') {
 	// writing

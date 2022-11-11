@@ -31,6 +31,7 @@
 	globalThis.pkg = (file) => ops.op_packages_dir() + `/${file}/index.js`;
 	globalThis.__dirname = ops.op_dirname();
 	globalThis.sleep = (ms) => ops.op_sleep(ms);
+	globalThis.fetch = (url) => core.opAsync('op_fetch', url);
 
 	globalThis.console = {
 		log: (...args) => {
@@ -59,6 +60,7 @@
 		machine: () => ops.op_machine(),
 		hostname: () => ops.op_hostname().slice(1, -1),
 		homedir: () => ops.op_homedir(),
+		cpus: () => ops.op_cpus(),
 		uptime: () => ops.op_uptime(),
 		freemem: () => ops.op_freemem(),
 		totalmem: () => ops.op_totalmem(),
@@ -75,6 +77,7 @@
 	};
 
 	globalThis.core = {
+		listen: () => ops.op_listen(),
 		encode: (text) => ops.op_encode(text),
 		encode_fast: (text) => ops.op_encode_fast(text),
 		escape: (text) => ops.op_escape(text),

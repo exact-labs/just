@@ -1,3 +1,4 @@
+mod http;
 mod os;
 
 use crate::serde_v8::from_v8;
@@ -121,12 +122,14 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             os::op_homedir::decl(),
             os::op_release::decl(),
             os::op_platform::decl(),
+            os::op_cpus::decl(),
             os::op_uptime::decl(),
             os::op_freemem::decl(),
             os::op_totalmem::decl(),
             os::op_loadavg::decl(),
             os::op_dirname::decl(),
             os::op_exit::decl(),
+            http::op_fetch::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
