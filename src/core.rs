@@ -2,8 +2,14 @@ use colored::Colorize;
 use deno_core::error::AnyError;
 use deno_core::op;
 use duration_string::DurationString;
+use nanoid::nanoid;
 use std::{env, thread};
 use v_htmlescape::escape;
+
+#[op]
+pub fn op_id(len: usize) -> String {
+    return nanoid!(len);
+}
 
 #[op]
 pub fn op_escape(text: String) -> Result<String, AnyError> {

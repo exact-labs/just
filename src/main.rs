@@ -19,6 +19,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             fs::op_remove_file::decl(),
             modify::op_encode::decl(),
             modify::op_encode_fast::decl(),
+            core::op_id::decl(),
             core::op_escape::decl(),
             core::op_packages_dir::decl(),
             core::op_stdout::decl(),

@@ -34,7 +34,12 @@ core.print('\x1b[35mos.totalmem() \x1b[0m');
 console.log(os.totalmem());
 core.print('\x1b[35mos.loadavg() \x1b[0m');
 console.log(os.loadavg());
-
+core.print(`\x1b[35mrandID unsec \x1b[0m`);
+console.log([...Array(4)].map((i) => Math.round(Date.now() + Math.random() * Date.now()).toString(36)).join(''));
+core.print(`\x1b[35mrandID sec \x1b[0m`);
+console.log(core.id());
+core.print('\x1b[35mcore.uuid() \x1b[0m');
+console.log(core.uuid());
 // format demo
 core.print('\x1b[35m.parseBytes() \x1b[0m');
 console.log(`${os.freemem().parseBytes()}/${os.totalmem().parseBytes()}`);
