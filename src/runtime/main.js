@@ -57,6 +57,8 @@
 		release: () => ops.op_release(),
 		platform: () => ops.op_platform(),
 		machine: () => ops.op_machine(),
+		hostname: () => ops.op_hostname().slice(1, -1),
+		homedir: () => ops.op_homedir(),
 		uptime: () => ops.op_uptime(),
 		freemem: () => ops.op_freemem(),
 		totalmem: () => ops.op_totalmem(),

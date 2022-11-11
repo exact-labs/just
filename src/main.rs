@@ -117,6 +117,8 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             os::op_env_get::decl(),
             os::op_env_set::decl(),
             os::op_machine::decl(),
+            os::op_hostname::decl(),
+            os::op_homedir::decl(),
             os::op_release::decl(),
             os::op_platform::decl(),
             os::op_uptime::decl(),

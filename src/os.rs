@@ -1,4 +1,5 @@
 use deno_core::op;
+use dirs;
 use std::{env, process};
 use sysinfo::{System, SystemExt}; // 0.4.15
 
@@ -78,6 +79,16 @@ pub fn op_platform() -> String {
 #[op]
 pub fn op_machine() -> String {
     return format!("{}", env::consts::ARCH);
+}
+
+#[op]
+pub fn op_hostname() -> String {
+    return format!("{:?}", hostname::get().unwrap());
+}
+
+#[op]
+pub fn op_homedir() -> String {
+    return format!("{}", dirs::home_dir().unwrap().display());
 }
 
 #[op]
