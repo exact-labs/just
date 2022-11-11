@@ -1,0 +1,10 @@
+{
+	"version": "0.0.1",
+	"name": "pkg_test",
+	"dependencies": {
+		"test": "0.0.1"
+	},
+	"scripts": {
+		"start": "core-js run testing/pkg.js"
+	}
+}
