@@ -7,20 +7,33 @@ mod serve;
 
 use colored::Colorize;
 use deno_core::error::AnyError;
-// use deno_core::include_js_files;
+use deno_core::include_js_files;
+use deno_core::op;
 use deno_core::serde_v8;
 use deno_core::Extension;
 use std::{env, process, rc::Rc, time::Instant};
 
+#[op]
+fn op_version() -> String {
+    return format!("{}", env!("CARGO_PKG_VERSION"));
+}
+
 async fn exec(file_path: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_path)?;
     let runjs_extension = Extension::builder()
-        // .js(include_js_files!(
-        //   prefix "runtime/util",
-        //   "runtime/util/http.js",
-        // ))
+        .js(include_js_files!(
+          prefix "runtime/util",
+          "runtime/util/core.js",
+          "runtime/util/cli.js",
+          "runtime/util/native.js",
+          "runtime/util/string.js",
+          "runtime/util/http.js",
+          "runtime/util/misc.js",
+        ))
         .ops(vec![
+            op_version::decl(),
             fs::op_read_file::decl(),
+            fs::op_read_dir::decl(),
             fs::op_write_file::decl(),
             fs::op_remove_file::decl(),
             modify::op_encode::decl(),
