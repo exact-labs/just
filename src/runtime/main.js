@@ -91,7 +91,10 @@
 		encode: (text) => ops.op_encode(text),
 		encode_fast: (text) => ops.op_encode_fast(text),
 		escape: (text) => ops.op_escape(text),
-		id: (len = 21) => ops.op_id(len),
+		id: {
+			secure: (len = 21) => ops.op_id(len),
+			basic: (rounds = 3) => [...Array(rounds)].map((i) => Math.round(Date.now() + Math.random() * Date.now()).toString(36)).join(''),
+		},
 		print: (text) => ops.op_print(text),
 		uuid: () => {
 			var lut = [];
