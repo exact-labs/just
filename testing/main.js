@@ -52,7 +52,10 @@ process.env.set('DEBUG', 'no');
 console.log(process.env.get('DEBUG'));
 
 core.print(`\x1b[35mhttp.get('https://httpbin.org/json') \x1b[0m`);
-http.get('https://httpbin.org/json').then((data) => console.log(data));
+await http.get('https://httpbin.org/json').then((data) => console.log(data));
+
+core.print(`\x1b[35mhttp.post('https://httpbin.org/anything') \x1b[0m`);
+await http.post('https://httpbin.org/anything', 'hello world').then((data) => console.log(data));
 
 if (process.env.get('DEBUG') == 'yes') {
 	// writing
