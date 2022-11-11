@@ -114,7 +114,6 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             op_encode::decl(),
             op_encode_fast::decl(),
             op_escape::decl(),
-            os::op_env::decl(),
             os::op_env_get::decl(),
             os::op_env_set::decl(),
             os::op_machine::decl(),

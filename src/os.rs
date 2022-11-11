@@ -1,7 +1,4 @@
-use deno_core::error::AnyError;
 use deno_core::op;
-use deno_core::serde_v8;
-use deno_core::v8;
 use std::{env, process};
 use sysinfo::{System, SystemExt}; // 0.4.15
 
@@ -13,22 +10,6 @@ pub fn op_env_get(var: String) -> String {
 #[op]
 pub fn op_env_set(key: String, var: String) {
     env::set_var(key, var);
-}
-
-#[op(v8)]
-pub fn op_env<'scope>(
-    scope: &mut v8::HandleScope<'scope>,
-) -> Result<serde_v8::Value<'scope>, AnyError> {
-    let args: Vec<String> = env::args().collect();
-    let array = v8::Array::new(scope, args.len() as i32);
-    let mut i = 0;
-    for arg in args {
-        let str = v8::String::new(scope, &arg).unwrap().into();
-        array.set_index(scope, i, str);
-        i += 1;
-    }
-    let array_value: v8::Local<v8::Value> = array.into();
-    Ok(array_value.into())
 }
 
 #[op]
