@@ -3,9 +3,11 @@ mod fs;
 mod http;
 mod modify;
 mod os;
+mod serve;
 
 use colored::Colorize;
 use deno_core::error::AnyError;
+// use deno_core::include_js_files;
 use deno_core::serde_v8;
 use deno_core::Extension;
 use std::{env, process, rc::Rc, time::Instant};
@@ -13,6 +15,10 @@ use std::{env, process, rc::Rc, time::Instant};
 async fn exec(file_path: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_path)?;
     let runjs_extension = Extension::builder()
+        // .js(include_js_files!(
+        //   prefix "runtime/util",
+        //   "runtime/util/http.js",
+        // ))
         .ops(vec![
             fs::op_read_file::decl(),
             fs::op_write_file::decl(),
@@ -42,6 +48,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             os::op_exit::decl(),
             http::op_get::decl(),
             http::op_post::decl(),
+            serve::op_static::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {

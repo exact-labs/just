@@ -39,7 +39,8 @@ console.log(core.id.basic());
 core.print(`\x1b[35mrandID secure \x1b[0m`);
 console.log(core.id.secure());
 core.print('\x1b[35mcore.uuid() \x1b[0m');
-console.log(core.uuid());
+console.log(core.id.uuid());
+
 // format demo
 core.print('\x1b[35m.parseBytes() \x1b[0m');
 console.log(`${os.freemem().parseBytes()}/${os.totalmem().parseBytes()}`);
