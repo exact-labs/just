@@ -88,7 +88,12 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 1 && (args[1] == "--version" || args[1] == "-v") {
-        println!("core_js {}", env!("CARGO_PKG_VERSION"));
+        println!(
+            "core_js {} ({} {})",
+            env!("CARGO_PKG_VERSION"),
+            env!("GIT_HASH"),
+            env!("BUILD_DATE")
+        );
         process::exit(1);
     }
 
