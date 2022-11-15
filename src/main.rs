@@ -1,5 +1,6 @@
 mod cmd;
 mod core;
+mod db;
 mod fs;
 mod http;
 mod modify;
@@ -27,6 +28,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
           "runtime/util/core.js",
           "runtime/util/cli.js",
           "runtime/util/cmd.js",
+          "runtime/util/db.js",
           "runtime/util/native.js",
           "runtime/util/string.js",
           "runtime/util/http.js",
@@ -66,6 +68,12 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             http::op_get::decl(),
             http::op_post::decl(),
             serve::op_static::decl(),
+            db::op_db_init::decl(),
+            db::op_db_create::decl(),
+            db::op_db_exec::decl(),
+            db::op_db_insert::decl(),
+            db::op_db_query::decl(),
+            db::op_db_delete::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
@@ -89,7 +97,8 @@ fn main() {
 
     if args.len() > 1 && (args[1] == "--version" || args[1] == "-v") {
         println!(
-            "core_js {} ({} {})",
+            "{} {} ({} {})",
+            env!("CARGO_PKG_NAME"),
             env!("CARGO_PKG_VERSION"),
             env!("GIT_HASH"),
             env!("BUILD_DATE")
