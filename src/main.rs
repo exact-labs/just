@@ -1,3 +1,4 @@
+mod cmd;
 mod core;
 mod fs;
 mod http;
@@ -25,10 +26,11 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
           prefix "runtime/util",
           "runtime/util/core.js",
           "runtime/util/cli.js",
+          "runtime/util/cmd.js",
           "runtime/util/native.js",
           "runtime/util/string.js",
           "runtime/util/http.js",
-          "runtime/util/misc.js",
+          "runtime/util/extra.js",
         ))
         .ops(vec![
             op_version::decl(),
@@ -45,6 +47,8 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             core::op_stderr::decl(),
             core::op_info::decl(),
             core::op_sleep::decl(),
+            cmd::op_exec::decl(),
+            cmd::op_spawn::decl(),
             os::op_env_get::decl(),
             os::op_env_set::decl(),
             os::op_machine::decl(),
@@ -82,6 +86,12 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    if args.len() > 1 && (args[1] == "--version" || args[1] == "-v") {
+        println!("core_js {}", env!("CARGO_PKG_VERSION"));
+        process::exit(1);
+    }
+
     let filename = match args.len() {
         1 => {
             eprintln!("{}", "Please specify a script to run.".yellow());

@@ -1,0 +1,14 @@
+console.log(extra.rgbToHex(255, 0, 244));
+console.log(extra.date.timeFrom(new Date()));
+console.log(extra.date.diff(new Date('2020-10-21'), new Date()));
+console.log(extra.date.isWeek(new Date()));
+console.log(extra.math.randInt(0, 5));
+console.log(extra.math.randFloat(0, 5));
+console.log(extra.temp.ctof(15));
+console.log(extra.temp.ftoc(15));
+console.log('hello world'.reverse());
+console.log('{"hello":"world"}'.json()['hello']);
+console.log(extra.base64.encode('hello world'));
+console.log(extra.base64.decode('d29ybGQgaGVsbG8='));
+console.log(extra.base64.test('d29ybGQgaGVsbG8='));
+console.log(extra.base64.test('hello world'));

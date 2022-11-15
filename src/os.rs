@@ -1,7 +1,7 @@
 use deno_core::op;
 use dirs;
 use std::{env, process};
-use sysinfo::{System, SystemExt}; // 0.4.15
+use sysinfo::{System, SystemExt};
 
 #[op]
 pub fn op_env_get(var: String) -> String {

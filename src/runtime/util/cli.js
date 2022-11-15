@@ -5,7 +5,7 @@
 	const fmt = (...args) => {
 		return args
 			.map((arg) =>
-				JSON.stringify(arg)
+				JSON.stringify(arg.toString())
 					.replace(/\\n/g, '\n')
 					.replace(/\\'/g, "'")
 					.replace(/\\"/g, '"')
@@ -14,7 +14,7 @@
 					.replace(/\\t/g, '\t')
 					.replace(/\\b/g, '\b')
 					.replace(/\\f/g, '\f')
-					.slice(1, arg.length + 1)
+					.slice(1, arg.toString().length + 1)
 			)
 			.join(' ');
 	};

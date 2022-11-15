@@ -13,4 +13,12 @@
 			return JSON.parse(this);
 		},
 	});
+
+	Object.defineProperty(String.prototype, 'reverse', {
+		value() {
+			return this.split('').reverse().join('');
+		},
+	});
+
+	globalThis.string = {};
 })(globalThis);

@@ -1,6 +1,6 @@
 [package]
 name = "core_js"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]
@@ -19,3 +19,4 @@ nanoid = "0.4.0"
 staticfile = "0.5.0"
 mount = "0.4.0"
 iron = "0.6.1"
+shell = { git = "https://github.com/google/rust-shell" }
