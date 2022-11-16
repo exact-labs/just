@@ -26,18 +26,15 @@ pub fn op_db_insert(db_name: String, table: String, keys: String, value: String)
 pub fn op_db_query(db_name: String, table: String, query: String) {
     let connection = sqlite::open(db_name).unwrap();
 
-    return connection
-        .iterate(format!("SELECT * from {table} {query}"), |pairs| {
-            let mut values = HashMap::new();
-
-            for &(name, value) in pairs.iter() {
-                values.insert(name, value.unwrap());
-            }
-
-            println!("{:?}", values);
-            true
-        })
-        .unwrap();
+    println!(
+        "{:#?}",
+        connection
+            .prepare(format!("SELECT * from {table} {query}"))
+            .unwrap()
+            .into_iter()
+            .map(|row| row.unwrap())
+            .collect::<Vec<_>>()
+    )
 }
 
 #[op]
