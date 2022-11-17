@@ -23,18 +23,22 @@ pub fn op_db_insert(db_name: String, table: String, keys: String, value: String)
 }
 
 #[op]
-pub fn op_db_query(db_name: String, table: String, query: String) {
+pub fn op_db_query(db_name: String, table: String, query: String) -> String {
     let connection = sqlite::open(db_name).unwrap();
+    let mut rows: Vec<String> = Vec::new();
 
-    println!(
-        "{:#?}",
-        connection
-            .prepare(format!("SELECT * from {table} {query}"))
-            .unwrap()
-            .into_iter()
-            .map(|row| row.unwrap())
-            .collect::<Vec<_>>()
-    )
+    connection
+        .iterate(format!("SELECT * from {table} {query}"), |pairs| {
+            let mut column = HashMap::<&str, &str>::new();
+            for &(name, value) in pairs.iter() {
+                column.insert(name, value.unwrap());
+            }
+            rows.push(format!("{:?}", column));
+            true
+        })
+        .unwrap();
+
+    return format!("{:?}", rows);
 }
 
 #[op]
