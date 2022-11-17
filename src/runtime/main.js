@@ -4,5 +4,6 @@
 
 	globalThis.runtime = {
 		version: () => ops.op_version(),
+		internal: Deno,
 	};
 })(globalThis);

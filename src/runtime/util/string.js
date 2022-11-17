@@ -14,18 +14,6 @@
 		},
 	});
 
-	// Object.defineProperty(String.prototype, 'jsonString', {
-	// 	value() {
-	// 		return JSON.parse(
-	// 			`[${Array.from(this.slice(1, -1).replace(/"(-|)([0-9]+(?:\.[0-9]+)?)"/g, '$1$2'))
-	// 				.slice(1, -1)
-	// 				.join('')
-	// 				.split('}","{')
-	// 				.join('},{')}]`
-	// 		);
-	// 	},
-	// });
-
 	Object.defineProperty(String.prototype, 'reverse', {
 		value() {
 			return this.split('').reverse().join('');

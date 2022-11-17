@@ -68,6 +68,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             http::op_get::decl(),
             http::op_post::decl(),
             serve::op_static::decl(),
+            serve::op_static_test::decl(),
             db::op_db_init::decl(),
             db::op_db_create::decl(),
             db::op_db_exec::decl(),
