@@ -45,7 +45,7 @@ pub fn op_db_query(db_name: String, table: String, query: String) -> String {
 pub fn op_db_delete(db_name: String, table: String, query: String) {
     let connection = sqlite::open(db_name).unwrap();
     connection
-        .execute(format!("DELETE FROM {table} WHERE {query}"))
+        .execute(format!("DELETE FROM {table} {query}"))
         .unwrap();
 }
 
