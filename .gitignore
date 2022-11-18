@@ -1,3 +1,4 @@
 target/*
 .nova/*
 core_js
+tests/files/*.db
