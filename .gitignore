@@ -2,3 +2,4 @@ target/*
 .nova/*
 core_js
 tests/files/*.db
+src/embed/external
