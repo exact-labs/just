@@ -3,13 +3,12 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 )
 
 func Get_file(file string) {
 	body, err := ioutil.ReadFile(file)
 	if err != nil {
-		log.Fatalf("unable to read file: %v", err)
+		fmt.Printf("\x1b[31m%v\033[0m", err)
 	}
-	fmt.Print(string(body))
+	fmt.Println(string(body))
 }
