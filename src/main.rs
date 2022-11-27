@@ -2,6 +2,7 @@ mod cmd;
 mod core;
 mod db;
 mod fs;
+mod go;
 mod http;
 mod modify;
 mod os;
@@ -27,6 +28,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
           prefix "runtime/util",
           "runtime/util/core.js",
           "runtime/util/cli.js",
+          "runtime/util/ext.js",
           "runtime/util/cmd.js",
           "runtime/util/db.js",
           "runtime/util/native.js",
@@ -75,6 +77,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
             db::op_db_insert::decl(),
             db::op_db_query::decl(),
             db::op_db_delete::decl(),
+            go::run_ext_func::decl(),
         ])
         .build();
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
@@ -122,6 +125,9 @@ fn main() {
         .enable_all()
         .build()
         .unwrap();
+
+    go::init();
+
     let start = Instant::now();
     if let Err(error) = runtime.block_on(exec(&*format!("{}.{}", filename, "js"))) {
         eprintln!("error: {}", error);
