@@ -33,85 +33,93 @@ fn get_version(short: bool) -> String {
     };
 }
 
-fn core_runtime() -> deno_core::JsRuntime {
+fn extensions() -> deno_core::Extension {
+    return Extension::builder()
+        .js(include_js_files!(
+          prefix "runtime/util",
+          "runtime/util/core.js",
+          "runtime/util/cli.js",
+          "runtime/util/ext.js",
+          "runtime/util/cmd.js",
+          "runtime/util/db.js",
+          "runtime/util/native.js",
+          "runtime/util/string.js",
+          "runtime/util/http.js",
+          "runtime/util/extra.js",
+        ))
+        .ops(vec![
+            core::op_version::decl(),
+            fs::op_read_file::decl(),
+            fs::op_read_dir::decl(),
+            fs::op_write_file::decl(),
+            fs::op_remove_file::decl(),
+            modify::op_encode::decl(),
+            modify::op_encode_fast::decl(),
+            core::op_id::decl(),
+            core::op_escape::decl(),
+            core::op_packages_dir::decl(),
+            core::op_stdout::decl(),
+            core::op_stderr::decl(),
+            core::op_info::decl(),
+            core::op_sleep::decl(),
+            cmd::op_exec::decl(),
+            cmd::op_spawn::decl(),
+            os::op_env_get::decl(),
+            os::op_env_set::decl(),
+            os::op_machine::decl(),
+            os::op_hostname::decl(),
+            os::op_homedir::decl(),
+            os::op_release::decl(),
+            os::op_platform::decl(),
+            os::op_cpus::decl(),
+            os::op_uptime::decl(),
+            os::op_freemem::decl(),
+            os::op_totalmem::decl(),
+            os::op_loadavg::decl(),
+            os::op_dirname::decl(),
+            os::op_exit::decl(),
+            http::op_get::decl(),
+            http::op_post::decl(),
+            serve::op_static::decl(),
+            serve::op_static_test::decl(),
+            db::op_db_init::decl(),
+            db::op_db_create::decl(),
+            db::op_db_exec::decl(),
+            db::op_db_insert::decl(),
+            db::op_db_query::decl(),
+            db::op_db_delete::decl(),
+            go::run_ext_func::decl(),
+        ])
+        .build();
+}
+
+async fn exec(file_name: &str) -> Result<(), AnyError> {
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
         module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
-        extensions: vec![Extension::builder()
-            .js(include_js_files!(
-              prefix "runtime/util",
-              "runtime/util/core.js",
-              "runtime/util/cli.js",
-              "runtime/util/ext.js",
-              "runtime/util/cmd.js",
-              "runtime/util/db.js",
-              "runtime/util/native.js",
-              "runtime/util/string.js",
-              "runtime/util/http.js",
-              "runtime/util/extra.js",
-            ))
-            .ops(vec![
-                core::op_version::decl(),
-                fs::op_read_file::decl(),
-                fs::op_read_dir::decl(),
-                fs::op_write_file::decl(),
-                fs::op_remove_file::decl(),
-                modify::op_encode::decl(),
-                modify::op_encode_fast::decl(),
-                core::op_id::decl(),
-                core::op_escape::decl(),
-                core::op_packages_dir::decl(),
-                core::op_stdout::decl(),
-                core::op_stderr::decl(),
-                core::op_info::decl(),
-                core::op_sleep::decl(),
-                cmd::op_exec::decl(),
-                cmd::op_spawn::decl(),
-                os::op_env_get::decl(),
-                os::op_env_set::decl(),
-                os::op_machine::decl(),
-                os::op_hostname::decl(),
-                os::op_homedir::decl(),
-                os::op_release::decl(),
-                os::op_platform::decl(),
-                os::op_cpus::decl(),
-                os::op_uptime::decl(),
-                os::op_freemem::decl(),
-                os::op_totalmem::decl(),
-                os::op_loadavg::decl(),
-                os::op_dirname::decl(),
-                os::op_exit::decl(),
-                http::op_get::decl(),
-                http::op_post::decl(),
-                serve::op_static::decl(),
-                serve::op_static_test::decl(),
-                db::op_db_init::decl(),
-                db::op_db_create::decl(),
-                db::op_db_exec::decl(),
-                db::op_db_insert::decl(),
-                db::op_db_query::decl(),
-                db::op_db_delete::decl(),
-                go::run_ext_func::decl(),
-            ])
-            .build()],
+        extensions: vec![extensions()],
         ..Default::default()
     });
     js_runtime
         .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
         .unwrap();
 
-    return js_runtime;
-}
-
-async fn exec(file_name: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_name)?;
-    let mod_id = core_runtime().load_main_module(&main_module, None).await?;
-    let result = core_runtime().mod_evaluate(mod_id);
-    core_runtime().run_event_loop(false).await?;
+    let mod_id = js_runtime.load_main_module(&main_module, None).await?;
+    let result = js_runtime.mod_evaluate(mod_id);
+    js_runtime.run_event_loop(false).await?;
     result.await?
 }
 
 async fn repl(line: &str) -> Result<deno_core::v8::Global<deno_core::v8::Value>, AnyError> {
-    return core_runtime().execute_script("<repl>", line);
+    let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
+        module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
+        extensions: vec![extensions()],
+        ..Default::default()
+    });
+    js_runtime
+        .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
+        .unwrap();
+    return js_runtime.execute_script("<repl>", line);
 }
 
 #[derive(Parser)]
