@@ -9,14 +9,14 @@ build:
    
 test:
 	cd src/embed && go mod tidy && go build .
-	cd tests && cargo run $(run)
+	cd tests && cargo run run $(run).js
 
 test_all_run:
 	cd src/embed && go mod tidy && go build .
 	d=$$(date +%s)\
 	; for file in tests/*.js; do \
 		cd tests; \
-		cargo run $${file#*/}; \
+		cargo run run $${file#*/}; \
 		cd ../; \
 	done \
 	&& echo "\n\033[4;36m\033[1;36mtests took $$(($$(date +%s)-d)) seconds\033[0m"
@@ -28,7 +28,7 @@ test_all_build:
 	d=$$(date +%s)\
 	; for file in tests/*.js; do \
 		cd tests; \
-		../core_js $${file#*/}; \
+		../core_js run $${file#*/}; \
 		cd ../; \
 	done \
 	&& echo "\n\033[4;36m\033[1;36mtests took $$(($$(date +%s)-d)) seconds\033[0m"
