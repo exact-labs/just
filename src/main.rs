@@ -8,17 +8,27 @@ mod modify;
 mod os;
 mod serve;
 
+use clap::{Parser, Subcommand};
 use colored::Colorize;
 use deno_core::error::AnyError;
 use deno_core::include_js_files;
-use deno_core::op;
 use deno_core::serde_v8;
 use deno_core::Extension;
-use std::{env, process, rc::Rc, time::Instant};
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
+use std::{env, rc::Rc, time::Instant};
 
-#[op]
-fn op_version() -> String {
-    return format!("{}", env!("CARGO_PKG_VERSION"));
+fn get_version(short: bool) -> String {
+    return match short {
+        true => format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
+        false => format!(
+            "{} {} ({} {})",
+            env!("CARGO_PKG_NAME"),
+            env!("CARGO_PKG_VERSION"),
+            env!("GIT_HASH"),
+            env!("BUILD_DATE")
+        ),
+    };
 }
 
 async fn exec(file_path: &str) -> Result<(), AnyError> {
@@ -37,7 +47,7 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
           "runtime/util/extra.js",
         ))
         .ops(vec![
-            op_version::decl(),
+            core::op_version::decl(),
             fs::op_read_file::decl(),
             fs::op_read_dir::decl(),
             fs::op_write_file::decl(),
@@ -96,31 +106,29 @@ async fn exec(file_path: &str) -> Result<(), AnyError> {
     result.await?
 }
 
+#[derive(Parser)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
+
+    #[arg(short, long)]
+    version: bool,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Build,
+    Run {
+        #[arg(short, long)]
+        silent: bool,
+
+        #[command()]
+        filename: String,
+    },
+}
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() > 1 && (args[1] == "--version" || args[1] == "-v") {
-        println!(
-            "{} {} ({} {})",
-            env!("CARGO_PKG_NAME"),
-            env!("CARGO_PKG_VERSION"),
-            env!("GIT_HASH"),
-            env!("BUILD_DATE")
-        );
-        process::exit(1);
-    }
-
-    let filename = match args.len() {
-        1 => {
-            eprintln!("{}", "Please specify a script to run.".yellow());
-            process::exit(0x0100);
-        }
-        2 => args[1].split(".").collect::<Vec<_>>().join("."),
-        _ => {
-            eprintln!("{}", "Too many arguments.".red());
-            process::exit(0x0100);
-        }
-    };
+    let cli = Cli::parse();
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -128,14 +136,62 @@ fn main() {
 
     go::init();
 
-    let start = Instant::now();
-    if let Err(error) = runtime.block_on(exec(&*format!("{}.{}", filename, "js"))) {
-        eprintln!("error: {}", error);
-    } else {
-        println!(
-            "\n{} took {}",
-            format!("{}.{}", filename, "js").white(),
-            format!("{:.2?}", start.elapsed()).yellow()
-        )
+    if cli.version {
+        println!("{}", get_version(false))
+    }
+
+    match &cli.command {
+        Some(Commands::Build) => {
+            println!("build");
+        }
+        Some(Commands::Run { silent, filename }) => {
+            if *silent {
+                if let Err(error) = runtime.block_on(exec(&*filename)) {
+                    eprintln!("error: {}", error);
+                }
+            } else {
+                let start = Instant::now();
+                if let Err(error) = runtime.block_on(exec(&*filename)) {
+                    eprintln!("error: {}", error);
+                } else {
+                    println!(
+                        "\n{} took {}",
+                        format!("{filename}").white(),
+                        format!("{:.2?}", start.elapsed()).yellow()
+                    )
+                }
+            }
+        }
+        None => {
+            let mut readline_editor = Editor::<()>::new();
+            let mut exit_value = 0;
+
+            println!("{}", get_version(true));
+            println!("Type \".help\" for more information.\n");
+
+            loop {
+                let readline = readline_editor.readline("> ");
+                match readline {
+                    Ok(line) => {
+                        println!("{}", line);
+                    }
+                    Err(ReadlineError::Interrupted) => {
+                        exit_value += 1;
+                        if exit_value == 2 {
+                            break;
+                        } else {
+                            println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
+                        }
+                    }
+                    Err(ReadlineError::Eof) => {
+                        break;
+                    }
+                    Err(err) => {
+                        println!("Error: {:?}", err);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

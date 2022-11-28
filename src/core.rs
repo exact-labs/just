@@ -12,6 +12,11 @@ pub fn op_id(len: usize) -> String {
 }
 
 #[op]
+fn op_version() -> String {
+    return format!("{}", env!("CARGO_PKG_VERSION"));
+}
+
+#[op]
 pub fn op_escape(text: String) -> Result<String, AnyError> {
     Ok(escape(&text).to_string())
 }

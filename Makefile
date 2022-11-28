@@ -16,8 +16,7 @@ test_all_run:
 	d=$$(date +%s)\
 	; for file in tests/*.js; do \
 		cd tests; \
-		a=$${file#*/}; \
-		cargo run $${a%.js*}; \
+		cargo run $${file#*/}; \
 		cd ../; \
 	done \
 	&& echo "\n\033[4;36m\033[1;36mtests took $$(($$(date +%s)-d)) seconds\033[0m"
@@ -29,8 +28,7 @@ test_all_build:
 	d=$$(date +%s)\
 	; for file in tests/*.js; do \
 		cd tests; \
-		a=$${file#*/}; \
-		../core_js $${a%.js*}; \
+		../core_js $${file#*/}; \
 		cd ../; \
 	done \
 	&& echo "\n\033[4;36m\033[1;36mtests took $$(($$(date +%s)-d)) seconds\033[0m"
