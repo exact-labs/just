@@ -1,9 +1,7 @@
 ((globalThis) => {
-	const { core } = Deno;
-	const { ops } = core;
-
+	Deno.core.initializeAsyncOps();
 	globalThis.runtime = {
-		version: () => ops.op_version(),
+		version: () => Deno.core.ops.op_version(),
 		internal: Deno,
 	};
 })(globalThis);
