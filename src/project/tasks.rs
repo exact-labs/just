@@ -9,9 +9,7 @@ pub fn task_list(tasks: BTreeMap<String, String>) {
         .map(|(key, val)| format!("{}: {}", key, val))
         .collect::<Vec<_>>();
 
-    let ans = Select::new("Select a task to run:", options).prompt();
-
-    match ans {
+    match Select::new("Select a task to run:", options).prompt() {
         Ok(task) => {
             let key = task.split(":").collect::<Vec<_>>()[0];
 
@@ -23,6 +21,6 @@ pub fn task_list(tasks: BTreeMap<String, String>) {
             );
             cmd!(&tasks[key]).run().unwrap();
         }
-        Err(_) => println!("There was an error, please try again"),
+        Err(_) => println!("Aborted..."),
     }
 }

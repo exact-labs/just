@@ -1,29 +1,29 @@
 use colored::Colorize;
 use inquire::Select;
 
+fn create_template(name: &str) {
+    if let Err(error) = std::fs::create_dir(name) {
+        eprintln!("{}", format!("{}", error).red());
+    }
+}
+
 pub fn download_template() {
     let options = vec![
-        "basic example",
-        "advanced example",
+        "basic_example",
+        "advanced_example",
         "benchmark",
         "sqlite",
         "webserver",
-        "static http",
-        "cmd spawn",
-        "read file",
+        "static_http",
+        "cmd_spawn",
+        "read_file",
         "utility",
         "hashing",
-        "chat server",
+        "chat_server",
     ];
 
-    let ans = Select::new("Select a template:", options).prompt();
-
-    match ans {
-        Ok(choice) => println!("{choice}"),
-        Err(_) => println!("There was an error, please try again"),
-    }
-
-    if let Err(error) = std::fs::create_dir("dirname") {
-        eprintln!("{}", format!("{}", error).red());
+    match Select::new("Select a template:", options).prompt() {
+        Ok(choice) => create_template(choice),
+        Err(_) => println!("Aborted..."),
     }
 }

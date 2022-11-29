@@ -305,22 +305,14 @@ fn main() {
         println!("{}", get_version(false))
     } else {
         match &cli.command {
-            Some(Commands::Setup) => {
-                go::init();
-            }
+            Some(Commands::Setup) => go::init(),
             Some(Commands::Init) => create_project_yml(),
             Some(Commands::Tasks) => list_tasks(),
             Some(Commands::Task { task }) => run_task(task),
             Some(Commands::Create) => project::create::download_template(),
-            Some(Commands::Fmt) => {
-                println!("fmt (wip)");
-            }
-            Some(Commands::Compile) => {
-                println!("compile (wip)");
-            }
-            Some(Commands::Bundle) => {
-                println!("bundle (wip)");
-            }
+            Some(Commands::Fmt) => println!("fmt (wip)"),
+            Some(Commands::Compile) => println!("compile (wip)"),
+            Some(Commands::Bundle) => println!("bundle (wip)"),
             Some(Commands::Run { silent, filename }) => start_exec(filename.to_string(), *silent),
             Some(Commands::Start { silent }) => start_exec(project::package::read().index, *silent),
             None => start_repl(),
