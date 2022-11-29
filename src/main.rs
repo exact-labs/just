@@ -50,7 +50,7 @@ fn project_meta() {
     let package = project::package::read();
     println!(
         "{} {} {}",
-        "Running".green().bold(),
+        "Starting".green().bold(),
         format!("{}", package.name).white(),
         format!("v{}", package.version).cyan()
     );
@@ -168,11 +168,13 @@ enum Commands {
     Init,
     /// Initialize a new project
     Create,
-    /// Run a task defined in project.yaml
+    /// Run a task defined in project.yml
     Task {
         #[command()]
         task: String,
     },
+    /// List all tasks in project.yml
+    Tasks,
     /// Start the index script
     Start {
         #[arg(short, long)]
@@ -237,6 +239,39 @@ fn start_repl() {
     }
 }
 
+fn run_task(task: &str) {
+    let tasks = project::package::read().tasks;
+    println!(
+        "{} {} `{}`",
+        "Running".green().bold(),
+        "task".white(),
+        tasks[task],
+    );
+    cmd!(&tasks[task]).run().unwrap();
+}
+
+fn list_tasks() {
+    let tasks = project::package::read().tasks;
+    project::tasks::task_list(tasks);
+}
+
+fn create_project_yml() {
+    let exists: bool = std::path::Path::new("package.yml").exists();
+    if !exists {
+        project::init::create_project();
+    } else {
+        let answer = question::Question::new("overwrite project.yml?")
+            .show_defaults()
+            .confirm();
+
+        if answer == question::Answer::YES {
+            project::init::create_project();
+        } else {
+            println!("Aborting...");
+        }
+    }
+}
+
 fn start_exec(filename: String, silent: bool) {
     let exists: bool = std::path::Path::new("package.yml").exists();
     let runtime = tokio::runtime::Builder::new_current_thread()
@@ -265,7 +300,6 @@ fn start_exec(filename: String, silent: bool) {
 
 fn main() {
     let cli = Cli::parse();
-    let exists: bool = std::path::Path::new("package.yml").exists();
 
     if cli.version {
         println!("{}", get_version(false))
@@ -274,34 +308,10 @@ fn main() {
             Some(Commands::Setup) => {
                 go::init();
             }
-            Some(Commands::Init) => {
-                if !exists {
-                    project::init::create_project();
-                } else {
-                    let answer = question::Question::new("overwrite project.yml?")
-                        .show_defaults()
-                        .confirm();
-
-                    if answer == question::Answer::YES {
-                        project::init::create_project();
-                    } else {
-                        println!("Aborting...");
-                    }
-                }
-            }
-            Some(Commands::Task { task }) => {
-                let tasks = project::package::read().tasks;
-                println!(
-                    "{} {} `{}`",
-                    "Running".green().bold(),
-                    "task".white(),
-                    tasks[task],
-                );
-                cmd!(&tasks[task]).run().unwrap();
-            }
-            Some(Commands::Create) => {
-                println!("create (wip)");
-            }
+            Some(Commands::Init) => create_project_yml(),
+            Some(Commands::Tasks) => list_tasks(),
+            Some(Commands::Task { task }) => run_task(task),
+            Some(Commands::Create) => project::create::download_template(),
             Some(Commands::Fmt) => {
                 println!("fmt (wip)");
             }

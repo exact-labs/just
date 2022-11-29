@@ -7,3 +7,5 @@ license: mit
 index: tests/cmd.js
 tasks:
   start/uuid: ./just run tests/uuid.js
+  benchmark: ./just run tests/bench.js
+  console: ./just run tests/console.js
