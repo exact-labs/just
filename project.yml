@@ -1,0 +1,9 @@
+name: project
+description: the project desc
+version: 0.0.1
+author: john@example.com
+url: example.com
+license: mit
+index: tests/cmd.js
+tasks:
+  start/uuid: ./core_js run tests/uuid.js

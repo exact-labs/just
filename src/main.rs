@@ -7,6 +7,7 @@ mod http;
 mod modify;
 mod os;
 mod serve;
+mod tasks;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
@@ -16,6 +17,7 @@ use deno_core::serde_v8;
 use deno_core::Extension;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
+use shell::cmd;
 use std::{env, rc::Rc, time::Instant};
 
 const RUNTIME_JAVASCRIPT_CORE: &str = include_str!("./runtime/main.js");
@@ -143,8 +145,16 @@ enum Commands {
     Fmt,
     /// Initialize a new project
     Create,
-    /// Run a task defined in tasks.yaml
-    Task,
+    /// Run a task defined in project.yaml
+    Task {
+        #[command()]
+        task: String,
+    },
+    /// Start the index script
+    Start {
+        #[arg(short, long)]
+        silent: bool,
+    },
     /// Run a javascript program
     Run {
         #[arg(short, long)]
@@ -155,12 +165,81 @@ enum Commands {
     },
 }
 
-fn main() {
-    let cli = Cli::parse();
+fn start_repl() {
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap();
+
+    let mut readline_editor = Editor::<()>::new();
+    let mut exit_value = 0;
+
+    println!("{}", get_version(true));
+    println!("Type \".help\" for more information.");
+
+    loop {
+        let readline = readline_editor.readline("> ");
+        match readline {
+            Ok(line) => {
+                if line == ".help" {
+                    println!(
+                        ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
+                    )
+                } else if line == ".clear" {
+                    print!("{}[2J", 27 as char);
+                } else if line == ".exit" {
+                    break;
+                } else {
+                    if let Err(error) = runtime.block_on(repl(&*line)) {
+                        eprintln!("{}", format!("{}", error).red());
+                    }
+                }
+            }
+            Err(ReadlineError::Interrupted) => {
+                exit_value += 1;
+                if exit_value == 2 {
+                    break;
+                } else {
+                    println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
+                }
+            }
+            Err(ReadlineError::Eof) => {
+                break;
+            }
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+        }
+    }
+}
+
+fn start_exec(filename: String, silent: bool) {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    if silent {
+        if let Err(error) = runtime.block_on(exec(&*filename)) {
+            eprintln!("{}", format!("{}", error).red());
+        }
+    } else {
+        let start = Instant::now();
+        if let Err(error) = runtime.block_on(exec(&*filename)) {
+            eprintln!("{}", format!("{}", error).red());
+        } else {
+            println!(
+                "\n{} took {}",
+                format!("{filename}").white(),
+                format!("{:.2?}", start.elapsed()).yellow()
+            )
+        }
+    }
+}
+
+fn main() {
+    let cli = Cli::parse();
 
     if cli.version {
         println!("{}", get_version(false))
@@ -172,8 +251,18 @@ fn main() {
             Some(Commands::Create) => {
                 println!("create (wip)");
             }
-            Some(Commands::Task) => {
-                println!("task (wip)");
+            Some(Commands::Task { task }) => {
+                let project = tasks::read();
+
+                // println!("{}", project.name);
+                // println!("{}", project.description);
+                // println!("{}", project.version);
+                // println!("{}", project.author);
+                // println!("{}", project.url);
+                // println!("{}", project.license);
+                // println!("{}", project.index);
+
+                cmd!(&project.tasks[task]).run().unwrap();
             }
             Some(Commands::Fmt) => {
                 println!("fmt (wip)");
@@ -184,67 +273,12 @@ fn main() {
             Some(Commands::Bundle) => {
                 println!("bundle (wip)");
             }
-            Some(Commands::Run { silent, filename }) => {
-                if *silent {
-                    if let Err(error) = runtime.block_on(exec(&*filename)) {
-                        eprintln!("{}", format!("{}", error).red());
-                    }
-                } else {
-                    let start = Instant::now();
-                    if let Err(error) = runtime.block_on(exec(&*filename)) {
-                        eprintln!("{}", format!("{}", error).red());
-                    } else {
-                        println!(
-                            "\n{} took {}",
-                            format!("{filename}").white(),
-                            format!("{:.2?}", start.elapsed()).yellow()
-                        )
-                    }
-                }
+            Some(Commands::Run { silent, filename }) => start_exec(filename.to_string(), *silent),
+            Some(Commands::Start { silent }) => {
+                let index_file = tasks::read().index;
+                start_exec(index_file, *silent);
             }
-            None => {
-                let mut readline_editor = Editor::<()>::new();
-                let mut exit_value = 0;
-
-                println!("{}", get_version(true));
-                println!("Type \".help\" for more information.");
-
-                loop {
-                    let readline = readline_editor.readline("> ");
-                    match readline {
-                        Ok(line) => {
-                            if line == ".help" {
-                                println!(
-                                    ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
-                                )
-                            } else if line == ".clear" {
-                                print!("{}[2J", 27 as char);
-                            } else if line == ".exit" {
-                                break;
-                            } else {
-                                if let Err(error) = runtime.block_on(repl(&*line)) {
-                                    eprintln!("{}", format!("{}", error).red());
-                                }
-                            }
-                        }
-                        Err(ReadlineError::Interrupted) => {
-                            exit_value += 1;
-                            if exit_value == 2 {
-                                break;
-                            } else {
-                                println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
-                            }
-                        }
-                        Err(ReadlineError::Eof) => {
-                            break;
-                        }
-                        Err(err) => {
-                            println!("Error: {:?}", err);
-                            break;
-                        }
-                    }
-                }
-            }
+            None => start_repl(),
         }
     }
 }
