@@ -1,5 +1,5 @@
 cmd.spawn('rustc --version').then((output) => {
-	console.log(output);
+	core.print(output);
 });
 
-console.log(cmd.exec('rustc --version'));
+core.print(cmd.exec('rustc --version'));

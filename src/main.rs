@@ -6,8 +6,8 @@ mod go;
 mod http;
 mod modify;
 mod os;
+mod project;
 mod serve;
-mod tasks;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
@@ -15,10 +15,21 @@ use deno_core::error::AnyError;
 use deno_core::include_js_files;
 use deno_core::serde_v8;
 use deno_core::Extension;
+use question;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 use shell::cmd;
 use std::{env, rc::Rc, time::Instant};
+
+macro_rules! ternary {
+    ($c:expr, $v:expr, $v1:expr) => {
+        if $c {
+            $v
+        } else {
+            $v1
+        }
+    };
+}
 
 const RUNTIME_JAVASCRIPT_CORE: &str = include_str!("./runtime/main.js");
 
@@ -33,6 +44,16 @@ fn get_version(short: bool) -> String {
             env!("BUILD_DATE")
         ),
     };
+}
+
+fn project_meta() {
+    let package = project::package::read();
+    println!(
+        "{} {} {}",
+        "Running".green().bold(),
+        format!("{}", package.name).white(),
+        format!("v{}", package.version).cyan()
+    );
 }
 
 fn extensions() -> deno_core::Extension {
@@ -143,6 +164,8 @@ enum Commands {
     Compile,
     /// Format source files
     Fmt,
+    /// Initialize a new package.yml
+    Init,
     /// Initialize a new project
     Create,
     /// Run a task defined in project.yaml
@@ -215,6 +238,7 @@ fn start_repl() {
 }
 
 fn start_exec(filename: String, silent: bool) {
+    let exists: bool = std::path::Path::new("package.yml").exists();
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -225,6 +249,7 @@ fn start_exec(filename: String, silent: bool) {
             eprintln!("{}", format!("{}", error).red());
         }
     } else {
+        ternary!(exists, project_meta(), {});
         let start = Instant::now();
         if let Err(error) = runtime.block_on(exec(&*filename)) {
             eprintln!("{}", format!("{}", error).red());
@@ -240,6 +265,7 @@ fn start_exec(filename: String, silent: bool) {
 
 fn main() {
     let cli = Cli::parse();
+    let exists: bool = std::path::Path::new("package.yml").exists();
 
     if cli.version {
         println!("{}", get_version(false))
@@ -248,21 +274,33 @@ fn main() {
             Some(Commands::Setup) => {
                 go::init();
             }
-            Some(Commands::Create) => {
-                println!("create (wip)");
+            Some(Commands::Init) => {
+                if !exists {
+                    project::init::create_project();
+                } else {
+                    let answer = question::Question::new("overwrite project.yml?")
+                        .show_defaults()
+                        .confirm();
+
+                    if answer == question::Answer::YES {
+                        project::init::create_project();
+                    } else {
+                        println!("Aborting...");
+                    }
+                }
             }
             Some(Commands::Task { task }) => {
-                let project = tasks::read();
-
-                // println!("{}", project.name);
-                // println!("{}", project.description);
-                // println!("{}", project.version);
-                // println!("{}", project.author);
-                // println!("{}", project.url);
-                // println!("{}", project.license);
-                // println!("{}", project.index);
-
-                cmd!(&project.tasks[task]).run().unwrap();
+                let tasks = project::package::read().tasks;
+                println!(
+                    "{} {} `{}`",
+                    "Running".green().bold(),
+                    "task".white(),
+                    tasks[task],
+                );
+                cmd!(&tasks[task]).run().unwrap();
+            }
+            Some(Commands::Create) => {
+                println!("create (wip)");
             }
             Some(Commands::Fmt) => {
                 println!("fmt (wip)");
@@ -274,10 +312,7 @@ fn main() {
                 println!("bundle (wip)");
             }
             Some(Commands::Run { silent, filename }) => start_exec(filename.to_string(), *silent),
-            Some(Commands::Start { silent }) => {
-                let index_file = tasks::read().index;
-                start_exec(index_file, *silent);
-            }
+            Some(Commands::Start { silent }) => start_exec(project::package::read().index, *silent),
             None => start_repl(),
         }
     }

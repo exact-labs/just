@@ -15,14 +15,22 @@ pub struct Project {
     pub tasks: BTreeMap<String, String>,
 }
 
+// println!("{}", project.name);
+// println!("{}", project.description);
+// println!("{}", project.version);
+// println!("{}", project.author);
+// println!("{}", project.url);
+// println!("{}", project.license);
+// println!("{}", project.index);
+
 pub fn read() -> Project {
-    let contents = fs::read_to_string("project.yml").unwrap();
+    let contents = fs::read_to_string("package.yml").unwrap();
     let yaml_file: Result<Project, _> = serde_yaml::from_str(&contents);
 
     let parsed = match yaml_file {
         Ok(project) => project,
         Err(error) => {
-            eprintln!("{}", format!("{} in project.yml", error).red());
+            eprintln!("{}", format!("{} in package.yml", error).red());
             std::process::exit(1);
         }
     };

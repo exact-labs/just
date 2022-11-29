@@ -29,6 +29,8 @@ clap = { version = "4.0.27", features = ["derive"] }
 rustyline = "9.1.2"
 sha2 = "0.10.6"
 data-encoding = "2.3.2"
+inquire = "0.5.2"
+question = "0.2.2"
 
 [build-dependencies]
 chrono = "0.4.23"
