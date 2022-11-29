@@ -1,35 +1,15 @@
-mod cmd;
-mod core;
-mod db;
-mod fs;
 mod go;
-mod http;
-mod modify;
-mod os;
+mod macros;
+mod ops;
 mod project;
-mod serve;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
-use deno_core::error::AnyError;
-use deno_core::include_js_files;
-use deno_core::serde_v8;
-use deno_core::Extension;
-use question;
-use rustyline::error::ReadlineError;
-use rustyline::Editor;
+use deno_core::{error::AnyError, include_js_files, serde_v8, Extension};
+use question::{Answer, Question};
+use rustyline::{error::ReadlineError, Editor};
 use shell::cmd;
-use std::{env, rc::Rc, time::Instant};
-
-macro_rules! ternary {
-    ($c:expr, $v:expr, $v1:expr) => {
-        if $c {
-            $v
-        } else {
-            $v1
-        }
-    };
-}
+use std::{env, process, rc::Rc, time::Instant};
 
 const RUNTIME_JAVASCRIPT_CORE: &str = include_str!("./runtime/main.js");
 
@@ -71,46 +51,46 @@ fn extensions() -> deno_core::Extension {
           "runtime/util/extra.js",
         ))
         .ops(vec![
-            core::op_version::decl(),
-            fs::op_read_file::decl(),
-            fs::op_read_dir::decl(),
-            fs::op_write_file::decl(),
-            fs::op_remove_file::decl(),
-            modify::op_encode::decl(),
-            modify::op_encode_fast::decl(),
-            core::op_id::decl(),
-            core::op_escape::decl(),
-            core::op_packages_dir::decl(),
-            core::op_stdout::decl(),
-            core::op_stderr::decl(),
-            core::op_info::decl(),
-            core::op_sleep::decl(),
-            cmd::op_exec::decl(),
-            cmd::op_spawn::decl(),
-            os::op_env_get::decl(),
-            os::op_env_set::decl(),
-            os::op_machine::decl(),
-            os::op_hostname::decl(),
-            os::op_homedir::decl(),
-            os::op_release::decl(),
-            os::op_platform::decl(),
-            os::op_cpus::decl(),
-            os::op_uptime::decl(),
-            os::op_freemem::decl(),
-            os::op_totalmem::decl(),
-            os::op_loadavg::decl(),
-            os::op_dirname::decl(),
-            os::op_exit::decl(),
-            http::op_get::decl(),
-            http::op_post::decl(),
-            serve::op_static::decl(),
-            serve::op_static_test::decl(),
-            db::op_db_init::decl(),
-            db::op_db_create::decl(),
-            db::op_db_exec::decl(),
-            db::op_db_insert::decl(),
-            db::op_db_query::decl(),
-            db::op_db_delete::decl(),
+            ops::core::op_version::decl(),
+            ops::fs::op_read_file::decl(),
+            ops::fs::op_read_dir::decl(),
+            ops::fs::op_write_file::decl(),
+            ops::fs::op_remove_file::decl(),
+            ops::modify::op_encode::decl(),
+            ops::modify::op_encode_fast::decl(),
+            ops::core::op_id::decl(),
+            ops::core::op_escape::decl(),
+            ops::core::op_packages_dir::decl(),
+            ops::core::op_stdout::decl(),
+            ops::core::op_stderr::decl(),
+            ops::core::op_info::decl(),
+            ops::core::op_sleep::decl(),
+            ops::cmd::op_exec::decl(),
+            ops::cmd::op_spawn::decl(),
+            ops::os::op_env_get::decl(),
+            ops::os::op_env_set::decl(),
+            ops::os::op_machine::decl(),
+            ops::os::op_hostname::decl(),
+            ops::os::op_homedir::decl(),
+            ops::os::op_release::decl(),
+            ops::os::op_platform::decl(),
+            ops::os::op_cpus::decl(),
+            ops::os::op_uptime::decl(),
+            ops::os::op_freemem::decl(),
+            ops::os::op_totalmem::decl(),
+            ops::os::op_loadavg::decl(),
+            ops::os::op_dirname::decl(),
+            ops::os::op_exit::decl(),
+            ops::http::op_get::decl(),
+            ops::http::op_post::decl(),
+            ops::serve::op_static::decl(),
+            ops::serve::op_static_test::decl(),
+            ops::db::op_db_init::decl(),
+            ops::db::op_db_create::decl(),
+            ops::db::op_db_exec::decl(),
+            ops::db::op_db_insert::decl(),
+            ops::db::op_db_query::decl(),
+            ops::db::op_db_delete::decl(),
             go::run_ext_func::decl(),
         ])
         .build();
@@ -150,6 +130,7 @@ struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
+    /// Print version information
     #[arg(short, long)]
     version: bool,
 }
@@ -260,15 +241,15 @@ fn create_project_yml() {
     if !exists {
         project::init::create_project();
     } else {
-        let answer = question::Question::new("overwrite project.yml?")
+        let answer = Question::new("overwrite project.yml?")
             .show_defaults()
             .confirm();
 
-        if answer == question::Answer::YES {
-            project::init::create_project();
-        } else {
-            println!("Aborting...");
-        }
+        ternary!(
+            answer == Answer::YES,
+            project::init::create_project(),
+            println!("{}", "Aborting...".white())
+        )
     }
 }
 
@@ -302,20 +283,21 @@ fn main() {
     let cli = Cli::parse();
 
     if cli.version {
-        println!("{}", get_version(false))
-    } else {
-        match &cli.command {
-            Some(Commands::Setup) => go::init(),
-            Some(Commands::Init) => create_project_yml(),
-            Some(Commands::Tasks) => list_tasks(),
-            Some(Commands::Task { task }) => run_task(task),
-            Some(Commands::Create) => project::create::download_template(),
-            Some(Commands::Fmt) => println!("fmt (wip)"),
-            Some(Commands::Compile) => println!("compile (wip)"),
-            Some(Commands::Bundle) => println!("bundle (wip)"),
-            Some(Commands::Run { silent, filename }) => start_exec(filename.to_string(), *silent),
-            Some(Commands::Start { silent }) => start_exec(project::package::read().index, *silent),
-            None => start_repl(),
-        }
+        println!("{}", get_version(false));
+        process::exit(0);
+    }
+
+    match &cli.command {
+        Some(Commands::Setup) => go::init(),
+        Some(Commands::Init) => create_project_yml(),
+        Some(Commands::Tasks) => list_tasks(),
+        Some(Commands::Task { task }) => run_task(task),
+        Some(Commands::Create) => project::create::download_template(),
+        Some(Commands::Fmt) => println!("fmt (wip)"),
+        Some(Commands::Compile) => println!("compile (wip)"),
+        Some(Commands::Bundle) => println!("bundle (wip)"),
+        Some(Commands::Run { silent, filename }) => start_exec(filename.to_string(), *silent),
+        Some(Commands::Start { silent }) => start_exec(project::package::read().index, *silent),
+        None => start_repl(),
     }
 }

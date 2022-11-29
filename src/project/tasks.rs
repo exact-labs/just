@@ -21,6 +21,6 @@ pub fn task_list(tasks: BTreeMap<String, String>) {
             );
             cmd!(&tasks[key]).run().unwrap();
         }
-        Err(_) => println!("Aborted..."),
+        Err(_) => println!("{}", "Aborting...".white()),
     }
 }

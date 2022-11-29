@@ -24,6 +24,6 @@ pub fn download_template() {
 
     match Select::new("Select a template:", options).prompt() {
         Ok(choice) => create_template(choice),
-        Err(_) => println!("Aborted..."),
+        Err(_) => println!("{}", "Aborting...".white()),
     }
 }
