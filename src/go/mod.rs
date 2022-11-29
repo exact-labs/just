@@ -24,25 +24,18 @@ pub fn init() {
             )))
             .is_dir();
 
-            if exists {
+            if !exists {
                 std::fs::create_dir_all(format!("{}/.core_js", path.display())).unwrap();
                 println!("created {}/.core_js", path.display());
             }
 
-            let sha_sum = helpers::sha256_digest(&PathBuf::from(format!(
-                "{}/.core_js/external",
-                path.display()
-            )))
-            .unwrap();
+            let external_runtime = format!("{}/.core_js/external", path.display());
+            let sha_sum = helpers::sha256_digest(&PathBuf::from(external_runtime.clone())).unwrap();
 
             if env!("FILE_SHA") != sha_sum {
-                let mut file =
-                    File::create(format!("{}/.core_js/external", path.display())).unwrap();
+                let mut file = File::create(external_runtime.clone()).unwrap();
                 file.write_all(BINARY_EXTERNAL).unwrap();
-                println!(
-                    "wrote external runtime file {}",
-                    format!("{}/.core_js/external", path.display())
-                );
+                println!("wrote external runtime file {}", external_runtime.clone());
                 file.set_permissions(std::fs::Permissions::from_mode(0o755))
                     .unwrap();
             } else {
