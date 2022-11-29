@@ -133,7 +133,19 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Build,
+    /// Setup for executing external modules
+    Setup,
+    /// Bundle module and dependencies into single file
+    Bundle,
+    /// Compile the script into a self contained executable
+    Compile,
+    /// Format source files
+    Fmt,
+    /// Initialize a new project
+    Create,
+    /// Run a task defined in tasks.yaml
+    Task,
+    /// Run a javascript program
     Run {
         #[arg(short, long)]
         silent: bool,
@@ -150,14 +162,27 @@ fn main() {
         .build()
         .unwrap();
 
-    go::init();
-
     if cli.version {
         println!("{}", get_version(false))
     } else {
         match &cli.command {
-            Some(Commands::Build) => {
-                println!("build");
+            Some(Commands::Setup) => {
+                go::init();
+            }
+            Some(Commands::Create) => {
+                println!("create (wip)");
+            }
+            Some(Commands::Task) => {
+                println!("task (wip)");
+            }
+            Some(Commands::Fmt) => {
+                println!("fmt (wip)");
+            }
+            Some(Commands::Compile) => {
+                println!("compile (wip)");
+            }
+            Some(Commands::Bundle) => {
+                println!("bundle (wip)");
             }
             Some(Commands::Run { silent, filename }) => {
                 if *silent {
