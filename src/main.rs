@@ -189,8 +189,18 @@ fn main() {
                 let readline = readline_editor.readline("> ");
                 match readline {
                     Ok(line) => {
-                        if let Err(error) = runtime.block_on(repl(&*line)) {
-                            eprintln!("{}", format!("{}", error).red());
+                        if line == ".help" {
+                            println!(
+                                ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
+                            )
+                        } else if line == ".clear" {
+                            print!("{}[2J", 27 as char);
+                        } else if line == ".exit" {
+                            break;
+                        } else {
+                            if let Err(error) = runtime.block_on(repl(&*line)) {
+                                eprintln!("{}", format!("{}", error).red());
+                            }
                         }
                     }
                     Err(ReadlineError::Interrupted) => {
