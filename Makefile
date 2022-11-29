@@ -1,11 +1,11 @@
 clean:
 	cd src/go/embed && rm external
-	rm core_js
+	rm just
 
 build:
 	cd src/go/embed && go mod tidy && go build .
 	cargo build --release
-	mv target/release/core_js .
+	mv target/release/just .
    
 test:
 	cd src/go/embed && go mod tidy && go build .
@@ -24,11 +24,11 @@ test_all_run:
 test_all_build:
 	cd src/go/embed && go mod tidy && go build .
 	cargo build --release
-	mv target/release/core_js .
+	mv target/release/just .
 	d=$$(date +%s)\
 	; for file in tests/*.js; do \
 		cd tests; \
-		../core_js run $${file#*/}; \
+		../just run $${file#*/}; \
 		cd ../; \
 	done \
 	&& echo "\n\033[4;36m\033[1;36mtests took $$(($$(date +%s)-d)) seconds\033[0m"

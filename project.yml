@@ -6,4 +6,4 @@ url: example.com
 license: mit
 index: tests/cmd.js
 tasks:
-  start/uuid: ./core_js run tests/uuid.js
+  start/uuid: ./just run tests/uuid.js

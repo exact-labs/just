@@ -238,38 +238,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5827cebf4670468b8772dd191856768aedcb1b0278a04f989f7766351917b9dc"
 
 [[package]]
-name = "core_js"
-version = "0.4.0"
-dependencies = [
- "chrono",
- "clap",
- "colored",
- "data-encoding",
- "deno_core",
- "dirs",
- "duration-string",
- "home",
- "hostname",
- "iron",
- "libc",
- "mount",
- "nanoid",
- "psutil",
- "reqwest",
- "rustyline",
- "serde",
- "serde_json",
- "serde_yaml",
- "sha2",
- "shell",
- "sqlite",
- "staticfile",
- "sysinfo",
- "tokio",
- "v_htmlescape",
-]
-
-[[package]]
 name = "cpufeatures"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1041,6 +1009,38 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49409df3e3bf0856b916e2ceaca09ee28e6871cf7d9ce97a692cacfdb2a25a47"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "just"
+version = "0.4.1"
+dependencies = [
+ "chrono",
+ "clap",
+ "colored",
+ "data-encoding",
+ "deno_core",
+ "dirs",
+ "duration-string",
+ "home",
+ "hostname",
+ "iron",
+ "libc",
+ "mount",
+ "nanoid",
+ "psutil",
+ "reqwest",
+ "rustyline",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "sha2",
+ "shell",
+ "sqlite",
+ "staticfile",
+ "sysinfo",
+ "tokio",
+ "v_htmlescape",
 ]
 
 [[package]]
