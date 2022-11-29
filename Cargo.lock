@@ -366,9 +366,9 @@ dependencies = [
 
 [[package]]
 name = "deno_core"
-version = "0.156.0"
+version = "0.160.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9157c30bd82f4e4feca1b19786554dace4ebdaf0f61e8ee25bce8c966c7d97c7"
+checksum = "d8fc1631e80a0656929c559c7426bdb0417d9acb15ef52dc09d4ea85217d42f2"
 dependencies = [
  "anyhow",
  "bytes",
@@ -383,6 +383,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_v8",
+ "smallvec",
  "sourcemap",
  "url 2.3.1",
  "v8",
@@ -390,11 +391,12 @@ dependencies = [
 
 [[package]]
 name = "deno_ops"
-version = "0.34.0"
+version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b29fb7131fc319533e89b3fd3100409927295c15d05bfd212cbbbbc18182dc0"
+checksum = "257fc36486bdeb82db7cad8bf4c8d791503b18497f8652f4673391b648c13a5a"
 dependencies = [
  "once_cell",
+ "pmutil",
  "proc-macro-crate",
  "proc-macro2",
  "quote",
@@ -1426,6 +1428,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pmutil"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3894e5d549cccbe44afecf72922f277f603cd4bb0219c8342631ef18fffbe004"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1981,9 +1994,9 @@ dependencies = [
 
 [[package]]
 name = "serde_v8"
-version = "0.67.0"
+version = "0.71.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "225ac8039b46a4094ce9a30985820af6a602d27bdc7c0ce2728c10ad67aa03dd"
+checksum = "f8769ec6006d818f36291ec9bb193b08eb48032bf31eab13a463b15c9e797f75"
 dependencies = [
  "bytes",
  "derive_more",
@@ -2435,9 +2448,9 @@ checksum = "936e4b492acfd135421d8dca4b1aa80a7bfc26e702ef3af710e0752684df5372"
 
 [[package]]
 name = "v8"
-version = "0.54.0"
+version = "0.55.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b63103bd7caa4c3571e8baafe58f3e04818df70505304ed814737e655d1d8d6"
+checksum = "46cd4f562bce7520fbb511850c5488366264caf346be221cf7e908f51ac33dbc"
 dependencies = [
  "bitflags",
  "fslock",

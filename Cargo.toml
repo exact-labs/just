@@ -1,10 +1,10 @@
 [package]
 name = "core_js"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2021"
 
 [dependencies]
-deno_core = "0.156.0"
+deno_core = "0.160.0"
 tokio = { version = "1.19.2", features = ["full"] }
 duration-string = "0.1.1" 
 colored = "2"
