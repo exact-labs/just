@@ -154,69 +154,69 @@ fn main() {
 
     if cli.version {
         println!("{}", get_version(false))
-    }
-
-    match &cli.command {
-        Some(Commands::Build) => {
-            println!("build");
-        }
-        Some(Commands::Run { silent, filename }) => {
-            if *silent {
-                if let Err(error) = runtime.block_on(exec(&*filename)) {
-                    eprintln!("{}", format!("{}", error).red());
-                }
-            } else {
-                let start = Instant::now();
-                if let Err(error) = runtime.block_on(exec(&*filename)) {
-                    eprintln!("{}", format!("{}", error).red());
+    } else {
+        match &cli.command {
+            Some(Commands::Build) => {
+                println!("build");
+            }
+            Some(Commands::Run { silent, filename }) => {
+                if *silent {
+                    if let Err(error) = runtime.block_on(exec(&*filename)) {
+                        eprintln!("{}", format!("{}", error).red());
+                    }
                 } else {
-                    println!(
-                        "\n{} took {}",
-                        format!("{filename}").white(),
-                        format!("{:.2?}", start.elapsed()).yellow()
-                    )
+                    let start = Instant::now();
+                    if let Err(error) = runtime.block_on(exec(&*filename)) {
+                        eprintln!("{}", format!("{}", error).red());
+                    } else {
+                        println!(
+                            "\n{} took {}",
+                            format!("{filename}").white(),
+                            format!("{:.2?}", start.elapsed()).yellow()
+                        )
+                    }
                 }
             }
-        }
-        None => {
-            let mut readline_editor = Editor::<()>::new();
-            let mut exit_value = 0;
+            None => {
+                let mut readline_editor = Editor::<()>::new();
+                let mut exit_value = 0;
 
-            println!("{}", get_version(true));
-            println!("Type \".help\" for more information.");
+                println!("{}", get_version(true));
+                println!("Type \".help\" for more information.");
 
-            loop {
-                let readline = readline_editor.readline("> ");
-                match readline {
-                    Ok(line) => {
-                        if line == ".help" {
-                            println!(
-                                ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
-                            )
-                        } else if line == ".clear" {
-                            print!("{}[2J", 27 as char);
-                        } else if line == ".exit" {
-                            break;
-                        } else {
-                            if let Err(error) = runtime.block_on(repl(&*line)) {
-                                eprintln!("{}", format!("{}", error).red());
+                loop {
+                    let readline = readline_editor.readline("> ");
+                    match readline {
+                        Ok(line) => {
+                            if line == ".help" {
+                                println!(
+                                    ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
+                                )
+                            } else if line == ".clear" {
+                                print!("{}[2J", 27 as char);
+                            } else if line == ".exit" {
+                                break;
+                            } else {
+                                if let Err(error) = runtime.block_on(repl(&*line)) {
+                                    eprintln!("{}", format!("{}", error).red());
+                                }
                             }
                         }
-                    }
-                    Err(ReadlineError::Interrupted) => {
-                        exit_value += 1;
-                        if exit_value == 2 {
-                            break;
-                        } else {
-                            println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
+                        Err(ReadlineError::Interrupted) => {
+                            exit_value += 1;
+                            if exit_value == 2 {
+                                break;
+                            } else {
+                                println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
+                            }
                         }
-                    }
-                    Err(ReadlineError::Eof) => {
-                        break;
-                    }
-                    Err(err) => {
-                        println!("Error: {:?}", err);
-                        break;
+                        Err(ReadlineError::Eof) => {
+                            break;
+                        }
+                        Err(err) => {
+                            println!("Error: {:?}", err);
+                            break;
+                        }
                     }
                 }
             }
