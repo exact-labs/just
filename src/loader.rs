@@ -1,5 +1,6 @@
 use std::pin::Pin;
 
+use colored::Colorize;
 use data_url::DataUrl;
 use deno_core::anyhow::{bail, Error};
 use deno_core::futures::FutureExt;
@@ -9,6 +10,7 @@ use deno_core::ModuleSource;
 use deno_core::ModuleSourceFuture;
 use deno_core::ModuleSpecifier;
 use deno_core::ModuleType;
+use terminal_spinners::{SpinnerBuilder, DOTS};
 
 pub struct RuntimeImport;
 
@@ -30,11 +32,19 @@ impl ModuleLoader for RuntimeImport {
     ) -> Pin<Box<ModuleSourceFuture>> {
         let module_specifier = module_specifier.clone();
         let string_specifier = module_specifier.to_string();
+
         async {
+            let mut module_type = ModuleType::JavaScript;
             let bytes = match module_specifier.scheme() {
                 "http" | "https" => {
+                    let handle = SpinnerBuilder::new()
+                        .spinner(&DOTS)
+                        .text(format!(" {} {module_specifier}", "download".green()))
+                        .start();
                     let res = reqwest::get(module_specifier).await?;
                     let res = res.error_for_status()?;
+                    handle.done();
+                    println!("");
                     res.bytes().await?
                 }
                 "file" => {
@@ -42,6 +52,17 @@ impl ModuleLoader for RuntimeImport {
                         Ok(path) => path,
                         Err(_) => bail!("Invalid file URL."),
                     };
+                    module_type = if let Some(extension) = path.extension() {
+                        let ext = extension.to_string_lossy().to_lowercase();
+                        if ext == "json" {
+                            ModuleType::Json
+                        } else {
+                            ModuleType::JavaScript
+                        }
+                    } else {
+                        ModuleType::JavaScript
+                    };
+
                     let bytes = tokio::fs::read(path).await?;
                     bytes.into()
                 }
@@ -67,7 +88,7 @@ impl ModuleLoader for RuntimeImport {
 
             Ok(ModuleSource {
                 code: bytes.to_vec().into_boxed_slice(),
-                module_type: ModuleType::JavaScript,
+                module_type: module_type,
                 module_url_specified: string_specifier.clone(),
                 module_url_found: string_specifier,
             })

@@ -1,0 +1,5 @@
+{
+	"hello": "world",
+	"array": [1, 2, 3],
+	"key": [{ "value": "yes" }]
+}

@@ -32,6 +32,7 @@ data-encoding = "2.3.2"
 inquire = "0.5.2"
 question = "0.2.2"
 data-url = "0.2.0"
+terminal-spinners = "0.3.2"
 
 [build-dependencies]
 chrono = "0.4.23"
