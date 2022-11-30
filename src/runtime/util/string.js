@@ -20,5 +20,13 @@
 		},
 	});
 
+	String.prototype.format = function () {
+		let args = Array.prototype.slice.call(arguments);
+		let i = 0;
+		return (output = this.replace(/%s|%d|%f|%@/g, function (match, idx) {
+			return (subst = args.slice(0, args.length).slice(i, ++i));
+		}));
+	};
+
 	globalThis.string = {};
 })(globalThis);

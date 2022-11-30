@@ -29,6 +29,7 @@ pub fn create_project() {
     let description = Text::new("description:").prompt();
     let index = Text::new("entry point:").with_default("index.js").prompt();
     let url = Text::new("project url:").prompt();
+    let repo = Text::new("repository url:").prompt();
     let author = Text::new("author:").prompt();
     let license = Text::new("license:").with_default("MIT").prompt();
 
@@ -51,6 +52,10 @@ pub fn create_project() {
     match url {
         Ok(url) => writeln!(&mut file, "url: {url}").unwrap(),
         Err(_) => create_error("url"),
+    }
+    match repo {
+        Ok(url) => writeln!(&mut file, "repository: {url}").unwrap(),
+        Err(_) => create_error("repository"),
     }
     match author {
         Ok(author) => writeln!(&mut file, "author: {author}").unwrap(),

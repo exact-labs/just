@@ -3,6 +3,7 @@ description: the project desc
 version: 0.0.1
 author: john@example.com
 url: example.com
+repository: github.com/example/example
 license: mit
 index: tests/cmd.js
 tasks:

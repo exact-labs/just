@@ -10,6 +10,7 @@ pub struct Project {
     pub version: String,
     pub author: String,
     pub url: String,
+    pub repository: String,
     pub license: String,
     pub index: String,
     pub tasks: BTreeMap<String, String>,
