@@ -36,7 +36,7 @@ impl ModuleLoader for RuntimeImport {
             let mut module_type = ModuleType::JavaScript;
             let bytes = match module_specifier.scheme() {
                 "http" | "https" => {
-                    println!("{} {module_specifier}", "download".green(),);
+                    println!("{} {module_specifier}", "download".green());
                     let res = reqwest::get(module_specifier).await?;
                     let res = res.error_for_status()?;
                     res.bytes().await?

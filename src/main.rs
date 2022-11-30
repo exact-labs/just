@@ -255,6 +255,46 @@ fn create_project_yml() {
     }
 }
 
+fn load_external_file(url: &String, silent: bool) {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    println!("{} {url}", "download".green());
+
+    let mut buf: Vec<u8> = vec![];
+    let _res = match reqwest::blocking::get(url) {
+        Ok(mut res) => res.copy_to(&mut buf),
+        Err(err) => {
+            println!("Request failed: {}", err.to_string());
+            return;
+        }
+    };
+
+    let contents = match std::str::from_utf8(buf.as_slice()) {
+        Ok(string) => string,
+        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+    };
+
+    if silent {
+        if let Err(error) = runtime.block_on(repl(&*contents)) {
+            eprintln!("{}", format!("{}", error).red());
+        }
+    } else {
+        let start = Instant::now();
+        if let Err(error) = runtime.block_on(repl(&*contents)) {
+            eprintln!("{}", format!("{}", error).red());
+        } else {
+            println!(
+                "\n{} took {}",
+                format!("{url}").white(),
+                format!("{:.2?}", start.elapsed()).yellow()
+            )
+        }
+    }
+}
+
 fn start_exec(filename: String, silent: bool) {
     let exists: bool = std::path::Path::new("package.yml").exists();
     let runtime = tokio::runtime::Builder::new_current_thread()
@@ -262,21 +302,25 @@ fn start_exec(filename: String, silent: bool) {
         .build()
         .unwrap();
 
-    if silent {
-        if let Err(error) = runtime.block_on(exec(&*filename)) {
-            eprintln!("{}", format!("{}", error).red());
-        }
+    if filename.starts_with("https://") || filename.starts_with("http://") {
+        load_external_file(&filename, silent);
     } else {
-        ternary!(exists, project_meta(), {});
-        let start = Instant::now();
-        if let Err(error) = runtime.block_on(exec(&*filename)) {
-            eprintln!("{}", format!("{}", error).red());
+        if silent {
+            if let Err(error) = runtime.block_on(exec(&*filename)) {
+                eprintln!("{}", format!("{}", error).red());
+            }
         } else {
-            println!(
-                "\n{} took {}",
-                format!("{filename}").white(),
-                format!("{:.2?}", start.elapsed()).yellow()
-            )
+            ternary!(exists, project_meta(), {});
+            let start = Instant::now();
+            if let Err(error) = runtime.block_on(exec(&*filename)) {
+                eprintln!("{}", format!("{}", error).red());
+            } else {
+                println!(
+                    "\n{} took {}",
+                    format!("{filename}").white(),
+                    format!("{:.2?}", start.elapsed()).yellow()
+                )
+            }
         }
     }
 }

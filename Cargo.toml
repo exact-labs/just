@@ -14,7 +14,7 @@ sysinfo = "0.26.7"
 v_htmlescape = "0.15.8"
 dirs = "4.0.0"
 hostname = "^0.3"
-reqwest = "0.11.12"
+reqwest = { version = "0.11.12", features = ["blocking"] } 
 nanoid = "0.4.0"
 staticfile = "0.5.0"
 mount = "0.4.0"
