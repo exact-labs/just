@@ -2,6 +2,10 @@
 	const { core } = Deno;
 	const { ops } = core;
 
+	globalThis.pkg = (file) => ops.op_packages_dir() + `/${file}/index.js`;
+	globalThis.__dirname = ops.op_dirname();
+	globalThis.sleep = (ms) => ops.op_sleep(ms);
+
 	globalThis.core = {
 		print: (text) => ops.op_print(text),
 		encode: (text) => ops.op_encode(text),

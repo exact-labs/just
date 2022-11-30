@@ -13,6 +13,7 @@ pub struct Project {
     pub license: String,
     pub index: String,
     pub tasks: BTreeMap<String, String>,
+    pub dependencies: BTreeMap<String, String>,
 }
 
 // println!("{}", project.name);

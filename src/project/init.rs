@@ -61,6 +61,6 @@ pub fn create_project() {
         Err(_) => create_error("license"),
     }
 
-    writeln!(&mut file, "tasks:").unwrap();
+    writeln!(&mut file, "tasks:\ndependencies:").unwrap();
     println!("{}", "\n✨ success, saved package.yml".yellow())
 }

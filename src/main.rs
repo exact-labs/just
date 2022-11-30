@@ -1,4 +1,5 @@
 mod go;
+mod loader;
 mod macros;
 mod ops;
 mod project;
@@ -98,7 +99,7 @@ fn extensions() -> deno_core::Extension {
 
 async fn exec(file_name: &str) -> Result<(), AnyError> {
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
-        module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
+        module_loader: Some(Rc::new(loader::RuntimeImport)),
         extensions: vec![extensions()],
         ..Default::default()
     });
@@ -115,7 +116,7 @@ async fn exec(file_name: &str) -> Result<(), AnyError> {
 
 async fn repl(line: &str) -> Result<deno_core::v8::Global<deno_core::v8::Value>, AnyError> {
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
-        module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
+        module_loader: Some(Rc::new(loader::RuntimeImport)),
         extensions: vec![extensions()],
         ..Default::default()
     });

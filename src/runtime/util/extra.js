@@ -15,10 +15,6 @@
 		return undefined;
 	};
 
-	globalThis.pkg = (file) => ops.op_packages_dir() + `/${file}/index.js`;
-	globalThis.__dirname = ops.op_dirname();
-	globalThis.sleep = (ms) => ops.op_sleep(ms);
-
 	globalThis.extra = {
 		rgbToHex: (r, g, b) => '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1),
 		base64: {

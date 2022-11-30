@@ -395,6 +395,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ee2393c4a91429dffb4bedf19f4d6abf27d8a732c8ce4980305d782e5426d57"
 
 [[package]]
+name = "data-url"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d7439c3735f405729d52c3fbbe4de140eaf938a1fe47d227c27f8254d4302a5"
+
+[[package]]
 name = "deno_core"
 version = "0.160.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1066,6 +1072,7 @@ dependencies = [
  "clap",
  "colored",
  "data-encoding",
+ "data-url",
  "deno_core",
  "dirs",
  "duration-string",
