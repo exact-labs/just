@@ -1,0 +1,9 @@
+name: test
+description: test
+version: 0.0.1
+author:
+url:
+license: none
+index: test.js
+tasks:
+dependencies:

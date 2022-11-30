@@ -40,7 +40,7 @@ fn project_meta() {
 fn extensions() -> deno_core::Extension {
     return Extension::builder()
         .js(include_js_files!(
-          prefix "runtime/util",
+          prefix "[exec:runtime]",
           "runtime/util/core.js",
           "runtime/util/cli.js",
           "runtime/util/ext.js",
@@ -61,7 +61,8 @@ fn extensions() -> deno_core::Extension {
             ops::modify::op_encode_fast::decl(),
             ops::core::op_id::decl(),
             ops::core::op_escape::decl(),
-            ops::core::op_packages_dir::decl(),
+            ops::core::op_package_dir::decl(),
+            ops::core::op_package_index::decl(),
             ops::core::op_stdout::decl(),
             ops::core::op_stderr::decl(),
             ops::core::op_info::decl(),

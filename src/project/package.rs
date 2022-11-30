@@ -16,14 +16,6 @@ pub struct Project {
     pub dependencies: BTreeMap<String, String>,
 }
 
-// println!("{}", project.name);
-// println!("{}", project.description);
-// println!("{}", project.version);
-// println!("{}", project.author);
-// println!("{}", project.url);
-// println!("{}", project.license);
-// println!("{}", project.index);
-
 pub fn read() -> Project {
     let contents = fs::read_to_string("package.yml").unwrap();
     let yaml_file: Result<Project, _> = serde_yaml::from_str(&contents);

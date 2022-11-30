@@ -1,3 +1,3 @@
-const { test } = await import(pkg('test'));
+const { test } = await require('test');
 
 test();

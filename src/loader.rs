@@ -10,7 +10,6 @@ use deno_core::ModuleSource;
 use deno_core::ModuleSourceFuture;
 use deno_core::ModuleSpecifier;
 use deno_core::ModuleType;
-use terminal_spinners::{SpinnerBuilder, DOTS};
 
 pub struct RuntimeImport;
 
@@ -37,14 +36,9 @@ impl ModuleLoader for RuntimeImport {
             let mut module_type = ModuleType::JavaScript;
             let bytes = match module_specifier.scheme() {
                 "http" | "https" => {
-                    let handle = SpinnerBuilder::new()
-                        .spinner(&DOTS)
-                        .text(format!(" {} {module_specifier}", "download".green()))
-                        .start();
+                    println!("{} {module_specifier}", "download".green(),);
                     let res = reqwest::get(module_specifier).await?;
                     let res = res.error_for_status()?;
-                    handle.done();
-                    println!("");
                     res.bytes().await?
                 }
                 "file" => {
@@ -62,7 +56,6 @@ impl ModuleLoader for RuntimeImport {
                     } else {
                         ModuleType::JavaScript
                     };
-
                     let bytes = tokio::fs::read(path).await?;
                     bytes.into()
                 }
