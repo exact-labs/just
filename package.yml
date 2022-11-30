@@ -10,3 +10,4 @@ tasks:
   benchmark: ./just run tests/bench.js
   console: ./just run tests/console.js
 dependencies:
+  test: 0.0.1

@@ -458,7 +458,7 @@ dependencies = [
  "proc-macro-crate",
  "proc-macro2",
  "quote",
- "regex 1.6.0",
+ "regex 1.7.0",
  "syn",
 ]
 
@@ -1116,6 +1116,7 @@ dependencies = [
  "nanoid",
  "psutil",
  "question",
+ "regex 1.7.0",
  "reqwest",
  "rustyline",
  "serde",
@@ -1127,6 +1128,7 @@ dependencies = [
  "staticfile",
  "sysinfo",
  "terminal-spinners",
+ "thread_local 1.1.4",
  "tokio",
  "v_htmlescape",
 ]
@@ -1939,15 +1941,15 @@ dependencies = [
  "aho-corasick 0.6.10",
  "memchr 2.5.0",
  "regex-syntax 0.5.6",
- "thread_local",
+ "thread_local 0.3.6",
  "utf8-ranges",
 ]
 
 [[package]]
 name = "regex"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c4eb3267174b8c6c2f654116623910a0fef09c4753f8dd83db29c48a0df988b"
+checksum = "e076559ef8e241f2ae3479e36f97bd5741c0330689e217ad51ce2c76808b868a"
 dependencies = [
  "aho-corasick 0.7.18",
  "memchr 2.5.0",
@@ -2328,7 +2330,7 @@ dependencies = [
  "base64 0.13.1",
  "if_chain",
  "lazy_static",
- "regex 1.6.0",
+ "regex 1.7.0",
  "rustc_version 0.2.3",
  "serde",
  "serde_json",
@@ -2518,6 +2520,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c6b53e329000edc2b34dbe8545fd20e55a333362d0a321909685a19bd28c3f1b"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "thread_local"
+version = "1.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5516c27b78311c50bf42c071425c560ac799b11c30b31f87e3081965fe5e0180"
+dependencies = [
+ "once_cell",
 ]
 
 [[package]]

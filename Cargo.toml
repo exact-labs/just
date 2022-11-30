@@ -33,6 +33,8 @@ inquire = "0.5.2"
 question = "0.2.2"
 data-url = "0.2.0"
 terminal-spinners = "0.3.2"
+thread_local = "1.1.4"
+regex = "1.7.0"
 
 [build-dependencies]
 chrono = "0.4.23"
