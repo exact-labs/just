@@ -31,8 +31,8 @@ fn project_meta() {
     let package = project::package::read();
     println!(
         "{} {} {}",
-        "Starting".green().bold(),
-        format!("{}", package.name).white(),
+        "starting".green(),
+        format!("{}", package.name),
         format!("v{}", package.version).cyan()
     );
 }
@@ -98,23 +98,6 @@ fn extensions() -> deno_core::Extension {
         .build();
 }
 
-async fn exec(file_name: &str) -> Result<(), AnyError> {
-    let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
-        module_loader: Some(Rc::new(loader::RuntimeImport)),
-        extensions: vec![extensions()],
-        ..Default::default()
-    });
-    js_runtime
-        .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
-        .unwrap();
-
-    let main_module = deno_core::resolve_path(file_name)?;
-    let mod_id = js_runtime.load_main_module(&main_module, None).await?;
-    let result = js_runtime.mod_evaluate(mod_id);
-    js_runtime.run_event_loop(false).await?;
-    result.await?
-}
-
 async fn repl(line: &str) -> Result<deno_core::v8::Global<deno_core::v8::Value>, AnyError> {
     let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
         module_loader: Some(Rc::new(loader::RuntimeImport)),
@@ -125,6 +108,128 @@ async fn repl(line: &str) -> Result<deno_core::v8::Global<deno_core::v8::Value>,
         .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
         .unwrap();
     return js_runtime.execute_script("<repl>", line);
+}
+
+async fn exec(code_path: &String) -> Result<(), AnyError> {
+    let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
+        module_loader: Some(Rc::new(loader::RuntimeImport)),
+        extensions: vec![extensions()],
+        ..Default::default()
+    });
+    js_runtime
+        .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
+        .unwrap();
+
+    let main_module = loader::import_prefix(code_path)?;
+    let mod_id = js_runtime.load_main_module(&main_module, None).await?;
+    let result = js_runtime.mod_evaluate(mod_id);
+    js_runtime.run_event_loop(false).await?;
+    result.await?
+}
+
+fn start_repl() {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    let mut readline_editor = Editor::<()>::new();
+    let mut exit_value = 0;
+
+    println!("{}", get_version(true));
+    println!("Type \".help\" for more information.");
+
+    loop {
+        let readline = readline_editor.readline("> ");
+        match readline {
+            Ok(line) => {
+                if line == ".help" {
+                    println!(
+                        ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
+                    )
+                } else if line == ".clear" {
+                    print!("{}[2J", 27 as char);
+                } else if line == ".exit" {
+                    break;
+                } else {
+                    if let Err(error) = runtime.block_on(repl(&line)) {
+                        eprintln!("{}", format!("{}", error).red());
+                    }
+                }
+            }
+            Err(ReadlineError::Interrupted) => {
+                exit_value += 1;
+                if exit_value == 2 {
+                    break;
+                } else {
+                    println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
+                }
+            }
+            Err(ReadlineError::Eof) => {
+                break;
+            }
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+        }
+    }
+}
+
+fn run_task(task: &str) {
+    let tasks = project::package::read().tasks;
+    println!("{} {} `{}`", "running".green(), "task", tasks[task],);
+    cmd!(&tasks[task]).run().unwrap();
+}
+
+fn list_tasks() {
+    let tasks = project::package::read().tasks;
+    project::tasks::task_list(tasks);
+}
+
+fn create_project_yml() {
+    let exists: bool = std::path::Path::new("package.yml").exists();
+    if !exists {
+        project::init::create_project();
+    } else {
+        let answer = Question::new("overwrite project.yml?")
+            .show_defaults()
+            .confirm();
+
+        ternary!(
+            answer == Answer::YES,
+            project::init::create_project(),
+            println!("{}", "Aborting...".white())
+        )
+    }
+}
+
+fn start_exec(path: String, silent: bool) {
+    let exists: bool = std::path::Path::new("package.yml").exists();
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    if silent {
+        if let Err(error) = runtime.block_on(exec(&path)) {
+            eprintln!("{}", format!("{}", error).red());
+        }
+    } else {
+        ternary!(exists, project_meta(), {});
+        let start = Instant::now();
+        if let Err(error) = runtime.block_on(exec(&path)) {
+            eprintln!("{}", format!("{}", error).red());
+        } else {
+            let path = path.split("/").collect::<Vec<_>>();
+
+            println!(
+                "\n{} took {}",
+                format!("{}", path[path.len() - 1]).white(),
+                format!("{:.2?}", start.elapsed()).yellow()
+            )
+        }
+    }
 }
 
 #[derive(Parser)]
@@ -171,158 +276,6 @@ enum Commands {
         #[command()]
         filename: String,
     },
-}
-
-fn start_repl() {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-
-    let mut readline_editor = Editor::<()>::new();
-    let mut exit_value = 0;
-
-    println!("{}", get_version(true));
-    println!("Type \".help\" for more information.");
-
-    loop {
-        let readline = readline_editor.readline("> ");
-        match readline {
-            Ok(line) => {
-                if line == ".help" {
-                    println!(
-                        ".clear    Clear the screen\n.exit     Exit the REPL\n.help     Print this help message"
-                    )
-                } else if line == ".clear" {
-                    print!("{}[2J", 27 as char);
-                } else if line == ".exit" {
-                    break;
-                } else {
-                    if let Err(error) = runtime.block_on(repl(&*line)) {
-                        eprintln!("{}", format!("{}", error).red());
-                    }
-                }
-            }
-            Err(ReadlineError::Interrupted) => {
-                exit_value += 1;
-                if exit_value == 2 {
-                    break;
-                } else {
-                    println!("(To exit, press Ctrl+C again, Ctrl+D or type .exit)");
-                }
-            }
-            Err(ReadlineError::Eof) => {
-                break;
-            }
-            Err(err) => {
-                println!("Error: {:?}", err);
-                break;
-            }
-        }
-    }
-}
-
-fn run_task(task: &str) {
-    let tasks = project::package::read().tasks;
-    println!(
-        "{} {} `{}`",
-        "Running".green().bold(),
-        "task".white(),
-        tasks[task],
-    );
-    cmd!(&tasks[task]).run().unwrap();
-}
-
-fn list_tasks() {
-    let tasks = project::package::read().tasks;
-    project::tasks::task_list(tasks);
-}
-
-fn create_project_yml() {
-    let exists: bool = std::path::Path::new("package.yml").exists();
-    if !exists {
-        project::init::create_project();
-    } else {
-        let answer = Question::new("overwrite project.yml?")
-            .show_defaults()
-            .confirm();
-
-        ternary!(
-            answer == Answer::YES,
-            project::init::create_project(),
-            println!("{}", "Aborting...".white())
-        )
-    }
-}
-
-fn load_external_file(url: &String, silent: bool) {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-
-    println!("{} {url}", "download".green());
-
-    let mut buf: Vec<u8> = vec![];
-    let _res = match reqwest::blocking::get(url) {
-        Ok(mut res) => res.copy_to(&mut buf),
-        Err(err) => {
-            println!("Request failed: {}", err.to_string());
-            return;
-        }
-    };
-
-    let contents = match std::str::from_utf8(buf.as_slice()) {
-        Ok(string) => string,
-        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-    };
-
-    if silent {
-        if let Err(error) = runtime.block_on(repl(&*contents)) {
-            eprintln!("{}", format!("{}", error).red());
-        }
-    } else {
-        let start = Instant::now();
-        if let Err(error) = runtime.block_on(repl(&*contents)) {
-            eprintln!("{}", format!("{}", error).red());
-        } else {
-            println!(
-                "\n{} took {}",
-                format!("{url}").white(),
-                format!("{:.2?}", start.elapsed()).yellow()
-            )
-        }
-    }
-}
-
-fn start_exec(filename: String, silent: bool) {
-    let exists: bool = std::path::Path::new("package.yml").exists();
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-
-    if filename.starts_with("https://") || filename.starts_with("http://") {
-        load_external_file(&filename, silent);
-    } else {
-        if silent {
-            if let Err(error) = runtime.block_on(exec(&*filename)) {
-                eprintln!("{}", format!("{}", error).red());
-            }
-        } else {
-            ternary!(exists, project_meta(), {});
-            let start = Instant::now();
-            if let Err(error) = runtime.block_on(exec(&*filename)) {
-                eprintln!("{}", format!("{}", error).red());
-            } else {
-                println!(
-                    "\n{} took {}",
-                    format!("{filename}").white(),
-                    format!("{:.2?}", start.elapsed()).yellow()
-                )
-            }
-        }
-    }
 }
 
 fn main() {

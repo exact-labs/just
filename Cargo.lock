@@ -1114,6 +1114,7 @@ dependencies = [
  "libc",
  "mount",
  "nanoid",
+ "normalize-path",
  "psutil",
  "question",
  "regex 1.7.0",
@@ -1131,6 +1132,7 @@ dependencies = [
  "termion",
  "thread_local 1.1.4",
  "tokio",
+ "url 2.3.1",
  "v_htmlescape",
 ]
 
@@ -1383,6 +1385,12 @@ checksum = "05aec50c70fd288702bcd93284a8444607f3292dbdf2a30de5ea5dcdbe72287b"
 dependencies = [
  "memchr 1.0.2",
 ]
+
+[[package]]
+name = "normalize-path"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf22e319b2e3cb517350572e3b70c6822e0a520abfb5c78f690e829a73e8d9f2"
 
 [[package]]
 name = "ntapi"

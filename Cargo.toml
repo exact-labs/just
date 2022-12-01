@@ -36,6 +36,8 @@ terminal-spinners = "0.3.2"
 thread_local = "1.1.4"
 regex = "1.7.0"
 termion = "1.5.6"
+url = "2.3.1"
+normalize-path = "0.2.0"
 
 [build-dependencies]
 chrono = "0.4.23"
