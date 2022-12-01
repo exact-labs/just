@@ -1,8 +1,10 @@
 use crate::go;
 use crate::helpers;
+use crate::logger;
 use crate::project;
 use crate::runtime;
 use crate::ternary;
+
 use colored::Colorize;
 use question::{Answer, Question};
 use rustyline::{error::ReadlineError, Editor};
@@ -70,7 +72,9 @@ pub fn run_task(task: &str) {
     let tasks = project::package::read().tasks;
     println!("\n{} task {}", "running".green(), task.bold());
     println!("{} {}\n", "»".white(), tasks[task]);
-    cmd!(&tasks[task]).run().unwrap();
+    if let Err(error) = cmd!(&tasks[task]).run() {
+        logger::error(format!("{:?}", error));
+    }
 }
 
 pub fn list_tasks() {
