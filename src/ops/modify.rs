@@ -1,7 +1,7 @@
-use crate::serde_v8::from_v8;
 use deno_core::op;
 use deno_core::serde_v8;
 use deno_core::v8;
+use serde_v8::from_v8;
 
 #[op(v8)]
 fn op_encode<'a>(scope: &mut v8::HandleScope, text: serde_v8::Value) -> serde_v8::Value<'a> {

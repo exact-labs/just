@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::fs;
 
 #[derive(Debug, Deserialize)]
-pub struct Project {
+pub struct Package {
     pub name: String,
     pub description: String,
     pub version: String,
@@ -17,9 +17,9 @@ pub struct Project {
     pub dependencies: BTreeMap<String, String>,
 }
 
-pub fn read() -> Project {
+pub fn read() -> Package {
     let contents = fs::read_to_string("package.yml").unwrap();
-    let yaml_file: Result<Project, _> = serde_yaml::from_str(&contents);
+    let yaml_file: Result<Package, _> = serde_yaml::from_str(&contents);
 
     let parsed = match yaml_file {
         Ok(project) => project,
