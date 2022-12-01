@@ -35,3 +35,10 @@ pub fn read_index(dir: std::path::Display, package: &String, version: &String) -
 pub fn string_to_static_str(s: String) -> &'static str {
     Box::leak(s.into_boxed_str())
 }
+
+pub fn trim_start_end(value: &str) -> &str {
+    let mut chars = value.chars();
+    chars.next();
+    chars.next_back();
+    chars.as_str()
+}

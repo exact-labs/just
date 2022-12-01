@@ -59,16 +59,17 @@ impl DependencyManager {
 pub fn project_meta() {
     let package = project::package::read();
     println!(
-        "{} {} {}",
+        "{} {}@{}",
         "starting".green(),
-        format!("{}", package.name),
-        format!("v{}", package.version).cyan()
+        format!("{}", package.name).bold(),
+        format!("{}", package.version).bold()
     );
 }
 
 pub fn run_task(task: &str) {
     let tasks = project::package::read().tasks;
-    println!("{} {} `{}`", "running".green(), "task", tasks[task],);
+    println!("\n{} task {}", "running".green(), task.bold());
+    println!("{} {}\n", "»".white(), tasks[task]);
     cmd!(&tasks[task]).run().unwrap();
 }
 

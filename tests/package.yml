@@ -7,9 +7,14 @@ repository: github.com/example/example
 license: mit
 index: cmd.js
 tasks:
-  start/uuid: ./just run uuid.js
-  benchmark: ./just run bench.js
-  console: ./just run console.js
+  start/uuid: ../just run uuid.js
+  benchmark: ../just run bench.js
+  console: ../just run console.js
+  package: ../just run package.js
+  cmd: ../just run cmd.js
+  bad_task: ./just run error.js
+  db: ../just run db_format.js
+
 dependencies:
   test: 0.0.1
   loop: 0.0.2

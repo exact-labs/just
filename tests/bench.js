@@ -1,6 +1,6 @@
 import { hello } from './hello.js';
 
-const { test } = await import(pkg('test'));
+const { test } = await require('test');
 const path = `${__dirname}/files/demo.txt`;
 
 // imports
