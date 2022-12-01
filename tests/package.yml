@@ -1,0 +1,15 @@
+name: project
+description: the project desc
+version: 0.0.1
+author: john@example.com
+url: example.com
+repository: github.com/example/example
+license: mit
+index: cmd.js
+tasks:
+  start/uuid: ./just run uuid.js
+  benchmark: ./just run bench.js
+  console: ./just run console.js
+dependencies:
+  test: 0.0.1
+  loop: 0.0.2
