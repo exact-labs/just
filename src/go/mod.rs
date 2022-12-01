@@ -18,32 +18,47 @@ fn string_to_static_str(s: String) -> &'static str {
 pub fn init() {
     match home::home_dir() {
         Some(path) => {
-            let exists: bool = Path::new(helpers::string_to_static_str(format!(
-                "{}/.core_js",
+            let folder_exists: bool = Path::new(helpers::string_to_static_str(format!(
+                "{}/.just",
                 path.display()
             )))
             .is_dir();
 
-            if !exists {
-                std::fs::create_dir_all(format!("{}/.core_js", path.display())).unwrap();
-                println!("created {}/.core_js", path.display());
+            let binary_exists: bool = Path::new(helpers::string_to_static_str(format!(
+                "{}/.just/external",
+                path.display()
+            )))
+            .is_file();
+
+            if !folder_exists {
+                std::fs::create_dir_all(format!("{}/.just", path.display())).unwrap();
+                println!("created {}/.just", path.display());
             }
 
-            let external_runtime = format!("{}/.core_js/external", path.display());
-            let sha_sum = helpers::sha256_digest(&PathBuf::from(external_runtime.clone())).unwrap();
+            let external_runtime = format!("{}/.just/external", path.display());
 
-            if env!("FILE_SHA") != sha_sum {
+            let write_file = || {
                 let mut file = File::create(external_runtime.clone()).unwrap();
                 file.write_all(BINARY_EXTERNAL).unwrap();
                 println!("wrote external runtime file {}", external_runtime.clone());
                 file.set_permissions(std::fs::Permissions::from_mode(0o755))
                     .unwrap();
+            };
+
+            if binary_exists {
+                let sha_sum =
+                    helpers::sha256_digest(&PathBuf::from(external_runtime.clone())).unwrap();
+
+                if env!("FILE_SHA") != sha_sum {
+                    write_file();
+                } else {
+                    println!(
+                        "external runtime for version: {} already exists",
+                        env!("CARGO_PKG_VERSION")
+                    )
+                }
             } else {
-                println!(
-                    "external runtime for version: {} already exists\nhash: {}",
-                    env!("CARGO_PKG_VERSION"),
-                    env!("FILE_SHA")
-                )
+                write_file();
             }
         }
         None => {
@@ -56,7 +71,7 @@ pub fn init() {
 #[op]
 pub fn run_ext_func(cmd: String) -> String {
     return cmd!(string_to_static_str(format!(
-        "{}/.core_js/external -run=\"{cmd}\"",
+        "{}/.just/external -run=\"{cmd}\"",
         home::home_dir().unwrap().display()
     )))
     .stdout_utf8()

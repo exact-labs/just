@@ -31,6 +31,10 @@ enum Commands {
     Fmt,
     /// Initialize a new package.yml
     Init,
+    /// Install all dependencies defined in package.yml
+    Install,
+    /// Manage dependencies
+    Deps,
     /// Initialize a new project
     Create,
     /// Run a task defined in project.yml
@@ -64,11 +68,13 @@ fn main() {
     }
 
     match &cli.command {
-        Some(Commands::Setup) => go::init(),
+        Some(Commands::Setup) => cli::setup(),
         Some(Commands::Init) => cli::create_project_yml(),
         Some(Commands::Tasks) => cli::list_tasks(),
         Some(Commands::Task { task }) => cli::run_task(task),
         Some(Commands::Create) => project::create::download_template(),
+        Some(Commands::Install) => println!("install (wip)"),
+        Some(Commands::Deps) => println!("deps (wip)"),
         Some(Commands::Fmt) => println!("fmt (wip)"),
         Some(Commands::Compile) => println!("compile (wip)"),
         Some(Commands::Bundle) => println!("bundle (wip)"),

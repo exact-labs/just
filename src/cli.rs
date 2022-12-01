@@ -1,3 +1,4 @@
+use crate::go;
 use crate::project;
 use crate::runtime;
 use crate::ternary;
@@ -7,6 +8,14 @@ use rustyline::{error::ReadlineError, Editor};
 use shell::cmd;
 use std::env;
 use std::time::Instant;
+
+pub fn setup() {
+    let home_dir = home::home_dir().unwrap();
+
+    go::init();
+    std::fs::create_dir_all(format!("{}/.just", &home_dir.display())).unwrap();
+    println!("created {}/.just/packages", &home_dir.display());
+}
 
 pub fn get_version(short: bool) -> String {
     return match short {
