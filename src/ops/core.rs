@@ -1,4 +1,5 @@
 use crate::helpers;
+use crate::project;
 use colored::Colorize;
 use deno_core::error::AnyError;
 use deno_core::op;
@@ -23,15 +24,16 @@ pub fn op_escape(text: String) -> Result<String, AnyError> {
 }
 
 #[op]
-pub fn op_package_dir(package: String) -> String {
+pub fn op_get_package(package: String) -> String {
     let dir = env::current_dir().unwrap();
-    return format!("{}/packages/{package}/", dir.display());
-}
+    let dependencies = project::package::read().dependencies;
+    let package_index = helpers::read_index(dir.display(), &package, &dependencies[&package]).index;
 
-#[op]
-pub fn op_package_index(package: String) -> String {
-    let dir = env::current_dir().unwrap();
-    return helpers::read_index(format!("{}/packages/{package}/", dir.display())).index;
+    return format!(
+        "{}/packages/{package}/{}/{package_index}",
+        dir.display(),
+        dependencies[&package]
+    );
 }
 
 #[op]

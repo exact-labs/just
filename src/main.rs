@@ -2,6 +2,7 @@ mod cli;
 mod go;
 mod helpers;
 mod loader;
+mod logger;
 mod macros;
 mod ops;
 mod project;
@@ -33,8 +34,18 @@ enum Commands {
     Init,
     /// Install all dependencies defined in package.yml
     Install,
-    /// Manage dependencies
-    Deps,
+    /// Add a new dependency
+    Add {
+        #[command()]
+        name: String,
+    },
+    /// Remove a dependency
+    Remove {
+        #[command()]
+        name: String,
+    },
+    /// Remove unused dependencies
+    Clean,
     /// Initialize a new project
     Create,
     /// Run a task defined in project.yml
@@ -73,8 +84,10 @@ fn main() {
         Some(Commands::Tasks) => cli::list_tasks(),
         Some(Commands::Task { task }) => cli::run_task(task),
         Some(Commands::Create) => project::create::download_template(),
-        Some(Commands::Install) => println!("install (wip)"),
-        Some(Commands::Deps) => println!("deps (wip)"),
+        Some(Commands::Install) => cli::DependencyManager::install(),
+        Some(Commands::Add { name }) => cli::DependencyManager::add(name),
+        Some(Commands::Remove { name }) => cli::DependencyManager::remove(name),
+        Some(Commands::Clean) => cli::DependencyManager::clean(),
         Some(Commands::Fmt) => println!("fmt (wip)"),
         Some(Commands::Compile) => println!("compile (wip)"),
         Some(Commands::Bundle) => println!("bundle (wip)"),

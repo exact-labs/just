@@ -1,4 +1,5 @@
 use crate::go;
+use crate::helpers;
 use crate::project;
 use crate::runtime;
 use crate::ternary;
@@ -7,14 +8,23 @@ use question::{Answer, Question};
 use rustyline::{error::ReadlineError, Editor};
 use shell::cmd;
 use std::env;
+use std::path::Path;
 use std::time::Instant;
 
 pub fn setup() {
     let home_dir = home::home_dir().unwrap();
+    let folder_exists: bool = Path::new(helpers::string_to_static_str(format!(
+        "{}/.just/packages",
+        home_dir.display()
+    )))
+    .is_dir();
 
     go::init();
-    std::fs::create_dir_all(format!("{}/.just", &home_dir.display())).unwrap();
-    println!("created {}/.just/packages", &home_dir.display());
+
+    if !folder_exists {
+        std::fs::create_dir_all(format!("{}/.just/packages", &home_dir.display())).unwrap();
+        println!("created {}/.just/packages", &home_dir.display());
+    }
 }
 
 pub fn get_version(short: bool) -> String {
@@ -28,6 +38,22 @@ pub fn get_version(short: bool) -> String {
             env!("BUILD_DATE")
         ),
     };
+}
+
+pub struct DependencyManager;
+impl DependencyManager {
+    pub fn install() {
+        println!("install")
+    }
+    pub fn add(name: &String) {
+        println!("{name}")
+    }
+    pub fn remove(name: &String) {
+        println!("{name}")
+    }
+    pub fn clean() {
+        println!("clean")
+    }
 }
 
 pub fn project_meta() {

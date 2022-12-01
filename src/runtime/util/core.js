@@ -2,7 +2,7 @@
 	const { core } = Deno;
 	const { ops } = core;
 
-	globalThis.require = (package) => import('file:///' + ops.op_package_dir(package) + ops.op_package_index(package));
+	globalThis.require = (package) => import('file:///' + ops.op_get_package(package));
 	globalThis.__dirname = ops.op_dirname();
 	globalThis.sleep = (ms) => ops.op_sleep(ms);
 
