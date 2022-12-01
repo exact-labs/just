@@ -1,0 +1,9 @@
+name: loop
+description: loop
+version: 0.0.1
+author:
+url:
+license: none
+index: import.js
+tasks:
+dependencies:
