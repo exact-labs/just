@@ -5,10 +5,12 @@ mod loader;
 mod logger;
 mod macros;
 mod ops;
+mod platform;
 mod project;
 mod runtime;
 
 use clap::{Parser, Subcommand};
+use platform::{compile::CompileOptions, CommandRunner};
 
 #[derive(Parser)]
 struct Cli {
@@ -26,8 +28,10 @@ enum Commands {
     Setup,
     /// Bundle module and dependencies into single file
     Bundle,
-    /// Compile the script into a self contained executable
-    Compile,
+    /// Build the script into a self contained executable
+    Build,
+    /// Run the transformer
+    Compile(Box<CompileOptions>),
     /// Format source files
     Fmt,
     /// Initialize a new package.yml
@@ -60,7 +64,7 @@ enum Commands {
         #[arg(short, long)]
         silent: bool,
     },
-    /// Run a javascript program
+    /// Run a JavaScript or TypeScript program
     Run {
         #[arg(short, long)]
         silent: bool,
@@ -88,8 +92,9 @@ fn main() {
         Some(Commands::Add { name }) => cli::DependencyManager::add(name),
         Some(Commands::Remove { name }) => cli::DependencyManager::remove(name),
         Some(Commands::Clean) => cli::DependencyManager::clean(),
+        Some(Commands::Compile(options)) => options.execute(),
         Some(Commands::Fmt) => println!("fmt (wip)"),
-        Some(Commands::Compile) => println!("compile (wip)"),
+        Some(Commands::Build) => println!("build (wip)"),
         Some(Commands::Bundle) => println!("bundle (wip)"),
         Some(Commands::Run { silent, filename }) => cli::run_exec(filename.to_string(), *silent),
         Some(Commands::Start { silent }) => cli::run_exec(project::package::read().index, *silent),
