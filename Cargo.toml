@@ -7,6 +7,10 @@ homepage = "https://justjs.dev"
 repository = "https://github.com/exact-rs/just"
 description = "A modern runtime for javascript."
 
+[[bin]]
+name = "just"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1.0.66"
 deno_core = "0.160.0"
