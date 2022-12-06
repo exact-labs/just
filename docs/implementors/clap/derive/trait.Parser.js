@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"just":[["impl Parser for <a class=\"struct\" href=\"just/platform/compile/struct.CompileOptions.html\" title=\"struct just::platform::compile::CompileOptions\">CompileOptions</a>"],["impl Parser for <a class=\"struct\" href=\"just/struct.Cli.html\" title=\"struct just::Cli\">Cli</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
