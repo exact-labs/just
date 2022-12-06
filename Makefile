@@ -9,12 +9,12 @@ build:
    
 test:
 	cd src/go/embed && go mod tidy && go build .
-	cd tests && cargo run run $(run).js
+	cd tests/javascript && cargo run run $(run).js
 
 test_all_run:
 	cd src/go/embed && go mod tidy && go build .
 	d=$$(date +%s)\
-	; for file in tests/*.js; do \
+	; for file in tests/javascript/*.js; do \
 		cd tests; \
 		cargo run run $${file#*/}; \
 		cd ../; \
@@ -26,7 +26,7 @@ test_all_build:
 	cargo build --release
 	mv target/release/just .
 	d=$$(date +%s)\
-	; for file in tests/*.js; do \
+	; for file in tests/javascript/*.js; do \
 		cd tests; \
 		../just run $${file#*/}; \
 		cd ../; \

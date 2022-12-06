@@ -5,7 +5,7 @@ author: john@example.com
 url: example.com
 repository: github.com/example/example
 license: mit
-index: cmd.js
+index: javascript/cmd.js
 tasks:
   start/uuid: ../just run javascript/uuid.js
   start/db: ../just run javascript/db_format.js
@@ -15,6 +15,7 @@ tests:
   benchmark: ../just run javascript/bench.js
   console: ../just run javascript/console.js
   package: ../just run javascript/package.js
+  import: ../just run javascript/import.js
   cmd: ../just run javascript/cmd.js
 
 dependencies:

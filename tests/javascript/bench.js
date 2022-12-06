@@ -57,7 +57,7 @@ try {
 } catch (err) {
 	console.error('Unable to read file', path, err);
 }
-core.print('\x1b[35mreadDir() \x1b[0m');
+core.print('\x1b[35mreadDir() \x1b[0m\n');
 fs.readDir().map((item) => {
 	console.log(item.slice(2));
 });
