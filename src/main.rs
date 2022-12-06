@@ -68,6 +68,7 @@ enum Commands {
         #[command()]
         file_name: String,
     },
+    /// Static file serving
     Serve {
         #[clap(short, long, default_value_t = String::from("localhost"))]
         address: String,
