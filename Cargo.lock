@@ -1382,7 +1382,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "just"
+name = "justjs"
 version = "0.4.3"
 dependencies = [
  "anyhow",
@@ -2699,9 +2699,9 @@ checksum = "4389f1d5789befaf6029ebd9f7dac4af7f7e3d61b69d4f30e2ac02b57e7712b0"
 
 [[package]]
 name = "rust-shell"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db76dbdae606c641d72e2e3eae084bd30cf8dfbef7482b720b8f8380e211e073"
+checksum = "fe96238927a56c408907a0c56cc7574cb198a462b4dd8c79169b98d9d5831460"
 dependencies = [
  "env_logger",
  "errno",
