@@ -1,22 +1,21 @@
 mod cli;
+mod compile;
 mod go;
 mod helpers;
 mod loader;
 mod logger;
 mod macros;
 mod ops;
-mod platform;
 mod project;
 mod runtime;
 
 use clap::{Parser, Subcommand};
-use platform::{compile::CompileOptions, CommandRunner};
+use compile::{CommandRunner, CompileOptions};
 
 #[derive(Parser)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
-
     /// Print version information
     #[arg(short, long)]
     version: bool,
@@ -26,9 +25,7 @@ struct Cli {
 enum Commands {
     /// Setup for executing external modules
     Setup,
-    /// Build the script into a self contained executable
-    Build,
-    /// Transform module into single file
+    /// Transform module(s) from TypeScript
     Compile(Box<CompileOptions>),
     /// Initialize a new package.yml
     Init,
@@ -55,6 +52,13 @@ enum Commands {
     },
     /// List all tasks in project.yml
     Tasks,
+    /// Run a test defined in project.yml
+    Test {
+        #[command()]
+        test: String,
+    },
+    /// List all tests in project.yml
+    Tests,
     /// Start the index script
     Start {
         #[arg(short, long)]
@@ -64,7 +68,6 @@ enum Commands {
     Run {
         #[arg(short, long)]
         silent: bool,
-
         #[command()]
         file_name: String,
     },
@@ -72,10 +75,8 @@ enum Commands {
     Serve {
         #[clap(short, long, default_value_t = String::from("localhost"))]
         address: String,
-
         #[clap(short, long, default_value_t = 3000)]
         port: u64,
-
         #[command()]
         dir_name: String,
     },
@@ -92,9 +93,10 @@ fn main() {
     match &cli.command {
         Some(Commands::Setup) => cli::setup(),
         Some(Commands::Tasks) => cli::list_tasks(),
-        Some(Commands::Build) => println!("build (wip)"),
+        Some(Commands::Tests) => cli::list_tests(),
         Some(Commands::Init) => cli::create_project_yml(),
         Some(Commands::Task { task }) => cli::run_task(task),
+        Some(Commands::Test { test }) => cli::run_test(test),
         Some(Commands::Compile(options)) => options.execute(),
         Some(Commands::Clean) => cli::DependencyManager::clean(),
         Some(Commands::Install) => cli::DependencyManager::install(),

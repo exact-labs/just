@@ -94,9 +94,23 @@ pub fn run_task(task: &str) {
     }
 }
 
+pub fn run_test(task: &str) {
+    let tasks = project::package::read().tests;
+    println!("\n{} test {}", "running".green(), task.bold());
+    println!("{} {}\n", "»".white(), tasks[task]);
+    if let Err(error) = cmd!(&tasks[task]).run() {
+        logger::error(format!("{:?}", error));
+    }
+}
+
 pub fn list_tasks() {
     let tasks = project::package::read().tasks;
     project::tasks::task_list(tasks);
+}
+
+pub fn list_tests() {
+    let tests = project::package::read().tests;
+    project::tests::test_list(tests);
 }
 
 pub fn create_project_yml() {

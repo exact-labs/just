@@ -323,6 +323,10 @@ impl CompileOptions {
     }
 }
 
+pub trait CommandRunner {
+    fn execute(&self);
+}
+
 #[swc_trace]
 impl super::CommandRunner for CompileOptions {
     fn execute(&self) {

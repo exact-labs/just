@@ -57,7 +57,7 @@ pub fn init() {
 
 #[op]
 pub fn run_ext_func(cmd: String) -> String {
-    return cmd!(string_to_static_str(format!("{}/.just/external -run=\"{cmd}\"", home::home_dir().unwrap().display())))
+    return cmd!(string_to_static_str(format!("{}/.just/external {cmd}", home::home_dir().unwrap().display())))
         .stdout_utf8()
         .unwrap();
 }

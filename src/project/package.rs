@@ -14,6 +14,7 @@ pub struct Package {
     pub license: String,
     pub index: String,
     pub tasks: BTreeMap<String, String>,
+    pub tests: BTreeMap<String, String>,
     pub dependencies: BTreeMap<String, String>,
 }
 
