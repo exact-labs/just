@@ -6,10 +6,7 @@ use shell::cmd;
 use std::collections::BTreeMap;
 
 pub fn task_list(tasks: BTreeMap<String, String>) {
-    let options = tasks
-        .iter()
-        .map(|(key, val)| format!("({key}): '{val}'"))
-        .collect::<Vec<_>>();
+    let options = tasks.iter().map(|(key, val)| format!("({key}): '{val}'")).collect::<Vec<_>>();
 
     match Select::new("Select a task to run:", options).prompt() {
         Ok(task) => {

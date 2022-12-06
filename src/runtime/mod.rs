@@ -72,9 +72,7 @@ pub async fn repl(line: &str) -> Result<deno_core::v8::Global<deno_core::v8::Val
         extensions: vec![extensions()],
         ..Default::default()
     });
-    js_runtime
-        .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
-        .unwrap();
+    js_runtime.execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE).unwrap();
     return js_runtime.execute_script("<repl>", line);
 }
 
@@ -84,9 +82,7 @@ pub async fn exec(code_path: &String) -> Result<(), AnyError> {
         extensions: vec![extensions()],
         ..Default::default()
     });
-    js_runtime
-        .execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE)
-        .unwrap();
+    js_runtime.execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE).unwrap();
 
     let main_module = loader::import_prefix(code_path)?;
     let mod_id = js_runtime.load_main_module(&main_module, None).await?;

@@ -60,17 +60,8 @@ pub async fn op_static_test(port: u64, dir: String) {
     match Iron::new(mount).http(format!("0.0.0.0:{}", port)) {
         Ok(_) => {
             println!("serving path {:?} on :{}", path, port);
-            println!(
-                "{:?}",
-                test_url(format!("http://localhost:{}", port))
-                    .await
-                    .unwrap()
-            );
-            println!(
-                "\n{} took {}",
-                format!("serve.rs").white(),
-                format!("{:.2?}", start.elapsed()).yellow()
-            );
+            println!("{:?}", test_url(format!("http://localhost:{}", port)).await.unwrap());
+            println!("\n{} took {}", format!("serve.rs").white(), format!("{:.2?}", start.elapsed()).yellow());
             exit(1)
         }
         Err(err) => {

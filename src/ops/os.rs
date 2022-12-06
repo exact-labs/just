@@ -30,17 +30,7 @@ pub fn op_release() -> String {
         let mut s = [0u8; 256];
         let mut mib = [libc::CTL_KERN, libc::KERN_OSRELEASE];
         let mut len = s.len();
-        if unsafe {
-            libc::sysctl(
-                mib.as_mut_ptr(),
-                mib.len() as _,
-                s.as_mut_ptr() as _,
-                &mut len,
-                std::ptr::null_mut(),
-                0,
-            )
-        } == -1
-        {
+        if unsafe { libc::sysctl(mib.as_mut_ptr(), mib.len() as _, s.as_mut_ptr() as _, &mut len, std::ptr::null_mut(), 0) } == -1 {
             return String::from("Unknown");
         }
 
@@ -54,19 +44,13 @@ pub fn op_release() -> String {
 
         let mut version_info = std::mem::MaybeUninit::<RTL_OSVERSIONINFOEXW>::uninit();
         unsafe {
-            (*version_info.as_mut_ptr()).dwOSVersionInfoSize =
-                std::mem::size_of::<RTL_OSVERSIONINFOEXW>() as u32;
+            (*version_info.as_mut_ptr()).dwOSVersionInfoSize = std::mem::size_of::<RTL_OSVERSIONINFOEXW>() as u32;
         }
         if !NT_SUCCESS(unsafe { RtlGetVersion(version_info.as_mut_ptr() as *mut _) }) {
             String::from("")
         } else {
             let version_info = unsafe { version_info.assume_init() };
-            format!(
-                "{}.{}.{}",
-                version_info.dwMajorVersion,
-                version_info.dwMinorVersion,
-                version_info.dwBuildNumber
-            )
+            format!("{}.{}.{}", version_info.dwMajorVersion, version_info.dwMinorVersion, version_info.dwBuildNumber)
         }
     }
 }
@@ -114,10 +98,7 @@ pub fn op_totalmem() -> String {
 #[op]
 pub fn op_loadavg() -> String {
     let load_avg = System::new_all().load_average();
-    return format!(
-        "[{}, {}, {}]",
-        load_avg.one, load_avg.five, load_avg.fifteen
-    );
+    return format!("[{}, {}, {}]", load_avg.one, load_avg.five, load_avg.fifteen);
 }
 
 #[op]

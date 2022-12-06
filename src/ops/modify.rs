@@ -16,10 +16,7 @@ fn op_encode<'a>(scope: &mut v8::HandleScope, text: serde_v8::Value) -> serde_v8
 }
 
 #[op(v8)]
-fn op_encode_fast<'a>(
-    scope: &mut v8::HandleScope,
-    text: serde_v8::Value<'a>,
-) -> serde_v8::Value<'a> {
+fn op_encode_fast<'a>(scope: &mut v8::HandleScope, text: serde_v8::Value<'a>) -> serde_v8::Value<'a> {
     let s = v8::Local::<v8::String>::try_from(text.v8_value).unwrap();
     let len = s.length();
     let capacity = (len as f64 * 1.2) as usize;

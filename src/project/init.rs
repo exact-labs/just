@@ -14,16 +14,7 @@ pub fn create_project() {
 
     let mut file = File::create("package.yml").unwrap();
     let current_dir = std::env::current_dir().unwrap();
-    let name = Text::new("package name:")
-        .with_default(
-            &current_dir
-                .file_name()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_string(),
-        )
-        .prompt();
+    let name = Text::new("package name:").with_default(&current_dir.file_name().unwrap().to_str().unwrap().to_string()).prompt();
 
     let version = Text::new("version:").with_default("1.0.0").prompt();
     let description = Text::new("description:").prompt();

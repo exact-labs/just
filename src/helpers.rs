@@ -2,9 +2,7 @@ use crate::logger;
 use serde::Deserialize;
 use std::fs;
 use tracing_chrome::{ChromeLayerBuilder, FlushGuard};
-use tracing_subscriber::{
-    filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer,
-};
+use tracing_subscriber::{filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer};
 
 #[derive(Debug, Deserialize)]
 pub struct Project {
@@ -12,16 +10,13 @@ pub struct Project {
 }
 
 pub fn read_index(dir: std::path::Display, package: &String, version: &String) -> Project {
-    let contents =
-        match fs::read_to_string(format!("{dir}/packages/{package}/{version}/package.yml")) {
-            Ok(text) => text,
-            Err(_) => {
-                logger::error(format!(
-                    "{package}@{version} not found. Did you run 'just install'"
-                ));
-                std::process::exit(1);
-            }
-        };
+    let contents = match fs::read_to_string(format!("{dir}/packages/{package}/{version}/package.yml")) {
+        Ok(text) => text,
+        Err(_) => {
+            logger::error(format!("{package}@{version} not found. Did you run 'just install'"));
+            std::process::exit(1);
+        }
+    };
 
     let yaml_file: Result<Project, _> = serde_yaml::from_str(&contents);
 
@@ -56,9 +51,7 @@ pub fn init_trace(out_file: &Option<String>) -> Option<FlushGuard> {
 
     let (chrome_layer, guard) = layer.build();
     tracing_subscriber::registry()
-        .with(chrome_layer.with_filter(filter::filter_fn(|metadata| {
-            !metadata.target().contains("cranelift") && !metadata.name().contains("log ")
-        })))
+        .with(chrome_layer.with_filter(filter::filter_fn(|metadata| !metadata.target().contains("cranelift") && !metadata.name().contains("log "))))
         .try_init()
         .expect("Should able to register trace");
 

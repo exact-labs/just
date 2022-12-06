@@ -18,17 +18,9 @@ fn string_to_static_str(s: String) -> &'static str {
 pub fn init() {
     match home::home_dir() {
         Some(path) => {
-            let folder_exists: bool = Path::new(helpers::string_to_static_str(format!(
-                "{}/.just",
-                path.display()
-            )))
-            .is_dir();
+            let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir();
 
-            let binary_exists: bool = Path::new(helpers::string_to_static_str(format!(
-                "{}/.just/external",
-                path.display()
-            )))
-            .is_file();
+            let binary_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/external", path.display()))).is_file();
 
             if !folder_exists {
                 std::fs::create_dir_all(format!("{}/.just", path.display())).unwrap();
@@ -41,21 +33,16 @@ pub fn init() {
                 let mut file = File::create(external_runtime.clone()).unwrap();
                 file.write_all(BINARY_EXTERNAL).unwrap();
                 println!("wrote external runtime file {}", external_runtime.clone());
-                file.set_permissions(std::fs::Permissions::from_mode(0o755))
-                    .unwrap();
+                file.set_permissions(std::fs::Permissions::from_mode(0o755)).unwrap();
             };
 
             if binary_exists {
-                let sha_sum =
-                    helpers::sha256_digest(&PathBuf::from(external_runtime.clone())).unwrap();
+                let sha_sum = helpers::sha256_digest(&PathBuf::from(external_runtime.clone())).unwrap();
 
                 if env!("FILE_SHA") != sha_sum {
                     write_file();
                 } else {
-                    println!(
-                        "external runtime for version: {} already exists",
-                        env!("CARGO_PKG_VERSION")
-                    )
+                    println!("external runtime for version: {} already exists", env!("CARGO_PKG_VERSION"))
                 }
             } else {
                 write_file();
@@ -70,10 +57,7 @@ pub fn init() {
 
 #[op]
 pub fn run_ext_func(cmd: String) -> String {
-    return cmd!(string_to_static_str(format!(
-        "{}/.just/external -run=\"{cmd}\"",
-        home::home_dir().unwrap().display()
-    )))
-    .stdout_utf8()
-    .unwrap();
+    return cmd!(string_to_static_str(format!("{}/.just/external -run=\"{cmd}\"", home::home_dir().unwrap().display())))
+        .stdout_utf8()
+        .unwrap();
 }

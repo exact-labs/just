@@ -18,9 +18,7 @@ use swc_core::{
         config::{Config, ConfigFile, Options},
         try_with_handler, Compiler, HandlerOpts, TransformOutput,
     },
-    common::{
-        errors::ColorConfig, sync::Lazy, FileName, FilePathMapping, SourceFile, SourceMap, GLOBALS,
-    },
+    common::{errors::ColorConfig, sync::Lazy, FileName, FilePathMapping, SourceFile, SourceMap, GLOBALS},
     trace_macro::swc_trace,
 };
 use walkdir::WalkDir;
@@ -40,11 +38,6 @@ pub struct CompileOptions {
     /// source-maps, errors etc
     #[clap(long, short = 'f', group = "input")]
     filename: Option<PathBuf>,
-
-    /// The name of the 'env' to use when loading configs and plugins. Defaults
-    /// to the value of SWC_ENV, or else NODE_ENV, or else development.
-    #[clap(long)]
-    env_name: Option<String>,
 
     /// List of glob paths to not compile.
     #[clap(long)]
@@ -99,12 +92,6 @@ pub struct CompileOptions {
     /// `trace-{unix epoch time}.json` will be used by default.
     #[clap(group = "experimental_trace", long)]
     trace_out_file: Option<String>,
-    /*Flags legacy @swc/cli supports, might need some thoughts if we need support same.
-     *log_watch_compilation: bool,
-     *copy_files: bool,
-     *include_dotfiles: bool,
-     *only: Option<String>,
-     *no_swcrc: bool, */
 }
 
 static COMPILER: Lazy<Arc<Compiler>> = Lazy::new(|| {
@@ -113,37 +100,22 @@ static COMPILER: Lazy<Arc<Compiler>> = Lazy::new(|| {
     Arc::new(Compiler::new(cm))
 });
 
-/// List of file extensions supported by default.
 static DEFAULT_EXTENSIONS: &[&str] = &["js", "jsx", "es6", "es", "mjs", "ts", "tsx"];
 
-/// Infer list of files to be transformed from cli arguments.
-/// If given input is a directory, it'll traverse it and collect all supported
-/// files.
 #[tracing::instrument(level = "info", skip_all)]
-fn get_files_list(
-    raw_files_input: &[PathBuf],
-    extensions: &[String],
-    ignore_pattern: Option<&str>,
-    _include_dotfiles: bool,
-) -> anyhow::Result<Vec<PathBuf>> {
+fn get_files_list(raw_files_input: &[PathBuf], extensions: &[String], ignore_pattern: Option<&str>, _include_dotfiles: bool) -> anyhow::Result<Vec<PathBuf>> {
     let input_dir = raw_files_input.iter().find(|p| p.is_dir());
 
     let files = if let Some(input_dir) = input_dir {
         if raw_files_input.len() > 1 {
-            return Err(anyhow::anyhow!(
-                "Cannot specify multiple files when using a directory as input"
-            ));
+            return Err(anyhow::anyhow!("Cannot specify multiple files when using a directory as input"));
         }
 
         WalkDir::new(input_dir)
             .into_iter()
             .filter_map(|e| e.ok())
             .map(|e| e.into_path())
-            .filter(|e| {
-                extensions
-                    .iter()
-                    .any(|ext| e.extension().map(|v| v == &**ext).unwrap_or(false))
-            })
+            .filter(|e| extensions.iter().any(|ext| e.extension().map(|v| v == &**ext).unwrap_or(false)))
             .collect()
     } else {
         raw_files_input.to_owned()
@@ -152,68 +124,28 @@ fn get_files_list(
     if let Some(ignore_pattern) = ignore_pattern {
         let pattern: Vec<PathBuf> = glob(ignore_pattern)?.filter_map(|p| p.ok()).collect();
 
-        return Ok(files
-            .into_iter()
-            .filter(|file_path| !pattern.iter().any(|p| p.eq(file_path)))
-            .collect());
+        return Ok(files.into_iter().filter(|file_path| !pattern.iter().any(|p| p.eq(file_path))).collect());
     }
 
     Ok(files)
 }
 
-/// Calculate full, absolute path to the file to emit.
-/// Currently this is quite naive calculation based on assumption input file's
-/// path and output dir are relative to the same directory.
-fn resolve_output_file_path(
-    out_dir: &Path,
-    file_path: &Path,
-    file_extension: PathBuf,
-) -> anyhow::Result<PathBuf> {
+fn resolve_output_file_path(out_dir: &Path, file_path: &Path, file_extension: PathBuf) -> anyhow::Result<PathBuf> {
     let default = PathBuf::from(".");
     let base = file_path.parent().unwrap_or(&default).display().to_string();
-
     let dist_absolute_path = out_dir.absolutize()?;
-
-    // These are possible combinations between input to output dir.
-    // cwd: /c/github/swc
-    //
-    // Input
-    // 1. Relative to cwd                   : ./crates/swc/tests/serde/a.js
-    // 2. Relative to cwd, traverse up      : ../repo/some/dir/b.js
-    // 3. Absolute path, relative to cwd: /c/github/swc/crates/swc/tests/serde/a.js
-    // 4. Absolute path, not relative to cwd: /c/github/repo/some/dir/b.js
-    //
-    // OutDir
-    // a. Relative to cwd: ./dist
-    // b. Relative to cwd, traverse up: ../outer_dist
-    // c. Absolute path: /c/github/swc/dist
-    // d. Absolute path, not relative to cwd: /c/github/outer_dist
-    //
-    // It is unclear how to calculate output path when either input or output is not
-    // relative to cwd (2,4 and b,d) and it is UB for now.
     let base = RelativePath::new(&*base);
-    let output_path = base.to_logical_path(dist_absolute_path).join(
-        // Custom output file extension is not supported yet
-        file_path
-            .with_extension(file_extension)
-            .file_name()
-            .expect("Filename should be available"),
-    );
+    let output_path = base
+        .to_logical_path(dist_absolute_path)
+        .join(file_path.with_extension(file_extension).file_name().expect("Filename should be available"));
 
     Ok(output_path)
 }
 
-fn emit_output(
-    output: &TransformOutput,
-    out_dir: &Option<PathBuf>,
-    file_path: &Path,
-    file_extension: PathBuf,
-) -> anyhow::Result<()> {
+fn emit_output(output: &TransformOutput, out_dir: &Option<PathBuf>, file_path: &Path, file_extension: PathBuf) -> anyhow::Result<()> {
     if let Some(out_dir) = out_dir {
         let output_file_path = resolve_output_file_path(out_dir, file_path, file_extension)?;
-        let output_dir = output_file_path
-            .parent()
-            .expect("Parent should be available");
+        let output_dir = output_file_path.parent().expect("Parent should be available");
 
         if !output_dir.is_dir() {
             fs::create_dir_all(output_dir)?;
@@ -226,16 +158,8 @@ fn emit_output(
             fs::write(source_map_path, source_map)?;
         }
     } else {
-        println!(
-            "{}\n{}\n{}",
-            file_path.display(),
-            output.code,
-            output
-                .map
-                .as_ref()
-                .map(|m| m.to_string())
-                .unwrap_or_default()
-        );
+        let output_file_path = resolve_output_file_path(Path::new("./"), file_path, file_extension)?;
+        fs::write(&output_file_path, &output.code)?;
     };
     Ok(())
 }
@@ -245,14 +169,7 @@ fn collect_stdin_input() -> Option<String> {
         return None;
     }
 
-    Some(
-        io::stdin()
-            .lock()
-            .lines()
-            .map(|line| line.expect("Not able to read stdin"))
-            .collect::<Vec<String>>()
-            .join("\n"),
-    )
+    Some(io::stdin().lock().lines().map(|line| line.expect("Not able to read stdin")).collect::<Vec<String>>().join("\n"))
 }
 
 struct InputContext {
@@ -269,11 +186,10 @@ impl CompileOptions {
         let base_options = Options::default();
         let base_config = Config::default();
 
-        let config_file = self.config_file.as_ref().map(|config_file_path| {
-            ConfigFile::Str(config_file_path.to_string_lossy().to_string())
-        });
+        let config_file = self.config_file.as_ref().map(|config_file_path| ConfigFile::Str(config_file_path.to_string_lossy().to_string()));
 
         let mut ret = Options {
+            env_name: String::from("JUST_ENV"),
             config: Config { ..base_config },
             config_file,
             ..base_options
@@ -283,15 +199,9 @@ impl CompileOptions {
             ret.filename = file_path.to_str().unwrap_or_default().to_owned();
         }
 
-        if let Some(env_name) = &self.env_name {
-            ret.env_name = env_name.to_string();
-        }
-
         Ok(ret)
     }
 
-    /// Create canonical list of inputs to be processed across stdin / single
-    /// file / multiple files.
     fn collect_inputs(&self) -> anyhow::Result<Vec<InputContext>> {
         let compiler = COMPILER.clone();
 
@@ -316,10 +226,7 @@ impl CompileOptions {
                 options,
                 fm,
                 compiler,
-                file_path: self
-                    .filename
-                    .clone()
-                    .unwrap_or_else(|| PathBuf::from("unknown")),
+                file_path: self.filename.clone().unwrap_or_else(|| PathBuf::from("unknown")),
                 file_extension: self.out_file_extension.clone().into(),
             }]);
         } else if !self.files.is_empty() {
@@ -329,20 +236,11 @@ impl CompileOptions {
                 DEFAULT_EXTENSIONS.iter().map(|v| v.to_string()).collect()
             };
 
-            return get_files_list(
-                &self.files,
-                &included_extensions,
-                self.ignore.as_deref(),
-                false,
-            )?
-            .iter()
-            .map(|file_path| {
-                self.build_transform_options(&Some(file_path))
-                    .and_then(|options| {
-                        let fm = compiler
-                            .cm
-                            .load_file(file_path)
-                            .context(format!("Failed to open file {}", file_path.display()));
+            return get_files_list(&self.files, &included_extensions, self.ignore.as_deref(), false)?
+                .iter()
+                .map(|file_path| {
+                    self.build_transform_options(&Some(file_path)).and_then(|options| {
+                        let fm = compiler.cm.load_file(file_path).context(format!("Failed to open file {}", file_path.display()));
                         fm.map(|fm| InputContext {
                             options,
                             fm,
@@ -351,8 +249,8 @@ impl CompileOptions {
                             file_extension: self.out_file_extension.clone().into(),
                         })
                     })
-            })
-            .collect::<anyhow::Result<Vec<InputContext>>>();
+                })
+                .collect::<anyhow::Result<Vec<InputContext>>>();
         }
 
         anyhow::bail!("Input is empty");
@@ -368,69 +266,42 @@ impl CompileOptions {
                     color: ColorConfig::Always,
                     skip_filename: false,
                 },
-                |handler| {
-                    GLOBALS.set(&Default::default(), || {
-                        compiler.process_js_file(fm, handler, &options)
-                    })
-                },
+                |handler| GLOBALS.set(&Default::default(), || compiler.process_js_file(fm, handler, &options)),
             )
         };
 
         if let Some(single_out_file) = self.out_file.as_ref() {
-            let result: anyhow::Result<Vec<TransformOutput>> = inputs
-                .into_par_iter()
-                .map(
-                    |InputContext {
-                         compiler,
-                         fm,
-                         options,
-                         ..
-                     }| execute(compiler, fm, options),
-                )
-                .collect();
+            let result: anyhow::Result<Vec<TransformOutput>> = inputs.into_par_iter().map(|InputContext { compiler, fm, options, .. }| execute(compiler, fm, options)).collect();
 
-            fs::create_dir_all(
-                single_out_file
-                    .parent()
-                    .expect("Parent should be available"),
-            )?;
+            fs::create_dir_all(single_out_file.parent().expect("Parent should be available"))?;
             let mut buf = File::create(single_out_file)?;
             let mut buf_srcmap = None;
 
-            // write all transformed files to single output buf
             result?.iter().try_for_each(|r| {
                 if let Some(src_map) = r.map.as_ref() {
                     if buf_srcmap.is_none() {
-                        // we'll init buf lazily as we don't read ./.swcrc directly to determine if
-                        // sourcemap would be generated or not
-                        let srcmap_buf_name =
-                            if let Some(source_map_target) = &self.source_map_target {
-                                File::create(source_map_target)?
-                            } else {
-                                File::create(single_out_file.with_extension(format!(
-                                    "{}map",
-                                    if let Some(ext) = single_out_file.extension() {
-                                        format!("{}.", ext.to_string_lossy())
-                                    } else {
-                                        "".to_string()
-                                    }
-                                )))?
-                            };
+                        let srcmap_buf_name = if let Some(source_map_target) = &self.source_map_target {
+                            File::create(source_map_target)?
+                        } else {
+                            File::create(single_out_file.with_extension(format!(
+                                "{}map",
+                                if let Some(ext) = single_out_file.extension() {
+                                    format!("{}.", ext.to_string_lossy())
+                                } else {
+                                    "".to_string()
+                                }
+                            )))?
+                        };
                         buf_srcmap = Some(srcmap_buf_name);
                     }
 
-                    buf_srcmap
-                        .as_ref()
-                        .expect("Srcmap buffer should be available")
-                        .write(src_map.as_bytes())
-                        .and(Ok(()))?;
+                    buf_srcmap.as_ref().expect("Srcmap buffer should be available").write(src_map.as_bytes()).and(Ok(()))?;
                 }
 
                 buf.write(r.code.as_bytes()).and(Ok(()))
             })?;
 
-            buf.flush()
-                .context("Failed to write output into single file")
+            buf.flush().context("Failed to write output into single file")
         } else {
             inputs.into_par_iter().try_for_each(
                 |InputContext {
@@ -443,9 +314,7 @@ impl CompileOptions {
                     let result = execute(compiler, fm, options);
 
                     match result {
-                        Ok(output) => {
-                            emit_output(&output, &self.out_dir, &file_path, file_extension)
-                        }
+                        Ok(output) => emit_output(&output, &self.out_dir, &file_path, file_extension),
                         Err(e) => Err(e),
                     }
                 },
@@ -457,11 +326,7 @@ impl CompileOptions {
 #[swc_trace]
 impl super::CommandRunner for CompileOptions {
     fn execute(&self) {
-        let guard = if self.experimental_trace {
-            init_trace(&self.trace_out_file)
-        } else {
-            None
-        };
+        let guard = if self.experimental_trace { init_trace(&self.trace_out_file) } else { None };
 
         if let Err(error) = self.execute_inner() {
             eprintln!("{}", format!("{}", error).red());

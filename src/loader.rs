@@ -86,22 +86,11 @@ pub fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
     ret
 }
 
-pub fn resolve_import(
-    specifier: &str,
-    base: &str,
-) -> Result<ModuleSpecifier, ModuleResolutionError> {
+pub fn resolve_import(specifier: &str, base: &str) -> Result<ModuleSpecifier, ModuleResolutionError> {
     let url = match Url::parse(specifier) {
         Ok(url) => url,
-        Err(ParseError::RelativeUrlWithoutBase)
-            if !(specifier.starts_with('/')
-                || specifier.starts_with("./")
-                || specifier.starts_with("../")) =>
-        {
-            let maybe_referrer = if base.is_empty() {
-                None
-            } else {
-                Some(base.to_string())
-            };
+        Err(ParseError::RelativeUrlWithoutBase) if !(specifier.starts_with('/') || specifier.starts_with("./") || specifier.starts_with("../")) => {
+            let maybe_referrer = if base.is_empty() { None } else { Some(base.to_string()) };
             return Err(ImportPrefixMissing(specifier.to_string(), maybe_referrer));
         }
         Err(ParseError::RelativeUrlWithoutBase) => {
@@ -141,9 +130,7 @@ pub fn resolve_url(url_str: &str) -> Result<Url, ModuleResolutionError> {
 }
 
 pub fn resolve_path(path_str: &str) -> Result<Url, ModuleResolutionError> {
-    let path = std::env::current_dir()
-        .map_err(|_| ModuleResolutionError::InvalidPath(path_str.into()))?
-        .join(path_str);
+    let path = std::env::current_dir().map_err(|_| ModuleResolutionError::InvalidPath(path_str.into()))?.join(path_str);
     let path = normalize_path(&path);
     Url::from_file_path(path.clone()).map_err(|()| ModuleResolutionError::InvalidPath(path))
 }
@@ -157,21 +144,11 @@ pub fn import_prefix(specifier: &str) -> Result<Url, ModuleResolutionError> {
 }
 
 impl ModuleLoader for RuntimeImport {
-    fn resolve(
-        &self,
-        specifier: &str,
-        referrer: &str,
-        _is_main: bool,
-    ) -> Result<ModuleSpecifier, deno_core::anyhow::Error> {
+    fn resolve(&self, specifier: &str, referrer: &str, _is_main: bool) -> Result<ModuleSpecifier, deno_core::anyhow::Error> {
         Ok(resolve_import(specifier, referrer)?)
     }
 
-    fn load(
-        &self,
-        module_specifier: &ModuleSpecifier,
-        _maybe_referrer: Option<ModuleSpecifier>,
-        _is_dyn_import: bool,
-    ) -> Pin<Box<ModuleSourceFuture>> {
+    fn load(&self, module_specifier: &ModuleSpecifier, _maybe_referrer: Option<ModuleSpecifier>, _is_dyn_import: bool) -> Pin<Box<ModuleSourceFuture>> {
         let module_specifier = module_specifier.clone();
         let string_specifier = module_specifier.to_string();
 
@@ -216,11 +193,7 @@ impl ModuleLoader for RuntimeImport {
                 schema => bail!("Invalid schema {}", schema),
             };
 
-            let bytes = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
-                bytes.slice(3..)
-            } else {
-                bytes
-            };
+            let bytes = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) { bytes.slice(3..) } else { bytes };
 
             Ok(ModuleSource {
                 code: bytes.to_vec().into_boxed_slice(),

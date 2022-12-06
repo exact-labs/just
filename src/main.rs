@@ -26,14 +26,10 @@ struct Cli {
 enum Commands {
     /// Setup for executing external modules
     Setup,
-    /// Bundle module and dependencies into single file
-    Bundle,
     /// Build the script into a self contained executable
     Build,
-    /// Run the transformer
+    /// Transform module into single file
     Compile(Box<CompileOptions>),
-    /// Format source files
-    Fmt,
     /// Initialize a new package.yml
     Init,
     /// Install all dependencies defined in package.yml
@@ -64,13 +60,23 @@ enum Commands {
         #[arg(short, long)]
         silent: bool,
     },
-    /// Run a JavaScript or TypeScript program
+    /// Run a JavaScript program
     Run {
         #[arg(short, long)]
         silent: bool,
 
         #[command()]
-        filename: String,
+        file_name: String,
+    },
+    Serve {
+        #[clap(short, long, default_value_t = String::from("localhost"))]
+        address: String,
+
+        #[clap(short, long, default_value_t = 3000)]
+        port: u64,
+
+        #[command()]
+        dir_name: String,
     },
 }
 
@@ -84,19 +90,18 @@ fn main() {
 
     match &cli.command {
         Some(Commands::Setup) => cli::setup(),
-        Some(Commands::Init) => cli::create_project_yml(),
         Some(Commands::Tasks) => cli::list_tasks(),
+        Some(Commands::Build) => println!("build (wip)"),
+        Some(Commands::Init) => cli::create_project_yml(),
         Some(Commands::Task { task }) => cli::run_task(task),
-        Some(Commands::Create) => project::create::download_template(),
+        Some(Commands::Compile(options)) => options.execute(),
+        Some(Commands::Clean) => cli::DependencyManager::clean(),
         Some(Commands::Install) => cli::DependencyManager::install(),
+        Some(Commands::Serve { address, port, dir_name }) => cli::serve(port, address, dir_name),
+        Some(Commands::Create) => project::create::download_template(),
         Some(Commands::Add { name }) => cli::DependencyManager::add(name),
         Some(Commands::Remove { name }) => cli::DependencyManager::remove(name),
-        Some(Commands::Clean) => cli::DependencyManager::clean(),
-        Some(Commands::Compile(options)) => options.execute(),
-        Some(Commands::Fmt) => println!("fmt (wip)"),
-        Some(Commands::Build) => println!("build (wip)"),
-        Some(Commands::Bundle) => println!("bundle (wip)"),
-        Some(Commands::Run { silent, filename }) => cli::run_exec(filename.to_string(), *silent),
+        Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name.to_string(), *silent),
         Some(Commands::Start { silent }) => cli::run_exec(project::package::read().index, *silent),
         None => cli::run_repl(),
     }

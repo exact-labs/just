@@ -29,11 +29,7 @@ pub fn op_get_package(package: String) -> String {
     let dependencies = project::package::read().dependencies;
     let package_index = helpers::read_index(dir.display(), &package, &dependencies[&package]).index;
 
-    return format!(
-        "{}/packages/{package}/{}/{package_index}",
-        dir.display(),
-        dependencies[&package]
-    );
+    return format!("{}/packages/{package}/{}/{package_index}", dir.display(), dependencies[&package]);
 }
 
 #[op]
