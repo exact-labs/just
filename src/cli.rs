@@ -82,7 +82,7 @@ impl DependencyManager {
 
 pub fn project_meta() {
     let package = project::package::read();
-    println!("{} {}@{}", "starting".green(), format!("{}", package.name).bold(), format!("{}", package.version).bold());
+    println!("{} {}@{}", "starting".green(), format!("{}", package.info.name).bold(), format!("{}", package.info.version).bold());
 }
 
 pub fn run_task(task: &str) {

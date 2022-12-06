@@ -1,11 +1,16 @@
-name: project
-description: the project desc
-version: 0.0.1
-author: john@example.com
-url: example.com
-repository: github.com/example/example
-license: mit
-index: javascript/cmd.js
+info:
+  name: project
+  description: the project desc
+  version: 0.0.1
+  author: john@example.com
+  url: example.com
+  repository: github.com/example/example
+  license: mit
+  index: javascript/cmd.js
+
+registry:
+  public: true
+
 tasks:
   start/uuid: ../just run javascript/uuid.js
   start/db: ../just run javascript/db_format.js

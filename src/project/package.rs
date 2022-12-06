@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::fs;
 
 #[derive(Debug, Deserialize)]
-pub struct Package {
+pub struct Info {
     pub name: String,
     pub description: String,
     pub version: String,
@@ -13,6 +13,17 @@ pub struct Package {
     pub repository: String,
     pub license: String,
     pub index: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Registry {
+    pub public: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Package {
+    pub info: Info,
+    pub registry: Registry,
     pub tasks: BTreeMap<String, String>,
     pub tests: BTreeMap<String, String>,
     pub dependencies: BTreeMap<String, String>,

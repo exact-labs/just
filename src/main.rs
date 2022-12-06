@@ -105,7 +105,7 @@ fn main() {
         Some(Commands::Add { name }) => cli::DependencyManager::add(name),
         Some(Commands::Remove { name }) => cli::DependencyManager::remove(name),
         Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name.to_string(), *silent),
-        Some(Commands::Start { silent }) => cli::run_exec(project::package::read().index, *silent),
+        Some(Commands::Start { silent }) => cli::run_exec(project::package::read().info.index, *silent),
         None => cli::run_repl(),
     }
 }
