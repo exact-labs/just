@@ -1,5 +1,7 @@
 # Just
+
 ![crates.io](https://img.shields.io/crates/v/justjs.svg?style=flat-square)
+
 ### _NOTICE:_ README LINKS AND SITE ARE WIP. LINKS MAY NOT WORK
 
 <img align="right" src="https://cdn.justjs.dev/assets/svg/logo.svg" height="150px" alt="just circle logo">
@@ -13,7 +15,7 @@ Just is a _simple_, and _modern_ runtime for **JavaScript** that uses V8 and is 
 - Built code formatter and task runner.
 - Builds a self-contained executable.
 - Useful [built-in](https://justjs.dev/docs/tools) utilities.
-- Includes a set of standard modules for [Just](https://r.justjs.dev/std).
+- Includes a set of standard modules for [Just](https://justjs.dev/r/std).
 
 ### Install
 
@@ -75,7 +77,7 @@ await cmd.spawn('just -v').then((output) => {
 console.json(db.get('versions', "where version = '%s'".format(cmd.exec('just -v'))), true);
 ```
 
-Just package registry can be located [here](https://r.justjs.dev/).
+Just package registry can be located [here](https://justjs.dev/r/) ([api](https://r.justjs.dev)).
 
 You can find a deeper introduction, examples, and environment setup guides in
 the [docs](https://justjs.dev/docs).

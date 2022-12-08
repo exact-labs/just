@@ -64,22 +64,6 @@ pub fn get_version(short: bool) -> String {
     };
 }
 
-pub struct DependencyManager;
-impl DependencyManager {
-    pub fn install() {
-        println!("install")
-    }
-    pub fn add(name: &String) {
-        println!("{name}")
-    }
-    pub fn remove(name: &String) {
-        println!("{name}")
-    }
-    pub fn clean() {
-        println!("clean")
-    }
-}
-
 pub fn project_meta() {
     let package = project::package::read();
     println!("{} {}@{}", "starting".green(), format!("{}", package.info.name).bold(), format!("{}", package.info.version).bold());

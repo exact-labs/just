@@ -19,7 +19,6 @@ pub fn init() {
     match home::home_dir() {
         Some(path) => {
             let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir();
-
             let binary_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/external", path.display()))).is_file();
 
             if !folder_exists {
@@ -50,7 +49,7 @@ pub fn init() {
         }
         None => {
             eprintln!("{}", "Impossible to get your home dir.".red());
-            process::exit(0x0100);
+            process::exit(1);
         }
     }
 }

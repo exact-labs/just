@@ -7,6 +7,7 @@ mod logger;
 mod macros;
 mod ops;
 mod project;
+mod registry;
 mod runtime;
 
 use clap::{Parser, Subcommand};
@@ -29,6 +30,12 @@ enum Commands {
     Compile(Box<CompileOptions>),
     /// Initialize a new package.yml
     Init,
+    /// Package and upload this package to the registry
+    Publish,
+    /// Save an auth token for the registry locally
+    Login,
+    /// Remove the local auth token for the registry
+    Logout,
     /// Install all dependencies defined in package.yml
     Install,
     /// Add a new dependency
@@ -91,21 +98,38 @@ fn main() {
     }
 
     match &cli.command {
+        /* essentials */
         Some(Commands::Setup) => cli::setup(),
-        Some(Commands::Tasks) => cli::list_tasks(),
-        Some(Commands::Tests) => cli::list_tests(),
         Some(Commands::Init) => cli::create_project_yml(),
-        Some(Commands::Task { task }) => cli::run_task(task),
-        Some(Commands::Test { test }) => cli::run_test(test),
-        Some(Commands::Compile(options)) => options.execute(),
-        Some(Commands::Clean) => cli::DependencyManager::clean(),
-        Some(Commands::Install) => cli::DependencyManager::install(),
-        Some(Commands::Serve { address, port, dir_name }) => cli::serve(port, address, dir_name),
         Some(Commands::Create) => project::create::download_template(),
-        Some(Commands::Add { name }) => cli::DependencyManager::add(name),
-        Some(Commands::Remove { name }) => cli::DependencyManager::remove(name),
+
+        /* registry */
+        Some(Commands::Login) => registry::auth::login(),
+        Some(Commands::Logout) => registry::auth::logout(),
+        Some(Commands::Publish) => registry::package::publish(),
+
+        /* task runner */
+        Some(Commands::Tasks) => cli::list_tasks(),
+        Some(Commands::Task { task }) => cli::run_task(task),
+
+        /* misc */
+        Some(Commands::Serve { address, port, dir_name }) => cli::serve(port, address, dir_name),
+        Some(Commands::Compile(options)) => options.execute(),
+
+        /* testing */
+        Some(Commands::Test { test }) => cli::run_test(test),
+        Some(Commands::Tests) => cli::list_tests(),
+
+        /* package management */
+        Some(Commands::Clean) => registry::package::DependencyManager::clean(),
+        Some(Commands::Install) => registry::package::DependencyManager::install(),
+        Some(Commands::Add { name }) => registry::package::DependencyManager::add(name),
+        Some(Commands::Remove { name }) => registry::package::DependencyManager::remove(name),
+
+        /* runtime */
         Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name.to_string(), *silent),
         Some(Commands::Start { silent }) => cli::run_exec(project::package::read().info.index, *silent),
+
         None => cli::run_repl(),
     }
 }
