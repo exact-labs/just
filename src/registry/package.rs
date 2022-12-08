@@ -57,13 +57,11 @@ pub fn publish() {
             if !std::path::Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir() {
                 std::fs::create_dir_all(format!("{}/.just", path.display())).unwrap();
                 println!("created {}/.just", path.display());
-                std::fs::create_dir_all(format!("{}/.just/tmp", path.display())).unwrap();
-                println!("created {}/.just/tmp", path.display());
             }
 
             let package = project::package::read();
             let client = reqwest::blocking::Client::new();
-            let file_name = format!("{}/.just/tmp/{}.tgz", path.display(), package.info.name);
+            let file_name = format!("{}/.just/{}.tgz", path.display(), package.info.name);
 
             if std::path::Path::new(&file_name).is_file() {
                 remove_tar(&file_name);
