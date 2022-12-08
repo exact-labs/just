@@ -30,12 +30,14 @@ enum Commands {
     Compile(Box<CompileOptions>),
     /// Initialize a new package.yml
     Init,
-    /// Package and upload this package to the registry
-    Publish,
     /// Save an auth token for the registry locally
     Login,
     /// Remove the local auth token for the registry
     Logout,
+    /// Verify account on registry to publish
+    Verify,
+    /// Package and upload this package to the registry
+    Publish,
     /// Install all dependencies defined in package.yml
     Install,
     /// Add a new dependency
@@ -106,6 +108,7 @@ fn main() {
         /* registry */
         Some(Commands::Login) => registry::auth::login(),
         Some(Commands::Logout) => registry::auth::logout(),
+        Some(Commands::Verify) => registry::auth::verify(),
         Some(Commands::Publish) => registry::package::publish(),
 
         /* task runner */

@@ -5,8 +5,14 @@ use inquire::{min_length, Password, PasswordDisplayMode, Text};
 use std::io::Write;
 
 #[derive(Debug, serde::Deserialize)]
+struct Record {
+    id: String,
+}
+
+#[derive(Debug, serde::Deserialize)]
 struct Response {
     token: String,
+    record: Record,
 }
 
 pub fn login() {
@@ -58,8 +64,8 @@ pub fn login() {
                     match serde_json::from_str::<Response>(&response.text().unwrap()) {
                         Ok(json) => {
                             let mut file = std::fs::File::create(format!("{}/.just/.token", path.display())).unwrap();
-                            file.write_all(json.token.as_bytes()).unwrap();
-                            pb.finish_with_message(format!("\x08{} {}", "✔".green(), "logged in".bright_green()));
+                            file.write_all(format!("{{\"token\":\"{}\",\"access\":\"{}\"}}", json.token, json.record.id).as_bytes()).unwrap();
+                            pb.finish_with_message(format!("\x08{} {} {}", "✔".green(), "logged in".bright_green(), format!("({})", json.record.id).white()));
                         }
                         Err(_) => {
                             eprint!("\r{} {}\n", "✖".red(), "unable to login, invalid username or password".bright_red());
@@ -75,6 +81,10 @@ pub fn login() {
             std::process::exit(1);
         }
     }
+}
+
+pub fn verify() {
+    println!("verify");
 }
 
 pub fn logout() {
