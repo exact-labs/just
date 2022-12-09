@@ -18,22 +18,6 @@ struct Response {
     message: serde_json::Value,
 }
 
-pub struct DependencyManager;
-impl DependencyManager {
-    pub fn install() {
-        println!("install")
-    }
-    pub fn add(name: &String) {
-        println!("{name}")
-    }
-    pub fn remove(name: &String) {
-        println!("{name}")
-    }
-    pub fn clean() {
-        println!("clean")
-    }
-}
-
 fn remove_tar(file: &str) {
     if let Err(_) = std::fs::remove_file(file) {
         eprintln!("{} {}", "✖".red(), "unable to publish, please try again".bright_red());
@@ -42,7 +26,7 @@ fn remove_tar(file: &str) {
 }
 
 fn write_tar(file_name: &String) -> Result<(), std::io::Error> {
-    let current_dir = std::env::current_dir().unwrap();
+    let current_dir = std::env::current_dir().expect("cannot retrive current directory");
     let tar_gz = File::create(file_name)?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(enc);

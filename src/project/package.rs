@@ -30,9 +30,15 @@ pub struct Package {
 }
 
 pub fn read() -> Package {
-    let contents = fs::read_to_string("package.yml").unwrap();
-    let yaml_file: Result<Package, _> = serde_yaml::from_str(&contents);
+    let contents = match fs::read_to_string("package.yml") {
+        Ok(content) => content,
+        Err(_) => {
+            eprintln!("{} {}", "✖".red(), "unable to find package.yml, did you mean to run 'just init'".bright_red());
+            std::process::exit(1);
+        }
+    };
 
+    let yaml_file: Result<Package, _> = serde_yaml::from_str(&contents);
     let parsed = match yaml_file {
         Ok(project) => project,
         Err(error) => {

@@ -16,6 +16,7 @@ rayon = "1"
 colored = "2"
 url = "2.3.1"
 walkdir = "2"
+rand = "0.8.5"
 tar = "0.4.38"
 dirs = "4.0.0"
 iron = "0.6.1"
@@ -40,6 +41,7 @@ sysinfo = "0.26.7"
 question = "0.2.2"
 data-url = "0.2.0"
 tracing = "0.1.37"
+console = "0.15.2"
 rustyline = "9.1.2"
 indicatif = "0.17.2"
 staticfile = "0.5.0"
@@ -47,6 +49,7 @@ deno_core = "0.160.0"
 serde_json = "1.0.87"
 serde_yaml = "0.9.14"
 thread_local = "1.1.4"
+futures-util = "0.3.25"
 v_htmlescape = "0.15.8"
 data-encoding = "2.3.2"
 relative-path = "1.6.1"
@@ -58,9 +61,9 @@ terminal-spinners = "0.3.2"
 tokio = { version = "1.19.2", features = ["full"] }
 clap = { version = "4.0.27", features = ["derive"] }
 shell = { version = "0.2.0", package = "rust-shell" }
-reqwest = { version = "0.11.12", features = ["blocking", "json", "multipart"] } 
 tracing-subscriber = { version = "0.3.9", features = ["env-filter"] }
 path-absolutize = { version = "3.0.11", features = ["once_cell_cache"] }
+reqwest = { version = "0.11.12", features = ["blocking", "json", "multipart", "stream"] } 
 
 swc_core = { version = "0.44.1", features = [
   "trace_macro",

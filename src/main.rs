@@ -124,10 +124,10 @@ fn main() {
         Some(Commands::Tests) => cli::list_tests(),
 
         /* package management */
-        Some(Commands::Clean) => registry::package::DependencyManager::clean(),
-        Some(Commands::Install) => registry::package::DependencyManager::install(),
-        Some(Commands::Add { name }) => registry::package::DependencyManager::add(name),
-        Some(Commands::Remove { name }) => registry::package::DependencyManager::remove(name),
+        Some(Commands::Clean) => registry::manager::clean(),
+        Some(Commands::Install) => registry::manager::install(),
+        Some(Commands::Add { name }) => registry::manager::add(name),
+        Some(Commands::Remove { name }) => registry::manager::remove(name),
 
         /* runtime */
         Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name.to_string(), *silent),
