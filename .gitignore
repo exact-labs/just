@@ -3,3 +3,4 @@ target/*
 just
 tests/files/*.db
 src/go/embed/external
+testing
