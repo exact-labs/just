@@ -21,6 +21,34 @@ struct Response {
     dist: Dist,
 }
 
+fn remove_file(file: &str) {
+    if let Err(_) = std::fs::remove_file(file) {
+        eprintln!("{} {}", "✖".red(), "unable remove file, please try again".bright_red());
+        std::process::exit(1);
+    }
+}
+fn move_package(file: &str, name: &str, version: &str) {
+    let current_dir = std::env::current_dir().expect("cannot retrive current directory");
+
+    if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages", current_dir.display()))).is_dir() {
+        std::fs::create_dir_all(format!("{}/packages", current_dir.display())).unwrap();
+    }
+
+    match File::open(file) {
+        Ok(tarball) => {
+            let tar = GzDecoder::new(tarball);
+            let mut archive = Archive::new(tar);
+            archive.unpack(format!("{}/packages/{name}/{version}", current_dir.display())).expect("failed to unpack tarball");
+            remove_file(file);
+        }
+        Err(_) => {
+            eprintln!("{} {}", "✖".red(), "unable to add package, filesystem error".bright_red());
+            remove_file(file);
+            std::process::exit(1);
+        }
+    }
+}
+
 pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_info: String) -> Result<(), String> {
     let res = client
         .get(url)
@@ -82,9 +110,12 @@ pub fn add(input: &str) {
                     pb.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located package {name}@{}", json.dist.version).green()));
 
                     let runtime = tokio::runtime::Runtime::new().unwrap();
-                    match runtime.block_on(download(&reqwest::Client::new(), &json.dist.tarball, &format!("{name}.tgz"), format!("{name}@{}", json.dist.version))) {
-                        Ok(x) => x,
-                        Err(err) => println!("{err}"),
+                    match runtime.block_on(download(&reqwest::Client::new(), &json.dist.tarball, &format!("{name}.tgz"), format!("{name}@{}", &json.dist.version))) {
+                        Ok(_) => move_package(&format!("{name}.tgz"), &name, &json.dist.version),
+                        Err(err) => {
+                            eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
+                            std::process::exit(1);
+                        }
                     };
                 }
                 Err(_) => {
@@ -119,9 +150,9 @@ pub fn add(input: &str) {
                         let runtime = tokio::runtime::Runtime::new().unwrap();
 
                         match runtime.block_on(download(&reqwest::Client::new(), link, &format!("{name}.tgz"), format!("{name}@{}", version))) {
-                            Ok(x) => x,
+                            Ok(_) => move_package(&format!("{name}.tgz"), &name, &version),
                             Err(err) => {
-                                eprint!("{}", err);
+                                eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
                                 std::process::exit(1);
                             }
                         };
