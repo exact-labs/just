@@ -1,4 +1,5 @@
 use crate::helpers;
+use crate::project;
 use crate::ternary;
 use colored::Colorize;
 use flate2::read::GzDecoder;
@@ -8,6 +9,7 @@ use std::cmp::min;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
+use std::time::{Duration, Instant};
 use tar::Archive;
 
 #[derive(Debug, serde::Deserialize)]
@@ -38,6 +40,7 @@ fn move_package(file: &str, name: &str, version: &str) {
         Ok(tarball) => {
             let tar = GzDecoder::new(tarball);
             let mut archive = Archive::new(tar);
+
             archive.unpack(format!("{}/packages/{name}/{version}", current_dir.display())).expect("failed to unpack tarball");
             remove_file(file);
         }
@@ -81,12 +84,23 @@ pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_i
 }
 
 pub fn install() {
-    println!("install")
+    let started = Instant::now();
+    let packages = project::package::read().dependencies;
+    for (name, versions) in &packages {
+        for ver in versions.split(",").collect::<Vec<&str>>() {
+            add(&format!("{}@{}", name, ver.trim_matches(' ')), false)
+        }
+    }
+    println!("{}", format!("✨ done in {}", HumanDuration(started.elapsed())).yellow());
 }
 
-pub fn add(input: &str) {
-    let mut version = "".to_string();
+pub fn add(input: &str, timer: bool) {
+    let version;
+    let started = Instant::now();
+    let mut package = project::package::read();
     let name = input.split("@").collect::<Vec<&str>>()[0];
+    let current_dir = std::env::current_dir().expect("cannot retrive current directory");
+    let mut versions = package.dependencies.get(name).unwrap().split(",").collect::<Vec<&str>>();
     let style = ProgressStyle::with_template("{spinner:.yellow} {msg}").unwrap().tick_strings(&[
         "[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]", "[    ]", "[   =]", "[  ==]", "[ ===]", "[====]", "[=== ]", "[==  ]", "[=   ]", "",
     ]);
@@ -98,7 +112,7 @@ pub fn add(input: &str) {
     );
 
     let pb = ProgressBar::new_spinner();
-    pb.enable_steady_tick(std::time::Duration::from_millis(80));
+    pb.enable_steady_tick(Duration::from_millis(80));
     pb.set_style(style.clone());
     pb.set_message("locating...");
 
@@ -107,19 +121,33 @@ pub fn add(input: &str) {
             match serde_json::from_str::<Response>(&res.text().unwrap()) {
                 Ok(json) => {
                     version = json.dist.version.clone();
-                    pb.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located package {name}@{}", json.dist.version).green()));
+                    if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages/{name}/{version}", current_dir.display()))).is_dir() {
+                        pb.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located package {name}@{}", json.dist.version).green()));
 
-                    let runtime = tokio::runtime::Runtime::new().unwrap();
-                    match runtime.block_on(download(&reqwest::Client::new(), &json.dist.tarball, &format!("{name}.tgz"), format!("{name}@{}", &json.dist.version))) {
-                        Ok(_) => move_package(&format!("{name}.tgz"), &name, &json.dist.version),
-                        Err(err) => {
-                            eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
-                            std::process::exit(1);
-                        }
-                    };
+                        let runtime = tokio::runtime::Runtime::new().unwrap();
+                        match runtime.block_on(download(&reqwest::Client::new(), &json.dist.tarball, &format!("{name}.tgz"), format!("{name}@{}", &json.dist.version))) {
+                            Ok(_) => {
+                                move_package(&format!("{name}.tgz"), &name, &json.dist.version);
+                                versions.push(&version);
+                                package.dependencies.insert(name.to_string(), versions.join(",").trim_matches(' ').to_string());
+
+                                if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
+                                    eprintln!("{} {}", "✖".red(), format!("unable to add {name}@{version}, {err}").bright_red());
+                                    std::process::exit(1);
+                                };
+                            }
+                            Err(err) => {
+                                eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
+                                std::process::exit(1);
+                            }
+                        };
+                    } else {
+                        pb.finish_with_message(format!("\x08{} {}", "ℹ".magenta(), format!("skipped installed package {name}@{}", json.dist.version).bright_magenta()));
+                    }
                 }
                 Err(_) => {
                     pb.finish_with_message(format!("\x08{} {}", "✖".red(), format!("unable to find {}", package_info).bright_red()));
+                    std::process::exit(1);
                 }
             };
         }
@@ -129,7 +157,7 @@ pub fn add(input: &str) {
         }
     };
 
-    match reqwest::blocking::get(format!("https://r.justjs.dev/dependencies/{package_info}")) {
+    match reqwest::blocking::get(format!("https://r.justjs.dev/dependencies/{}", input.split("@").collect::<Vec<&str>>()[0].to_string())) {
         Ok(res) => {
             match serde_json::from_str::<HashMap<String, Vec<String>>>(&res.text().unwrap()) {
                 Ok(json) => {
@@ -138,24 +166,30 @@ pub fn add(input: &str) {
                         let name = link.split("/").collect::<Vec<&str>>()[3];
                         let version = link.split("/").collect::<Vec<&str>>()[5];
 
-                        pb_dep.enable_steady_tick(std::time::Duration::from_millis(80));
+                        pb_dep.enable_steady_tick(Duration::from_millis(80));
                         pb_dep.set_style(style.clone());
                         pb_dep.set_message("locating...");
-                        pb_dep.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located dependency {name}@{}", &version).bright_green()));
+
+                        if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages/{name}/{version}", current_dir.display()))).is_dir() {
+                            pb_dep.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located dependency {name}@{}", &version).bright_green()));
+                        } else {
+                            pb_dep.finish_with_message(format!("\x08{} {}", "ℹ".magenta(), format!("skipped installed dependency {name}@{}", &version).bright_magenta()));
+                        }
                     }
 
                     for link in &json[&version] {
                         let name = link.split("/").collect::<Vec<&str>>()[3];
                         let version = link.split("/").collect::<Vec<&str>>()[5];
                         let runtime = tokio::runtime::Runtime::new().unwrap();
-
-                        match runtime.block_on(download(&reqwest::Client::new(), link, &format!("{name}.tgz"), format!("{name}@{}", version))) {
-                            Ok(_) => move_package(&format!("{name}.tgz"), &name, &version),
-                            Err(err) => {
-                                eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
-                                std::process::exit(1);
-                            }
-                        };
+                        if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages/{name}/{version}", current_dir.display()))).is_dir() {
+                            match runtime.block_on(download(&reqwest::Client::new(), link, &format!("{name}.tgz"), format!("{name}@{}", version))) {
+                                Ok(_) => move_package(&format!("{name}.tgz"), &name, &version),
+                                Err(err) => {
+                                    eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
+                                    std::process::exit(1);
+                                }
+                            };
+                        }
                     }
                 }
                 Err(_) => {}
@@ -166,24 +200,49 @@ pub fn add(input: &str) {
             std::process::exit(1);
         }
     };
-
-    // println!("{} Done in {}", SPARKLE, HumanDuration(started.elapsed()));
+    if timer {
+        println!("{}", format!("✨ done in {}", HumanDuration(started.elapsed())).yellow());
+    }
 }
 
 pub fn remove(name: &String) {
+    let started = Instant::now();
+    let current_dir = std::env::current_dir().expect("cannot retrive current directory");
+    let mut package = project::package::read();
+    let dependencies = package.dependencies.clone();
+    let key = name.split("@").collect::<Vec<&str>>()[0];
+    let mut versions = dependencies.get(key).unwrap().split(",").collect::<Vec<&str>>();
+
     let package_dir = ternary!(
         name.split("@").collect::<Vec<&str>>().len() > 1,
         format!("{}/{}", name.split("@").collect::<Vec<&str>>()[0], name.split("@").collect::<Vec<&str>>()[1]),
         name.split("@").collect::<Vec<&str>>()[0].to_string()
     );
 
-    let current_dir = std::env::current_dir().expect("cannot retrive current directory");
     if let Err(_) = std::fs::remove_dir_all(format!("{}/packages/{package_dir}", current_dir.display())) {
         eprintln!("{} {}", "✖".red(), format!("unable to remove {name}, is it installed?").bright_red());
         std::process::exit(1);
     } else {
+        if name.split("@").collect::<Vec<&str>>().len() > 1 {
+            if versions.len() > 1 {
+                versions.remove(versions.iter().position(|x| &*x.trim_matches(' ') == name.split("@").collect::<Vec<&str>>()[1]).unwrap());
+                package.dependencies.remove(key);
+                package.dependencies.insert(key.to_string(), String::from(versions.join(",").trim_matches(' ')));
+            } else {
+                package.dependencies.remove(key);
+            }
+        } else {
+            package.dependencies.remove(name);
+        }
+
+        if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
+            eprintln!("{} {}", "✖".red(), format!("unable to remove {name}, {err}").bright_red());
+            std::process::exit(1);
+        }
         println!("\x08{} {}", "✔".green(), format!("removed package {name}").green());
     }
+
+    println!("{}", format!("✨ done in {}", HumanDuration(started.elapsed())).yellow());
 }
 
 pub fn clean() {

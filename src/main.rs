@@ -126,7 +126,7 @@ fn main() {
         /* package management */
         Some(Commands::Clean) => registry::manager::clean(),
         Some(Commands::Install) => registry::manager::install(),
-        Some(Commands::Add { name }) => registry::manager::add(name),
+        Some(Commands::Add { name }) => registry::manager::add(name, true),
         Some(Commands::Remove { name }) => registry::manager::remove(name),
 
         /* runtime */
