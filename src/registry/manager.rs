@@ -31,6 +31,8 @@ fn remove_file(file: &str) {
 }
 fn move_package(file: &str, name: &str, version: &str) {
     let current_dir = std::env::current_dir().expect("cannot retrive current directory");
+    let mut package = project::package::read();
+    let dependencies = package.dependencies.clone();
 
     if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages", current_dir.display()))).is_dir() {
         std::fs::create_dir_all(format!("{}/packages", current_dir.display())).unwrap();
@@ -43,6 +45,18 @@ fn move_package(file: &str, name: &str, version: &str) {
 
             archive.unpack(format!("{}/packages/{name}/{version}", current_dir.display())).expect("failed to unpack tarball");
             remove_file(file);
+
+            if package.dependencies.get(name) == None {
+                package.dependencies.insert(name.to_string(), version.to_string());
+            } else {
+                let mut versions = dependencies.get(name).unwrap().split(",").collect::<Vec<&str>>();
+                versions.push(&version);
+                package.dependencies.insert(name.to_string(), versions.join(",").trim_matches(' ').to_string());
+            }
+            if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
+                eprintln!("{} {}", "✖".red(), format!("unable to add {name}@{version}, {err}").bright_red());
+                std::process::exit(1);
+            };
         }
         Err(_) => {
             eprintln!("{} {}", "✖".red(), "unable to add package, filesystem error".bright_red());
@@ -97,10 +111,8 @@ pub fn install() {
 pub fn add(input: &str, timer: bool) {
     let version;
     let started = Instant::now();
-    let mut package = project::package::read();
     let name = input.split("@").collect::<Vec<&str>>()[0];
     let current_dir = std::env::current_dir().expect("cannot retrive current directory");
-    let mut versions = package.dependencies.get(name).unwrap().split(",").collect::<Vec<&str>>();
     let style = ProgressStyle::with_template("{spinner:.yellow} {msg}").unwrap().tick_strings(&[
         "[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]", "[    ]", "[   =]", "[  ==]", "[ ===]", "[====]", "[=== ]", "[==  ]", "[=   ]", "",
     ]);
@@ -126,16 +138,7 @@ pub fn add(input: &str, timer: bool) {
 
                         let runtime = tokio::runtime::Runtime::new().unwrap();
                         match runtime.block_on(download(&reqwest::Client::new(), &json.dist.tarball, &format!("{name}.tgz"), format!("{name}@{}", &json.dist.version))) {
-                            Ok(_) => {
-                                move_package(&format!("{name}.tgz"), &name, &json.dist.version);
-                                versions.push(&version);
-                                package.dependencies.insert(name.to_string(), versions.join(",").trim_matches(' ').to_string());
-
-                                if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
-                                    eprintln!("{} {}", "✖".red(), format!("unable to add {name}@{version}, {err}").bright_red());
-                                    std::process::exit(1);
-                                };
-                            }
+                            Ok(_) => move_package(&format!("{name}.tgz"), &name, &json.dist.version),
                             Err(err) => {
                                 eprint!("\r{} {}\n", "✖".red(), format!("unable to add package {}: {}", package_info, err.to_string()).bright_red());
                                 std::process::exit(1);
