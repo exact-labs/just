@@ -1,6 +1,7 @@
 use crate::helpers;
 use crate::project;
 use crate::ternary;
+use anyhow::Context;
 use colored::Colorize;
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
@@ -50,9 +51,11 @@ fn move_package(file: &str, name: &str, version: &str) {
                 package.dependencies.insert(name.to_string(), version.to_string());
             } else {
                 let mut versions = dependencies.get(name).unwrap().split(",").collect::<Vec<&str>>();
+
                 versions.push(&version);
                 package.dependencies.insert(name.to_string(), versions.join(",").trim_matches(' ').to_string());
             }
+
             if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
                 eprintln!("{} {}", "✖".red(), format!("unable to add {name}@{version}, {err}").bright_red());
                 std::process::exit(1);
@@ -81,6 +84,7 @@ pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_i
     pb.set_style(ProgressStyle::with_template("{msg}: [{bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})").unwrap());
     pb.set_message(format!("{}", format!("+ {package_info}").bright_cyan()));
 
+    // let mut lockfile = project::package::lock();
     let mut file = File::create(path).or(Err(format!("Failed to create file '{}'", path)))?;
     let mut downloaded: u64 = 0;
     let mut stream = res.bytes_stream();
@@ -92,6 +96,14 @@ pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_i
         downloaded = new;
         pb.set_position(new);
     }
+
+    //     lockfile.version = env!("CARGO_PKG_VERSION").to_string();
+    //     lockfile.remotes.insert(url.to_string(), package_info.clone());
+    //
+    //     if let Err(_) = File::create("just.lock").unwrap().write_all(serde_json::to_string_pretty(&lockfile).unwrap().as_bytes()) {
+    //         eprintln!("{} {}", "✖".red(), format!("unable to add").bright_red());
+    //         std::process::exit(1);
+    //     };
 
     pb.finish_with_message(format!("{}", format!("+ {package_info}").bright_cyan()));
     return Ok(());
@@ -214,7 +226,15 @@ pub fn remove(name: &String) {
     let mut package = project::package::read();
     let dependencies = package.dependencies.clone();
     let key = name.split("@").collect::<Vec<&str>>()[0];
-    let mut versions = dependencies.get(key).unwrap().split(",").collect::<Vec<&str>>();
+    let generic_error = |err: String| -> String { format!("{} {}", "✖".red(), format!("unable to remove {name}, {err}").bright_red()) };
+
+    let mut versions = match dependencies.get(key).with_context(|| generic_error(String::from("is it installed?"))) {
+        Ok(content) => content.split(",").collect::<Vec<&str>>(),
+        Err(err) => {
+            eprintln!("{err}");
+            std::process::exit(1);
+        }
+    };
 
     let package_dir = ternary!(
         name.split("@").collect::<Vec<&str>>().len() > 1,
@@ -223,7 +243,7 @@ pub fn remove(name: &String) {
     );
 
     if let Err(_) = std::fs::remove_dir_all(format!("{}/packages/{package_dir}", current_dir.display())) {
-        eprintln!("{} {}", "✖".red(), format!("unable to remove {name}, is it installed?").bright_red());
+        eprintln!("{}", generic_error(String::from("is it installed?")));
         std::process::exit(1);
     } else {
         if name.split("@").collect::<Vec<&str>>().len() > 1 {
@@ -239,7 +259,7 @@ pub fn remove(name: &String) {
         }
 
         if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
-            eprintln!("{} {}", "✖".red(), format!("unable to remove {name}, {err}").bright_red());
+            eprintln!("{}", generic_error(err.to_string()));
             std::process::exit(1);
         }
         println!("\x08{} {}", "✔".green(), format!("removed package {name}").green());

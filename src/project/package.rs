@@ -2,6 +2,8 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fs;
+use std::fs::File;
+use std::io::Write;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Info {
@@ -29,6 +31,21 @@ pub struct Package {
     pub dependencies: BTreeMap<String, String>,
 }
 
+// #[derive(Debug, Clone, Serialize, Deserialize)]
+// pub struct LockFile {
+//     pub version: String,
+//     pub remotes: BTreeMap<String, String>,
+// }
+//
+// impl LockFile {
+//     fn empty() -> Self {
+//         Self {
+//             version: env!("CARGO_PKG_VERSION").to_string(),
+//             remotes: BTreeMap::new(),
+//         }
+//     }
+// }
+
 pub fn read() -> Package {
     let contents = match fs::read_to_string("package.yml") {
         Ok(content) => content,
@@ -49,3 +66,29 @@ pub fn read() -> Package {
 
     return parsed;
 }
+
+// pub fn lock() -> LockFile {
+//     if let Err(err) = File::create("just.lock").unwrap().write_all(serde_json::to_string_pretty(&LockFile::empty()).unwrap().as_bytes()) {
+//         eprintln!("{} {}", "✖".red(), format!("unable to write default lockfile").bright_red());
+//         std::process::exit(1);
+//     };
+//
+//     let contents = match fs::read_to_string("just.lock") {
+//         Ok(content) => content,
+//         Err(_) => {
+//             eprintln!("{} {}", "✖".red(), "unable to find lockfile'".bright_red());
+//             std::process::exit(1);
+//         }
+//     };
+//
+//     let json_file: Result<LockFile, _> = serde_json::from_str(&contents);
+//     let parsed = match json_file {
+//         Ok(project) => project,
+//         Err(error) => {
+//             eprintln!("{}", format!("{} in lockfile", error).red());
+//             std::process::exit(1);
+//         }
+//     };
+//
+//     return parsed;
+// }
