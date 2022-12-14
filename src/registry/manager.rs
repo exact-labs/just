@@ -2,15 +2,15 @@ use crate::helpers;
 use crate::project;
 use crate::ternary;
 use anyhow::Context;
+use brown;
 use colored::Colorize;
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
 use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 use std::cmp::min;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Write;
 use std::time::{Duration, Instant};
+use std::{fs, fs::File, io::Write};
 use tar::Archive;
 
 #[derive(Debug, serde::Deserialize)]
@@ -25,7 +25,7 @@ struct Response {
 }
 
 fn remove_file(file: &str) {
-    if let Err(_) = std::fs::remove_file(file) {
+    if let Err(_) = fs::remove_file(file) {
         eprintln!("{} {}", "✖".red(), "unable remove file, please try again".bright_red());
         std::process::exit(1);
     }
@@ -269,5 +269,26 @@ pub fn remove(name: &String) {
 }
 
 pub fn clean() {
-    println!("clean")
+    let package = project::package::read();
+    let dependencies = package.dependencies.clone();
+    let generic_error = |name: &str, err: &str| -> String { format!("{} {}", "✖".red(), format!("unable to remove {name}, {err}").bright_red()) };
+
+    match brown::get_dirs("packages") {
+        Ok(paths) => {
+            for path in paths {
+                let package_dir = brown::direntry_to_path(&path).unwrap();
+                let package_name = package_dir.split('/').last().unwrap().clone();
+
+                if dependencies.get(package_name).is_none() {
+                    if let Err(_) = brown::remove_dir_brute(&package_dir) {
+                        eprintln!("{}", generic_error(package_name, "is it installed?"));
+                        std::process::exit(1);
+                    } else {
+                        println!("\x08{} {}", "✔".blue(), format!("removed unused package {package_name}").bright_blue());
+                    }
+                }
+            }
+        }
+        Err(_) => eprintln!("{} {}", "✖".red(), format!("unable to clean packages, try again").bright_red()),
+    };
 }

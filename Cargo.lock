@@ -192,6 +192,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "brown"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95daa3c47ad5dd6387747c11f6ea0dc164bacf55b610cb678eefb5adbba71396"
+dependencies = [
+ "qndr",
+ "thiserror",
+]
+
+[[package]]
 name = "browserslist-rs"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1471,6 +1481,7 @@ version = "0.4.3"
 dependencies = [
  "anyhow",
  "atty",
+ "brown",
  "chrono",
  "clap",
  "colored",
@@ -2484,6 +2495,12 @@ dependencies = [
  "thiserror",
  "unescape",
 ]
+
+[[package]]
+name = "qndr"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77f94121139c824ef3864b4ba43be4f3302358aaa65f4cb87dced40d74253e7d"
 
 [[package]]
 name = "question"
