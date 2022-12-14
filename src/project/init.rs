@@ -39,7 +39,12 @@ pub fn create_project() {
         Err(_) => create_error("description"),
     }
     match index {
-        Ok(index) => writeln!(&mut file, "  index: {index}").unwrap(),
+        Ok(index) => {
+            writeln!(&mut file, "  index: {index}").unwrap();
+            if let Err(_) = File::create(index) {
+                create_error("index");
+            };
+        }
         Err(_) => create_error("index"),
     }
     match url {
