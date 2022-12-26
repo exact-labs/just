@@ -125,6 +125,7 @@ pub fn add(input: &str, timer: bool) {
     let started = Instant::now();
     let name = input.split("@").collect::<Vec<&str>>()[0];
     let current_dir = std::env::current_dir().expect("cannot retrive current directory");
+    let client = reqwest::blocking::Client::builder().user_agent(format!("JustRuntime/{}", env!("CARGO_PKG_VERSION"))).build().unwrap();
     let style = ProgressStyle::with_template("{spinner:.yellow} {msg}").unwrap().tick_strings(&[
         "[    ]", "[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]", "[    ]", "[   =]", "[  ==]", "[ ===]", "[====]", "[=== ]", "[==  ]", "[=   ]", "",
     ]);
@@ -140,7 +141,7 @@ pub fn add(input: &str, timer: bool) {
     pb.set_style(style.clone());
     pb.set_message("locating...");
 
-    match reqwest::blocking::get(format!("https://r.justjs.dev/{package_info}")) {
+    match client.get(format!("https://r.justjs.dev/{package_info}")).send() {
         Ok(res) => {
             match serde_json::from_str::<Response>(&res.text().unwrap()) {
                 Ok(json) => {

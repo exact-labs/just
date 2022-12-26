@@ -5,11 +5,16 @@ use tracing_chrome::{ChromeLayerBuilder, FlushGuard};
 use tracing_subscriber::{filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer};
 
 #[derive(Debug, Deserialize)]
-pub struct Project {
+pub struct Info {
     pub index: String,
 }
 
-pub fn read_index(dir: std::path::Display, package: &String, version: &String) -> Project {
+#[derive(Debug, Deserialize)]
+pub struct Project {
+    pub info: Info,
+}
+
+pub fn read_index(dir: std::path::Display, package: &String, version: &str) -> Project {
     let contents = match fs::read_to_string(format!("{dir}/packages/{package}/{version}/package.yml")) {
         Ok(text) => text,
         Err(_) => {

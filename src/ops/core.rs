@@ -27,7 +27,7 @@ pub fn op_escape(text: String) -> Result<String, AnyError> {
 pub fn op_get_package(package: String) -> String {
     let dir = env::current_dir().unwrap();
     let dependencies = project::package::read().dependencies;
-    let package_index = helpers::read_index(dir.display(), &package, &dependencies[&package]).index;
+    let package_index = helpers::read_index(dir.display(), &package, dependencies[&package].split(',').last().unwrap()).info.index;
 
     return format!("{}/packages/{package}/{}/{package_index}", dir.display(), dependencies[&package]);
 }

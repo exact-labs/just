@@ -86,15 +86,16 @@ pub fn publish() {
             }
 
             let form = reqwest::blocking::multipart::Form::new()
-                .text("name", package.info.name)
-                .text("version", package.info.version)
-                .text("author", package.info.author)
                 .text("access", auth.access)
+                .text("url", package.info.url)
+                .text("name", package.info.name)
+                .text("index", package.info.index)
+                .text("author", package.info.author)
+                .text("version", package.info.version)
                 .text("license", package.info.license)
+                .text("repository", package.info.repository)
                 .text("description", package.info.description)
                 .text("dependencies", format!("{:?}", package.dependencies))
-                .text("url", package.info.url)
-                .text("repository", package.info.repository)
                 .text("visibility", ternary!(package.registry.public, "public", "private"))
                 .file("tarball", &file_name)
                 .unwrap();
