@@ -2,8 +2,6 @@
 
 ![crates.io](https://img.shields.io/crates/v/justjs.svg?style=flat-square)
 
-### _NOTICE:_ README LINKS AND SITE ARE WIP. LINKS MAY NOT WORK
-
 <img align="right" src="https://cdn.justjs.dev/assets/svg/logo.svg" height="150px" alt="just circle logo">
 
 Just is a _simple_, and _modern_ runtime for **JavaScript** that uses V8 and is built in Rust.
