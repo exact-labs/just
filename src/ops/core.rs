@@ -1,5 +1,6 @@
 use crate::helpers;
 use crate::project;
+use crate::ternary;
 use colored::Colorize;
 use deno_core::error::AnyError;
 use deno_core::op;
@@ -24,13 +25,18 @@ pub fn op_escape(text: String) -> Result<String, AnyError> {
 }
 
 #[op]
-pub fn op_get_package(package: String) -> String {
+pub fn op_get_package(package: String, version: String) -> String {
     let dir = env::current_dir().unwrap();
     let dependencies = project::package::read().dependencies;
-    // insert error handler here
-    let package_index = helpers::read_index(dir.display(), &package, dependencies[&package].split(',').last().unwrap()).info.index;
 
-    return format!("{}/packages/{package}/{}/{package_index}", dir.display(), dependencies[&package].split(',').last().unwrap());
+    let mut version_buffer = dependencies[&package].split(',').map(|s| s.to_string()).collect::<Vec<String>>();
+    version_buffer.sort_by(|a, b| b.cmp(a));
+
+    let package_version = ternary!(version != "", &version, &version_buffer[0]);
+    let package_index = helpers::read_index(dir.display(), &package, &package_version).info.index;
+    // insert error handler ^
+
+    return format!("{}/packages/{package}/{}/{package_index}", dir.display(), &package_version);
 }
 
 #[op]

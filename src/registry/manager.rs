@@ -52,8 +52,10 @@ fn move_package(file: &str, name: &str, version: &str) {
             } else {
                 let mut versions = dependencies.get(name).unwrap().split(",").collect::<Vec<&str>>();
 
-                versions.push(&version);
-                package.dependencies.insert(name.to_string(), versions.join(",").trim_matches(' ').to_string());
+                if versions.last().unwrap() != &version {
+                    versions.push(&version);
+                    package.dependencies.insert(name.to_string(), versions.join(",").trim_matches(' ').to_string());
+                }
             }
 
             if let Err(err) = File::create("package.yml").unwrap().write_all(serde_yaml::to_string(&package).unwrap().as_bytes()) {
