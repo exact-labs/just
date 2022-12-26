@@ -66,10 +66,11 @@ just run https://r.justjs.dev/std/examples/welcome.js
 Or a more complex one:
 
 ```js
+import { Database } from 'https://r.justjs.dev/sqlite';
+
 const db = new Database('db_name');
 
 db.create('versions', 'id text primary key, version text');
-
 await cmd.spawn('just -v').then((output) => {
 	db.add('versions', { id: core.id.secure(), version: output });
 });

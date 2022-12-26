@@ -14,11 +14,9 @@ fn extensions() -> deno_core::Extension {
           "util/cli.js",
           "util/ext.js",
           "util/cmd.js",
-          "util/db.js",
           "util/native.js",
           "util/string.js",
           "util/http.js",
-          "util/extra.js",
         ))
         .ops(vec![
             ops::core::op_version::decl(),
