@@ -14,6 +14,12 @@
 		},
 	});
 
+	Object.defineProperty(Object.prototype, 'pretty', {
+		value() {
+			return JSON.stringify(this, null, 3);
+		},
+	});
+
 	Object.defineProperty(String.prototype, 'reverse', {
 		value() {
 			return this.split('').reverse().join('');

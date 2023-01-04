@@ -2,9 +2,17 @@
 	const { core } = Deno;
 	const { ops } = core;
 
+	const parseBody = (p) => {
+		if (Array.isArray(p)) return JSON.stringify(p);
+		else if (typeof p == 'string') return p;
+		else if (p != null && typeof p == 'object') return JSON.stringify(p);
+		else return p;
+	};
+
 	globalThis.http = {
-		get: (url) => core.opAsync('op_get', url),
-		post: (url, body, json = false) => core.opAsync('op_post', url, json ? JSON.stringify(body) : body),
+		get: (url, headers = { 'User-Agent': 'JustRuntime/' + ops.op_version() }) => core.opAsync('op_get', url, JSON.stringify(headers)),
+		post: (url, body = '', headers = { 'User-Agent': 'JustRuntime/' + ops.op_version() }) =>
+			core.opAsync('op_post', url, parseBody(body), JSON.stringify(headers)),
 	};
 
 	globalThis.server = {
