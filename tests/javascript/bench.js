@@ -1,13 +1,13 @@
 import { hello } from './hello.js';
 
-const { test } = await require('test');
+// const { test } = await require('test');
 const path = `${__dirname}/files/demo.txt`;
 
 // imports
 core.print('\x1b[35mconsole.log (import) \x1b[0m');
 hello();
 core.print('\x1b[35mconsole.log (pkg) \x1b[0m');
-test();
+// test();
 
 // functions
 core.print('\x1b[35mruntime version \x1b[0m');

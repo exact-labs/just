@@ -1,4 +1,4 @@
-use deno_core::op;
+use engine::op;
 use dirs;
 use std::{env, process};
 use sysinfo::{System, SystemExt};

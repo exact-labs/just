@@ -1,4 +1,4 @@
-use deno_core::op;
+use engine::op;
 use std::collections::HashMap;
 
 #[op]

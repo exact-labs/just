@@ -108,18 +108,18 @@ pub fn create_project_yml() {
     }
 }
 
-pub fn run_exec(path: String, silent: bool) {
+pub fn run_exec(path: &str, silent: bool, code: &str) {
     let exists: bool = std::path::Path::new("package.yml").exists();
     let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
 
     if silent {
-        if let Err(error) = runtime.block_on(runtime::exec(&path)) {
+        if let Err(error) = runtime.block_on(runtime::exec(&path.to_string(), code.to_string())) {
             eprintln!("{}", format!("{}", error).red());
         }
     } else {
         ternary!(exists, project_meta(), {});
         let start = Instant::now();
-        if let Err(error) = runtime.block_on(runtime::exec(&path)) {
+        if let Err(error) = runtime.block_on(runtime::exec(&path.to_string(), code.to_string())) {
             eprintln!("{}", format!("{}", error).red());
         } else {
             let path = path.split("/").collect::<Vec<_>>();

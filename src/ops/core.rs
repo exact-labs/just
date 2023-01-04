@@ -1,9 +1,8 @@
 use crate::helpers;
 use crate::project;
 use crate::ternary;
+use engine::op;
 use colored::Colorize;
-use deno_core::error::AnyError;
-use deno_core::op;
 use duration_string::DurationString;
 use nanoid::nanoid;
 use std::{env, thread};
@@ -20,7 +19,7 @@ fn op_version() -> String {
 }
 
 #[op]
-pub fn op_escape(text: String) -> Result<String, AnyError> {
+pub fn op_escape(text: String) -> Result<String, anyhow::Error> {
     Ok(escape(&text).to_string())
 }
 
@@ -40,25 +39,25 @@ pub fn op_get_package(package: String, version: String) -> String {
 }
 
 #[op]
-pub fn op_stdout(msg: String) -> Result<(), AnyError> {
+pub fn op_stdout(msg: String) -> Result<(), anyhow::Error> {
     print!("{}\n", msg);
     Ok(())
 }
 
 #[op]
-pub fn op_stderr(msg: String) -> Result<(), AnyError> {
+pub fn op_stderr(msg: String) -> Result<(), anyhow::Error> {
     eprint!("{}\n", format!("{}", msg).red());
     Ok(())
 }
 
 #[op]
-pub fn op_info(msg: String) -> Result<(), AnyError> {
+pub fn op_info(msg: String) -> Result<(), anyhow::Error> {
     print!("{}\n", format!("{}", msg).cyan());
     Ok(())
 }
 
 #[op]
-pub fn op_sleep(ms: String) -> Result<(), AnyError> {
+pub fn op_sleep(ms: String) -> Result<(), anyhow::Error> {
     thread::sleep(DurationString::from_string(ms).unwrap().into());
     Ok(())
 }

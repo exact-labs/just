@@ -1,14 +1,10 @@
 use std::pin::Pin;
 
+use anyhow::bail;
+use ast::{parse_module, MediaType, ParseParams, SourceTextInfo};
 use colored::Colorize;
 use data_url::DataUrl;
-use deno_core::anyhow::bail;
-use deno_core::futures::FutureExt;
-use deno_core::ModuleLoader;
-use deno_core::ModuleSource;
-use deno_core::ModuleSourceFuture;
-use deno_core::ModuleSpecifier;
-use deno_core::ModuleType;
+use engine::{futures::FutureExt, ModuleLoader, ModuleSource, ModuleSourceFuture, ModuleSpecifier, ModuleType};
 use std::error::Error;
 use std::fmt;
 use std::path::Component;
@@ -144,7 +140,7 @@ pub fn import_prefix(specifier: &str) -> Result<Url, ModuleResolutionError> {
 }
 
 impl ModuleLoader for RuntimeImport {
-    fn resolve(&self, specifier: &str, referrer: &str, _is_main: bool) -> Result<ModuleSpecifier, deno_core::anyhow::Error> {
+    fn resolve(&self, specifier: &str, referrer: &str, _is_main: bool) -> Result<ModuleSpecifier, anyhow::Error> {
         Ok(resolve_import(specifier, referrer)?)
     }
 
@@ -193,10 +189,17 @@ impl ModuleLoader for RuntimeImport {
                 schema => bail!("Invalid schema {}", schema),
             };
 
-            let bytes = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) { bytes.slice(3..) } else { bytes };
+            let parsed_source = parse_module(ParseParams {
+                specifier: string_specifier.clone(),
+                text_info: SourceTextInfo::from_string(String::from_utf8_lossy(&bytes).into_owned()),
+                media_type: MediaType::TypeScript,
+                capture_tokens: true,
+                scope_analysis: false,
+                maybe_syntax: None,
+            })?;
 
             Ok(ModuleSource {
-                code: bytes.to_vec().into_boxed_slice(),
+                code: parsed_source.transpile(&Default::default())?.text.into_bytes().into_boxed_slice(),
                 module_type: module_type,
                 module_url_specified: string_specifier.clone(),
                 module_url_found: string_specifier,

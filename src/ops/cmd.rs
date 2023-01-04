@@ -1,5 +1,5 @@
 use crate::helpers;
-use deno_core::op;
+use engine::op;
 use shell::cmd;
 
 #[op]

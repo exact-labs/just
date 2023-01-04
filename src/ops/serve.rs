@@ -1,6 +1,5 @@
+use engine::op;
 use colored::Colorize;
-use deno_core::error::AnyError;
-use deno_core::op;
 use iron::Iron;
 use mount::Mount;
 use staticfile::Static;
@@ -34,7 +33,7 @@ pub fn op_static(port: u64, dir: String) {
     }
 }
 
-async fn test_url(url: String) -> Result<String, AnyError> {
+async fn test_url(url: String) -> Result<String, anyhow::Error> {
     println!("testing path {url}");
     print!("result: ");
     let resp = reqwest::get(url).await?.text().await?;

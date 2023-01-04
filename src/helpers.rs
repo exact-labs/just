@@ -1,8 +1,9 @@
 use crate::logger;
 use serde::Deserialize;
-use std::fs;
-use tracing_chrome::{ChromeLayerBuilder, FlushGuard};
-use tracing_subscriber::{filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer};
+use sha2::{Digest, Sha256};
+use std::io::{BufReader, Read};
+use std::path::PathBuf;
+use std::{fs, fs::File};
 
 #[derive(Debug, Deserialize)]
 pub struct Info {
@@ -36,6 +37,25 @@ pub fn read_index(dir: std::path::Display, package: &String, version: &str) -> P
     return parsed;
 }
 
+pub fn sha256_digest(path: &PathBuf) -> Result<String, anyhow::Error> {
+    let input = File::open(path)?;
+    let mut reader = BufReader::new(input);
+
+    let digest = {
+        let mut hasher = Sha256::new();
+        let mut buffer = [0; 1024];
+        loop {
+            let count = reader.read(&mut buffer)?;
+            if count == 0 {
+                break;
+            }
+            hasher.update(&buffer[..count]);
+        }
+        hasher.finalize()
+    };
+    Ok(data_encoding::HEXLOWER.encode(digest.as_ref()))
+}
+
 pub fn string_to_static_str(s: String) -> &'static str {
     Box::leak(s.into_boxed_str())
 }
@@ -45,20 +65,4 @@ pub fn trim_start_end(value: &str) -> &str {
     chars.next();
     chars.next_back();
     chars.as_str()
-}
-
-pub fn init_trace(out_file: &Option<String>) -> Option<FlushGuard> {
-    let mut layer = ChromeLayerBuilder::new().include_args(true);
-
-    if let Some(trace_out_file) = out_file {
-        layer = layer.file(trace_out_file.clone());
-    }
-
-    let (chrome_layer, guard) = layer.build();
-    tracing_subscriber::registry()
-        .with(chrome_layer.with_filter(filter::filter_fn(|metadata| !metadata.target().contains("cranelift") && !metadata.name().contains("log "))))
-        .try_init()
-        .expect("Should able to register trace");
-
-    Some(guard)
 }

@@ -1,5 +1,4 @@
 mod cli;
-mod compile;
 mod go;
 mod helpers;
 mod loader;
@@ -11,7 +10,6 @@ mod registry;
 mod runtime;
 
 use clap::{Parser, Subcommand};
-use compile::{CommandRunner, CompileOptions};
 
 #[derive(Parser)]
 struct Cli {
@@ -26,8 +24,6 @@ struct Cli {
 enum Commands {
     /// Setup for executing external modules
     Setup,
-    /// Transform module(s) from TypeScript
-    Compile(Box<CompileOptions>),
     /// Initialize a new package.yml
     Init,
     /// Save an auth token for the registry locally
@@ -73,6 +69,13 @@ enum Commands {
         #[arg(short, long)]
         silent: bool,
     },
+    /// Eval a JavaScript string
+    Eval {
+        #[arg(short, long)]
+        silent: bool,
+        #[command()]
+        code_content: String,
+    },
     /// Run a JavaScript program
     Run {
         #[arg(short, long)]
@@ -117,7 +120,6 @@ fn main() {
 
         /* misc */
         Some(Commands::Serve { address, port, dir_name }) => cli::serve(port, address, dir_name),
-        Some(Commands::Compile(options)) => options.execute(),
 
         /* testing */
         Some(Commands::Test { test }) => cli::run_test(test),
@@ -130,8 +132,9 @@ fn main() {
         Some(Commands::Remove { name }) => registry::manager::remove(name),
 
         /* runtime */
-        Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name.to_string(), *silent),
-        Some(Commands::Start { silent }) => cli::run_exec(project::package::read().info.index, *silent),
+        Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name, *silent, ""),
+        Some(Commands::Eval { silent, code_content }) => cli::run_exec("", *silent, code_content),
+        Some(Commands::Start { silent }) => cli::run_exec(&project::package::read().info.index, *silent, ""),
 
         None => cli::run_repl(),
     }

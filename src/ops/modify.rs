@@ -1,6 +1,4 @@
-use deno_core::op;
-use deno_core::serde_v8;
-use deno_core::v8;
+use engine::{op, serde_v8, v8};
 use serde_v8::from_v8;
 
 #[op(v8)]

@@ -1,11 +1,17 @@
-use deno_core::error::AnyError;
-use deno_core::op;
-use std::fs;
+use crate::helpers;
+use engine::op;
+use std::{fs, path::PathBuf};
 
 #[op]
-pub async fn op_read_file(path: String) -> Result<String, AnyError> {
+pub async fn op_read_file(path: String) -> Result<String, anyhow::Error> {
     let contents = tokio::fs::read_to_string(path).await?;
     Ok(contents)
+}
+
+#[op]
+pub fn op_file_sha(path: String) -> Result<String, anyhow::Error> {
+    let file_sha = helpers::sha256_digest(&PathBuf::from(path.clone()))?;
+    Ok(file_sha)
 }
 
 #[op]
@@ -21,13 +27,13 @@ pub fn op_read_dir(path: String) -> Vec<String> {
 }
 
 #[op]
-pub async fn op_write_file(path: String, contents: String) -> Result<(), AnyError> {
+pub async fn op_write_file(path: String, contents: String) -> Result<(), anyhow::Error> {
     tokio::fs::write(path, contents).await?;
     Ok(())
 }
 
 #[op]
-pub fn op_remove_file(path: String) -> Result<(), AnyError> {
+pub fn op_remove_file(path: String) -> Result<(), anyhow::Error> {
     std::fs::remove_file(path)?;
     Ok(())
 }
