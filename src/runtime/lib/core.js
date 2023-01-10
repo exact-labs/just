@@ -4,6 +4,7 @@
 	globalThis.sleep = (ms) => ops.sleep(ms);
 
 	globalThis.core = {
+      setup: () => ops.setup(),
 		print: (text) => ops.print(text),
 		println: (text) => ops.print(`${text}\n`),
 		escape: (text) => ops.escape_string(text),

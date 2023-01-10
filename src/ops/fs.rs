@@ -9,12 +9,6 @@ pub async fn op_read_file(path: String) -> Result<String, anyhow::Error> {
 }
 
 #[op]
-pub fn op_file_sha(path: String) -> Result<String, anyhow::Error> {
-    let file_sha = helpers::sha256_digest(&PathBuf::from(path.clone()))?;
-    Ok(file_sha)
-}
-
-#[op]
 pub fn op_read_dir(path: String) -> Vec<String> {
     let mut vec = Vec::new();
     let paths = fs::read_dir(path).unwrap();
@@ -39,13 +33,19 @@ pub async fn op_make_dir(path: String) -> Result<(), anyhow::Error> {
 }
 
 #[op]
-pub fn op_remove_file(path: String) -> Result<(), anyhow::Error> {
-    std::fs::remove_file(path)?;
+pub async fn op_remove_file(path: String) -> Result<(), anyhow::Error> {
+    tokio::fs::remove_file(path).await?;
     Ok(())
 }
 
 #[op]
-pub fn op_remove_dir(path: String) -> Result<(), anyhow::Error> {
-    std::fs::remove_dir(path)?;
+pub async fn op_remove_dir(path: String) -> Result<(), anyhow::Error> {
+    tokio::fs::remove_dir(path).await?;
     Ok(())
+}
+
+#[op]
+pub fn op_file_sha(path: String) -> Result<String, anyhow::Error> {
+    let file_sha = helpers::sha256_digest(&PathBuf::from(path.clone()))?;
+    Ok(file_sha)
 }

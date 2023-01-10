@@ -49,12 +49,12 @@ fn extensions() -> Extension {
           prefix "[exec:runtime]",
           "main.js",
           "helpers.js",
-          "util/core.js",
-          "util/log.js",
-          "util/go.js",
-          "util/system.js",
-          "util/format.js",
-          "util/http.js",
+          "lib/core.js",
+          "lib/log.js",
+          "lib/go.js",
+          "lib/system.js",
+          "lib/format.js",
+          "lib/http.js",
         ))
         .ops(ops)
         .ops(ops::core::init())

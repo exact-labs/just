@@ -1,8 +1,9 @@
 'use strict';
 
-const { ops } = __bootstrap.core;
+const Just = __bootstrap
+const { ops } = Just.core;
 
-__bootstrap.core.initializeAsyncOps();
+Just.core.initializeAsyncOps();
 
 delete Object.prototype.__proto__;
 delete Intl.v8BreakIterator;

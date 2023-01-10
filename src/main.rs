@@ -10,6 +10,7 @@ mod registry;
 mod runtime;
 
 use clap::{Parser, Subcommand};
+use exact_panic::setup_panic;
 
 #[derive(Parser)]
 struct Cli {
@@ -95,6 +96,8 @@ enum Commands {
 }
 
 fn main() {
+   setup_panic!();
+   
     let cli = Cli::parse();
 
     if cli.version {

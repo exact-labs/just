@@ -60,6 +60,15 @@ engine = { package = "deno_core", version = "0.160.0" }
 ast = { package = "deno_ast", version = "0.21.0", features = ["transpiling"] }
 reqwest = { version = "0.11.12", features = ["blocking", "json", "multipart", "stream"] }
 
+# unused for now
+termcolor = "1.0.4"
+uuid = { version = "0.8.0", features = ["v4"], default-features = false }
+serde_derive = "1.0.79"
+toml = "0.5.0"
+os_info = "2.0.6"
+backtrace = "0.3.9"
+exact-panic = "0.0.6"
+
 [build-dependencies]
 sha2 = "0.10.6"
 chrono = "0.4.23"

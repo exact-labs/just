@@ -13,6 +13,7 @@ use v_htmlescape::escape;
 pub fn init() -> Vec<OpDecl> {
     vec![
         uid::decl(),
+        setup::decl(),
         sleep::decl(),
         print::decl(),
         log_info::decl(),
@@ -28,6 +29,11 @@ pub fn init() -> Vec<OpDecl> {
         escape_string::decl(),
         runtime_version::decl(),
     ]
+}
+
+#[op]
+fn setup() {
+    crate::cli::setup();
 }
 
 #[op]

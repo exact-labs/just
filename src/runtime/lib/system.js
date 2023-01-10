@@ -1,17 +1,18 @@
 ((globalThis) => {
 	globalThis.fs = {
 		read: {
-			file: (path) => core.opAsync('op_read_file', path),
+			file: (path) => Just.core.opAsync('op_read_file', path),
 			dir: (path = './') => ops.op_read_dir(path),
 		},
 		write: {
-			file: (path, contents) => core.opAsync('op_write_file', path, contents),
-			dir: (path) => core.opAsync('op_make_dir', path),
+			file: (path, contents) => Just.core.opAsync('op_write_file', path, contents),
+			dir: (path) => Just.core.opAsync('op_make_dir', path),
 		},
 		remove: {
-			file: (path) => ops.op_remove_file(path),
-			dir: (path) => ops.op_remove_dir(path),
+			file: (path) => Just.core.opAsync('op_remove_file', path),
+			dir: (path) => Just.core.opAsync('op_remove_dir', path),
 		},
+		sha: (path) => ops.op_file_sha(path),
 	};
 
 	globalThis.os = {
