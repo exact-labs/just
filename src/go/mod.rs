@@ -54,8 +54,9 @@ pub fn init() {
 }
 
 #[op]
-pub fn run_ext_func(cmd: String) -> String {
-    return cmd!(string_to_static_str(format!("{}/.just/external {cmd}", home::home_dir().unwrap().display())))
-        .stdout_utf8()
-        .unwrap();
+pub fn external_function(name: String, args: String) -> String {
+    return match cmd!(string_to_static_str(format!("{}/.just/external {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
+        Ok(output) => output,
+        Err(err) => format!("{:?}", err),
+    };
 }

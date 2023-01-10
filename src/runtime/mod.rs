@@ -4,64 +4,58 @@ use crate::ops;
 use engine::{include_js_files, v8, Extension, JsRuntime, RuntimeOptions};
 use std::rc::Rc;
 
-const RUNTIME_JAVASCRIPT_CORE: &str = include_str!("./main.js");
-
 fn extensions() -> Extension {
+    let ops = vec![
+        ops::fs::op_read_file::decl(),
+        ops::fs::op_file_sha::decl(),
+        ops::fs::op_read_dir::decl(),
+        ops::fs::op_write_file::decl(),
+        ops::fs::op_remove_file::decl(),
+        ops::modify::op_encode::decl(),
+        ops::modify::op_encode_fast::decl(),
+        ops::cmd::op_exec::decl(),
+        ops::cmd::op_spawn::decl(),
+        ops::os::op_env_get::decl(),
+        ops::os::op_env_set::decl(),
+        ops::os::op_machine::decl(),
+        ops::os::op_hostname::decl(),
+        ops::os::op_homedir::decl(),
+        ops::os::op_release::decl(),
+        ops::os::op_platform::decl(),
+        ops::os::op_cpus::decl(),
+        ops::os::op_uptime::decl(),
+        ops::os::op_freemem::decl(),
+        ops::os::op_totalmem::decl(),
+        ops::os::op_loadavg::decl(),
+        ops::os::op_dirname::decl(),
+        ops::os::op_exit::decl(),
+        ops::http::op_get::decl(),
+        ops::http::op_post::decl(),
+        ops::serve::op_static::decl(),
+        ops::serve::op_static_test::decl(),
+        ops::db::op_db_init::decl(),
+        ops::db::op_db_create::decl(),
+        ops::db::op_db_exec::decl(),
+        ops::db::op_db_insert::decl(),
+        ops::db::op_db_query::decl(),
+        ops::db::op_db_delete::decl(),
+        go::external_function::decl(),
+    ];
+
     return Extension::builder()
         .js(include_js_files!(
           prefix "[exec:runtime]",
+          "main.js",
           "util/core.js",
           "util/cli.js",
-          "util/ext.js",
+          "util/go.js",
           "util/cmd.js",
           "util/native.js",
           "util/string.js",
           "util/http.js",
         ))
-        .ops(vec![
-            ops::core::op_version::decl(),
-            ops::core::op_id::decl(),
-            ops::core::op_escape::decl(),
-            ops::core::op_get_package::decl(),
-            ops::core::op_stdout::decl(),
-            ops::core::op_stderr::decl(),
-            ops::core::op_info::decl(),
-            ops::core::op_sleep::decl(),
-            ops::fs::op_read_file::decl(),
-            ops::fs::op_file_sha::decl(),
-            ops::fs::op_read_dir::decl(),
-            ops::fs::op_write_file::decl(),
-            ops::fs::op_remove_file::decl(),
-            ops::modify::op_encode::decl(),
-            ops::modify::op_encode_fast::decl(),
-            ops::cmd::op_exec::decl(),
-            ops::cmd::op_spawn::decl(),
-            ops::os::op_env_get::decl(),
-            ops::os::op_env_set::decl(),
-            ops::os::op_machine::decl(),
-            ops::os::op_hostname::decl(),
-            ops::os::op_homedir::decl(),
-            ops::os::op_release::decl(),
-            ops::os::op_platform::decl(),
-            ops::os::op_cpus::decl(),
-            ops::os::op_uptime::decl(),
-            ops::os::op_freemem::decl(),
-            ops::os::op_totalmem::decl(),
-            ops::os::op_loadavg::decl(),
-            ops::os::op_dirname::decl(),
-            ops::os::op_exit::decl(),
-            ops::http::op_get::decl(),
-            ops::http::op_post::decl(),
-            ops::serve::op_static::decl(),
-            ops::serve::op_static_test::decl(),
-            ops::db::op_db_init::decl(),
-            ops::db::op_db_create::decl(),
-            ops::db::op_db_exec::decl(),
-            ops::db::op_db_insert::decl(),
-            ops::db::op_db_query::decl(),
-            ops::db::op_db_delete::decl(),
-            go::run_ext_func::decl(),
-        ])
+        .ops(ops)
+        .ops(ops::core::init())
         .build();
 }
 
@@ -71,7 +65,6 @@ pub async fn repl(line: &str) -> Result<v8::Global<v8::Value>, anyhow::Error> {
         extensions: vec![extensions()],
         ..Default::default()
     });
-    js_runtime.execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE).unwrap();
     return js_runtime.execute_script("<repl>", line);
 }
 
@@ -81,7 +74,6 @@ pub async fn exec(code_path: &String, code_content: String) -> Result<(), anyhow
         extensions: vec![extensions()],
         ..Default::default()
     });
-    js_runtime.execute_script("[exec:runtime]", RUNTIME_JAVASCRIPT_CORE).unwrap();
 
     let main_module = loader::import_prefix(code_path)?;
     let mod_id = js_runtime.load_main_module(&main_module, (!code_content.is_empty()).then(|| code_content)).await?;
