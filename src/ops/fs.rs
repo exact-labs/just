@@ -33,7 +33,19 @@ pub async fn op_write_file(path: String, contents: String) -> Result<(), anyhow:
 }
 
 #[op]
+pub async fn op_make_dir(path: String) -> Result<(), anyhow::Error> {
+    tokio::fs::create_dir(path).await?;
+    Ok(())
+}
+
+#[op]
 pub fn op_remove_file(path: String) -> Result<(), anyhow::Error> {
     std::fs::remove_file(path)?;
+    Ok(())
+}
+
+#[op]
+pub fn op_remove_dir(path: String) -> Result<(), anyhow::Error> {
+    std::fs::remove_dir(path)?;
     Ok(())
 }

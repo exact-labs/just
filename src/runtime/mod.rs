@@ -9,8 +9,10 @@ fn extensions() -> Extension {
         ops::fs::op_read_file::decl(),
         ops::fs::op_file_sha::decl(),
         ops::fs::op_read_dir::decl(),
+        ops::fs::op_make_dir::decl(),
         ops::fs::op_write_file::decl(),
         ops::fs::op_remove_file::decl(),
+        ops::fs::op_remove_dir::decl(),
         ops::modify::op_encode::decl(),
         ops::modify::op_encode_fast::decl(),
         ops::cmd::op_exec::decl(),
@@ -46,12 +48,12 @@ fn extensions() -> Extension {
         .js(include_js_files!(
           prefix "[exec:runtime]",
           "main.js",
+          "helpers.js",
           "util/core.js",
-          "util/cli.js",
+          "util/log.js",
           "util/go.js",
-          "util/cmd.js",
-          "util/native.js",
-          "util/string.js",
+          "util/system.js",
+          "util/format.js",
           "util/http.js",
         ))
         .ops(ops)

@@ -1,12 +1,17 @@
 ((globalThis) => {
-	const { core } = Deno;
-	const { ops } = core;
-
 	globalThis.fs = {
-		readFile: (path) => core.opAsync('op_read_file', path),
-		readDir: (path = './') => ops.op_read_dir(path),
-		writeFile: (path, contents) => core.opAsync('op_write_file', path, contents),
-		removeFile: (path) => ops.op_remove_file(path),
+		read: {
+			file: (path) => core.opAsync('op_read_file', path),
+			dir: (path = './') => ops.op_read_dir(path),
+		},
+		write: {
+			file: (path, contents) => core.opAsync('op_write_file', path, contents),
+			dir: (path) => core.opAsync('op_make_dir', path),
+		},
+		remove: {
+			file: (path) => ops.op_remove_file(path),
+			dir: (path) => ops.op_remove_dir(path),
+		},
 	};
 
 	globalThis.os = {
@@ -29,5 +34,10 @@
 			set: (key, value) => ops.op_env_set(key, value),
 		},
 		cwd: () => ops.op_dirname(),
+	};
+
+	globalThis.cmd = {
+		exec: (cmd) => ops.op_exec(cmd),
+		spawn: async (cmd) => core.opAsync('op_spawn', cmd),
 	};
 })(globalThis);
