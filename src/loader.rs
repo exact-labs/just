@@ -3,16 +3,14 @@ use std::pin::Pin;
 use crate::helpers;
 use crate::runtime;
 use crate::ternary;
-use anyhow::{anyhow, bail};
+use anyhow::{anyhow, bail, Context};
 use ast::{parse_module, MediaType, ParseParams, SourceTextInfo};
 use colored::Colorize;
 use data_url::DataUrl;
 use engine::{futures::FutureExt, ModuleLoader, ModuleSource, ModuleSourceFuture, ModuleSpecifier, ModuleType};
 use std::error::Error;
 use std::fmt;
-use std::path::Component;
-use std::path::Path;
-use std::path::PathBuf;
+use std::{path::Component, path::Path, path::PathBuf};
 use url::ParseError;
 use url::Url;
 use ModuleResolutionError::*;
@@ -135,11 +133,7 @@ pub fn resolve_path(path_str: &str) -> Result<Url, ModuleResolutionError> {
 }
 
 pub fn import_prefix(specifier: &str) -> Result<Url, ModuleResolutionError> {
-    if specifier_has_uri_scheme(specifier) {
-        resolve_url(specifier)
-    } else {
-        resolve_path(specifier)
-    }
+    ternary!(specifier_has_uri_scheme(specifier), resolve_url(specifier), resolve_path(specifier))
 }
 
 impl ModuleLoader for RuntimeImport {
@@ -148,32 +142,18 @@ impl ModuleLoader for RuntimeImport {
     }
 
     fn load(&self, module_specifier: &ModuleSpecifier, _maybe_referrer: Option<ModuleSpecifier>, _is_dyn_import: bool) -> Pin<Box<ModuleSourceFuture>> {
-        let module_specifier = module_specifier.clone();
         let string_specifier = module_specifier.to_string();
+        let module_specifier = module_specifier.clone();
 
         async move {
-            let path = module_specifier.to_file_path().map_err(|_| anyhow!("Only file: URLs are supported."))?;
             let module_array = module_specifier.path().split("/").collect::<Vec<&str>>();
             let module_prefix = module_array[module_array.len() - 2];
-            let module_name = module_array.last().unwrap();
-            let media_type = MediaType::from(&path);
+            let module_name = module_array.last().context("Unable to find module name.")?;
 
-            let (module_type, should_transpile) = if module_prefix == "just" {
-                (ModuleType::JavaScript, false)
-            } else {
-                match MediaType::from(&path) {
-                    MediaType::JavaScript | MediaType::Mjs | MediaType::Cjs => (ModuleType::JavaScript, false),
-                    MediaType::Jsx => (ModuleType::JavaScript, true),
-                    MediaType::TypeScript | MediaType::Mts | MediaType::Cts | MediaType::Dts | MediaType::Dmts | MediaType::Dcts | MediaType::Tsx => (ModuleType::JavaScript, true),
-                    MediaType::Json => (ModuleType::Json, false),
-                    _ => bail!("Unknown file extension {:?}", path.extension()),
-                }
-            };
-
-            let bytes = match module_specifier.scheme() {
+            let (bytes, media_type, module_type, should_transpile) = match module_specifier.scheme() {
                 "http" | "https" => {
-                    let home_dir = home::home_dir().unwrap();
-                    let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/packages", home_dir.display()))).is_dir();
+                    let home_dir = helpers::get_home_dir()?;
+                    let folder_exists: bool = helpers::Exists::folder(format!("{}/.just/packages", home_dir.display()))?;
 
                     let package_directory: String = if module_specifier.path().ends_with(".js") {
                         format!("{}/.just/packages/{}{}", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path())
@@ -186,7 +166,7 @@ impl ModuleLoader for RuntimeImport {
                         println!("created {}/.just/packages", &home_dir.display());
                     }
 
-                    if !Path::new(&package_directory).exists() {
+                    if !helpers::Exists::file(package_directory.clone())? {
                         let res = reqwest::get(module_specifier).await?;
                         let res = res.error_for_status()?;
                         let download_path = format!("{}/.just/packages/{}/{}", &home_dir.display(), res.url().host().unwrap(), res.url().path());
@@ -201,26 +181,48 @@ impl ModuleLoader for RuntimeImport {
                         }
                     }
 
-                    tokio::fs::read(&package_directory).await?
-                }
-                "file" => {
-                    let path = match module_specifier.to_file_path() {
-                        Ok(path) => path,
-                        Err(_) => bail!("Invalid file URL."),
+                    let (module_type, should_transpile) = match MediaType::from(Path::new(&package_directory)) {
+                        MediaType::TypeScript | MediaType::Mts | MediaType::Cts | MediaType::Dts | MediaType::Dmts | MediaType::Dcts | MediaType::Tsx => (ModuleType::JavaScript, true),
+                        MediaType::JavaScript | MediaType::Mjs | MediaType::Cjs => (ModuleType::JavaScript, false),
+                        MediaType::Jsx => (ModuleType::JavaScript, true),
+                        MediaType::Json => (ModuleType::Json, false),
+                        _ => bail!("Unknown file extension {:?}", Path::new(&package_directory).extension()),
                     };
 
-                    ternary!(module_prefix == "just", runtime::import_lib(module_name).into(), tokio::fs::read(path).await?)
+                    (tokio::fs::read(&package_directory).await?, MediaType::from(&package_directory), module_type, should_transpile)
+                }
+                "file" => {
+                    let path = module_specifier.to_file_path().map_err(|_| anyhow!("Only file: URLs are supported."))?;
+                    let bytes = ternary!(module_prefix == "just", runtime::import_lib(module_name).into(), tokio::fs::read(&path).await?);
+
+                    let (module_type, should_transpile) = if module_prefix == "just" {
+                        (ModuleType::JavaScript, false)
+                    } else {
+                        match MediaType::from(&path) {
+                            MediaType::TypeScript | MediaType::Mts | MediaType::Cts | MediaType::Dts | MediaType::Dmts | MediaType::Dcts | MediaType::Tsx => (ModuleType::JavaScript, true),
+                            MediaType::JavaScript | MediaType::Mjs | MediaType::Cjs => (ModuleType::JavaScript, false),
+                            MediaType::Jsx => (ModuleType::JavaScript, true),
+                            MediaType::Json => (ModuleType::Json, false),
+                            _ => bail!("Unknown file extension {:?}", path.extension()),
+                        }
+                    };
+
+                    (bytes, MediaType::from(&path), module_type, should_transpile)
                 }
                 "data" => {
-                    let url = match DataUrl::process(module_specifier.as_str()) {
-                        Ok(url) => url,
-                        Err(_) => bail!("Not a valid data URL."),
+                    let data_url = DataUrl::process(module_specifier.as_str()).map_err(|e| anyhow!("Unable to parse data url {:?}.", e))?;
+                    let (bytes, _) = data_url.decode_to_vec().map_err(|e| anyhow!("Unable to parse data url {:?}.", e))?;
+                    let mime_type = data_url.mime_type().subtype.clone();
+
+                    let (module_type, should_transpile) = match helpers::string_to_static_str(mime_type.clone()) {
+                        "javascript" | "ecmascript" | "x-javascript" | "node" => (ModuleType::JavaScript, false),
+                        "typescript" | "x-typescript" | "tsx" => (ModuleType::JavaScript, true),
+                        "jsx" | "jscript" => (ModuleType::JavaScript, true),
+                        "json" => (ModuleType::Json, false),
+                        _ => bail!("Unknown mime type {:?}", data_url.mime_type().subtype),
                     };
-                    let bytes = match url.decode_to_vec() {
-                        Ok((bytes, _)) => bytes,
-                        Err(_) => bail!("Not a valid data URL."),
-                    };
-                    bytes.into()
+
+                    (bytes, MediaType::from_content_type(&module_specifier, &mime_type), module_type, should_transpile)
                 }
                 schema => bail!("Invalid schema {}", schema),
             };
