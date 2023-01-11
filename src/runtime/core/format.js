@@ -14,17 +14,10 @@ Object.defineProperties(String.prototype, {
 			return ops.to_bytes(String(this));
 		},
 	},
-
 	json: {
 		writable: false,
 		value: function () {
 			return JSON.parse(this);
-		},
-	},
-	pretty: {
-		writable: false,
-		value: function (space = 3, replacer = null) {
-			return JSON.stringify(this, replacer, space);
 		},
 	},
 	reverse: {
@@ -50,6 +43,15 @@ Object.defineProperties(Array.prototype, {
 		writable: false,
 		value: function () {
 			return ops.from_bytes(this);
+		},
+	},
+});
+
+Object.defineProperties(Object.prototype, {
+	pretty: {
+		writable: false,
+		value: function (space = 3, replacer = null) {
+			return JSON.stringify(this, replacer, space);
 		},
 	},
 });

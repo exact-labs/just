@@ -96,10 +96,9 @@ enum Commands {
 }
 
 fn main() {
-   setup_panic!();
-   
-    let cli = Cli::parse();
+    setup_panic!();
 
+    let cli = Cli::parse();
     if cli.version {
         println!("{}", cli::get_version(false));
         std::process::exit(0);

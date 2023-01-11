@@ -1,6 +1,9 @@
 use std::pin::Pin;
 
-use anyhow::bail;
+use crate::helpers;
+use crate::runtime;
+use crate::ternary;
+use anyhow::{anyhow, bail};
 use ast::{parse_module, MediaType, ParseParams, SourceTextInfo};
 use colored::Colorize;
 use data_url::DataUrl;
@@ -85,7 +88,7 @@ pub fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
 pub fn resolve_import(specifier: &str, base: &str) -> Result<ModuleSpecifier, ModuleResolutionError> {
     let url = match Url::parse(specifier) {
         Ok(url) => url,
-        Err(ParseError::RelativeUrlWithoutBase) if !(specifier.starts_with('/') || specifier.starts_with("./") || specifier.starts_with("../")) => {
+        Err(ParseError::RelativeUrlWithoutBase) if !(specifier.starts_with("just/") || specifier.starts_with('/') || specifier.starts_with("./") || specifier.starts_with("../")) => {
             let maybe_referrer = if base.is_empty() { None } else { Some(base.to_string()) };
             return Err(ImportPrefixMissing(specifier.to_string(), maybe_referrer));
         }
@@ -148,32 +151,65 @@ impl ModuleLoader for RuntimeImport {
         let module_specifier = module_specifier.clone();
         let string_specifier = module_specifier.to_string();
 
-        async {
-            let mut module_type = ModuleType::JavaScript;
+        async move {
+            let path = module_specifier.to_file_path().map_err(|_| anyhow!("Only file: URLs are supported."))?;
+            let module_array = module_specifier.path().split("/").collect::<Vec<&str>>();
+            let module_prefix = module_array[module_array.len() - 2];
+            let module_name = module_array.last().unwrap();
+            let media_type = MediaType::from(&path);
+
+            let (module_type, should_transpile) = if module_prefix == "just" {
+                (ModuleType::JavaScript, false)
+            } else {
+                match MediaType::from(&path) {
+                    MediaType::JavaScript | MediaType::Mjs | MediaType::Cjs => (ModuleType::JavaScript, false),
+                    MediaType::Jsx => (ModuleType::JavaScript, true),
+                    MediaType::TypeScript | MediaType::Mts | MediaType::Cts | MediaType::Dts | MediaType::Dmts | MediaType::Dcts | MediaType::Tsx => (ModuleType::JavaScript, true),
+                    MediaType::Json => (ModuleType::Json, false),
+                    _ => bail!("Unknown file extension {:?}", path.extension()),
+                }
+            };
+
             let bytes = match module_specifier.scheme() {
                 "http" | "https" => {
-                    println!("{} {module_specifier}", "download".green());
-                    let res = reqwest::get(module_specifier).await?;
-                    let res = res.error_for_status()?;
-                    res.bytes().await?
+                    let home_dir = home::home_dir().unwrap();
+                    let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/packages", home_dir.display()))).is_dir();
+
+                    let package_directory: String = if module_specifier.path().ends_with(".js") {
+                        format!("{}/.just/packages/{}{}", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path())
+                    } else {
+                        format!("{}/.just/packages/{}{}/mod.js", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path())
+                    };
+
+                    if !folder_exists {
+                        std::fs::create_dir_all(format!("{}/.just/packages", &home_dir.display())).unwrap();
+                        println!("created {}/.just/packages", &home_dir.display());
+                    }
+
+                    if !Path::new(&package_directory).exists() {
+                        let res = reqwest::get(module_specifier).await?;
+                        let res = res.error_for_status()?;
+                        let download_path = format!("{}/.just/packages/{}/{}", &home_dir.display(), res.url().host().unwrap(), res.url().path());
+
+                        println!("{} {}", "download".green(), res.url());
+                        if res.headers().get("Content-Type").unwrap() == "text/plain; charset=UTF-8" {
+                            tokio::fs::create_dir_all(&download_path).await?;
+                            tokio::fs::remove_dir(&download_path).await?;
+                            tokio::fs::write(&package_directory, res.bytes().await?).await?;
+                        } else {
+                            tokio::fs::create_dir_all(&download_path).await?;
+                        }
+                    }
+
+                    tokio::fs::read(&package_directory).await?
                 }
                 "file" => {
                     let path = match module_specifier.to_file_path() {
                         Ok(path) => path,
                         Err(_) => bail!("Invalid file URL."),
                     };
-                    module_type = if let Some(extension) = path.extension() {
-                        let ext = extension.to_string_lossy().to_lowercase();
-                        if ext == "json" {
-                            ModuleType::Json
-                        } else {
-                            ModuleType::JavaScript
-                        }
-                    } else {
-                        ModuleType::JavaScript
-                    };
-                    let bytes = tokio::fs::read(path).await?;
-                    bytes.into()
+
+                    ternary!(module_prefix == "just", runtime::import_lib(module_name).into(), tokio::fs::read(path).await?)
                 }
                 "data" => {
                     let url = match DataUrl::process(module_specifier.as_str()) {
@@ -189,21 +225,28 @@ impl ModuleLoader for RuntimeImport {
                 schema => bail!("Invalid schema {}", schema),
             };
 
-            let parsed_source = parse_module(ParseParams {
-                specifier: string_specifier.clone(),
-                text_info: SourceTextInfo::from_string(String::from_utf8_lossy(&bytes).into_owned()),
-                media_type: MediaType::TypeScript,
-                capture_tokens: true,
-                scope_analysis: false,
-                maybe_syntax: None,
-            })?;
+            let code = if should_transpile {
+                let parsed = parse_module(ParseParams {
+                    specifier: string_specifier.clone(),
+                    text_info: SourceTextInfo::from_string(String::from_utf8_lossy(&bytes).into_owned()),
+                    media_type,
+                    capture_tokens: false,
+                    scope_analysis: false,
+                    maybe_syntax: None,
+                })?;
+                parsed.transpile(&Default::default())?.text
+            } else {
+                String::from_utf8_lossy(&bytes).into_owned()
+            };
 
-            Ok(ModuleSource {
-                code: parsed_source.transpile(&Default::default())?.text.into_bytes().into_boxed_slice(),
-                module_type: module_type,
+            let module = ModuleSource {
+                code: code.into_bytes().into_boxed_slice(),
+                module_type,
                 module_url_specified: string_specifier.clone(),
                 module_url_found: string_specifier,
-            })
+            };
+
+            Ok(module)
         }
         .boxed_local()
     }

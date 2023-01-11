@@ -49,16 +49,24 @@ fn extensions() -> Extension {
           prefix "[exec:runtime]",
           "main.js",
           "helpers.js",
-          "lib/core.js",
-          "lib/log.js",
-          "lib/go.js",
-          "lib/system.js",
-          "lib/format.js",
-          "lib/http.js",
+          "core/core.js",
+          "core/log.js",
+          "core/go.js",
+          "core/system.js",
+          "core/format.js",
         ))
         .ops(ops)
         .ops(ops::core::init())
         .build();
+}
+
+pub fn import_lib(lib_name: &str) -> &str {
+    return match lib_name {
+        "io" => include_str!("lib/io.js"),
+        "sys" => include_str!("lib/sys.js"),
+        "net" => include_str!("lib/net.js"),
+        _ => "",
+    };
 }
 
 pub async fn repl(line: &str) -> Result<v8::Global<v8::Value>, anyhow::Error> {
