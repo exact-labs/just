@@ -9,7 +9,11 @@ info:
   index: index.js
 registry:
   public: true
-tasks: {}
+tasks:
+  serve: '../../just run serve.ts'
+  test: '../../just start'
+  kv: '../../just run kv.js'
+  db: '../../just run db.js'
 tests: {}
 dependencies:
   sqlite: 0.0.1,0.0.2

@@ -1,5 +1,5 @@
-use engine::op;
 use colored::Colorize;
+use engine::op;
 use iron::Iron;
 use mount::Mount;
 use staticfile::Static;
@@ -61,11 +61,11 @@ pub async fn op_static_test(port: u64, dir: String) {
             println!("serving path {:?} on :{}", path, port);
             println!("{:?}", test_url(format!("http://localhost:{}", port)).await.unwrap());
             println!("\n{} took {}", format!("serve.rs").white(), format!("{:.2?}", start.elapsed()).yellow());
-            exit(1)
+            exit(1);
         }
         Err(err) => {
             println!("{}", err);
-            exit(1)
+            exit(1);
         }
     }
 }

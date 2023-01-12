@@ -169,11 +169,33 @@ impl ModuleLoader for RuntimeImport {
                     if module_prefix != "just" && !helpers::Exists::file(package_directory.clone())? {
                         let res = reqwest::get(module_specifier.clone()).await?;
                         let res = res.error_for_status()?;
-                        let download_path = format!("{}/.just/packages/{}/{}", &home_dir.display(), res.url().host().unwrap(), res.url().path());
+                        let content_type = res.headers().get("Content-Type").unwrap().to_str().unwrap();
+                        let download_path = format!("{}/.just/packages/{}{}", &home_dir.display(), res.url().host().unwrap(), res.url().path());
 
                         println!("{} {}", "download".green(), res.url());
 
-                        if res.headers().get("Content-Type").unwrap().to_str().unwrap().contains(&"text/plain") {
+                        if content_type.contains(&"text/plain")
+                            || content_type.contains(&"text/jsx")
+                            || content_type.contains(&"text/tsx")
+                            || content_type.contains(&"text/node")
+                            || content_type.contains(&"text/json")
+                            || content_type.contains(&"text/jscript")
+                            || content_type.contains(&"text/javascript")
+                            || content_type.contains(&"text/typescript")
+                            || content_type.contains(&"text/ecmascript")
+                            || content_type.contains(&"application/jsx")
+                            || content_type.contains(&"application/tsx")
+                            || content_type.contains(&"application/node")
+                            || content_type.contains(&"application/json")
+                            || content_type.contains(&"text/x-javascript")
+                            || content_type.contains(&"text/x-typescript")
+                            || content_type.contains(&"application/jscript")
+                            || content_type.contains(&"application/javascript")
+                            || content_type.contains(&"application/typescript")
+                            || content_type.contains(&"application/ecmascript")
+                            || content_type.contains(&"application/x-javascript")
+                            || content_type.contains(&"application/x-typescript")
+                        {
                             tokio::fs::create_dir_all(&download_path).await?;
                             tokio::fs::remove_dir(&download_path).await?;
                             tokio::fs::write(&package_directory, res.bytes().await?).await?;
