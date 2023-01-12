@@ -66,16 +66,17 @@ Or a more complex one:
 ```js
 import { cmd } from 'just/sys';
 import { random } from 'just/crypto';
-import { Database } from 'https://r.justjs.dev/sqlite';
+import { Database } from 'just/db:sqlite';
 
 const db = new Database('db_name');
 
 db.create('versions', 'id text primary key, version text');
 await cmd.spawn('just -v').then((output) => {
-	db.add('versions', { id: random.secure(), version: output });
+	db.insert('versions', { id: random.secure(), version: output });
 });
 
-console.json(db.get('versions', "where version = '%s'".format(cmd.exec('just -v'))), true);
+console.json(db.query('versions', "where version = '%s'".format(cmd.exec('just -v'))), true);
+db.remove('versions', '');
 ```
 
 Just package registry can be located [here](https://justjs.dev/r/) ([api](https://r.justjs.dev)).

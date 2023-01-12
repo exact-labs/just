@@ -1,9 +1,7 @@
-pub mod cmd;
 pub mod core;
 pub mod db;
 pub mod fs;
-pub mod http;
-pub mod kv;
-pub mod modify;
-pub mod os;
+pub mod go;
+pub mod net;
 pub mod serve;
+pub mod sys;

@@ -1,49 +1,10 @@
 use dirs;
 use engine::op;
-use std::{env, fs, process};
+use std::{env, process};
 use sysinfo::{System, SystemExt};
 
 #[op]
-pub fn local_env(env_name: String) -> String {
-    let mut path = env::current_dir().unwrap();
-
-    if env_name != "env=find" {
-        path.push(&env_name.split("=").collect::<Vec<&str>>()[1]);
-        return fs::read_to_string(path).unwrap();
-    } else {
-        path.push(".env.dev");
-        if path.is_file() {
-            return fs::read_to_string(path).unwrap();
-        } else {
-            path.pop();
-            path.push(".env.prod");
-            if path.is_file() {
-                return fs::read_to_string(path).unwrap();
-            } else {
-                path.pop();
-                path.push(".env");
-                if path.is_file() {
-                    return fs::read_to_string(path).unwrap();
-                } else {
-                    return String::from("");
-                }
-            }
-        }
-    }
-}
-
-#[op]
-pub fn op_env_get(var: String) -> Result<String, anyhow::Error> {
-    Ok(env::var(var)?)
-}
-
-#[op]
-pub fn op_env_set(key: String, var: String) {
-    env::set_var(key, var);
-}
-
-#[op]
-pub fn op_release() -> String {
+fn os_release() -> String {
     #[cfg(target_os = "linux")]
     {
         match std::fs::read_to_string("/proc/sys/kernel/osrelease") {
@@ -85,58 +46,58 @@ pub fn op_release() -> String {
 }
 
 #[op]
-pub fn op_platform() -> String {
+fn os_platform() -> String {
     return format!("{}", env::consts::OS);
 }
 
 #[op]
-pub fn op_machine() -> String {
+fn os_machine() -> String {
     return format!("{}", env::consts::ARCH);
 }
 
 #[op]
-pub fn op_hostname() -> String {
+fn os_hostname() -> String {
     return format!("{:?}", hostname::get().unwrap());
 }
 
 #[op]
-pub fn op_homedir() -> String {
+fn os_homedir() -> String {
     return format!("{}", dirs::home_dir().unwrap().display());
 }
 
 #[op]
-pub fn op_uptime() -> String {
+fn os_uptime() -> String {
     return format!("{}", System::new_all().uptime());
 }
 
 #[op]
-pub fn op_cpus() -> String {
+fn os_cpus() -> String {
     return format!("{}", System::new_all().cpus().len());
 }
 
 #[op]
-pub fn op_freemem() -> String {
+fn os_freemem() -> String {
     return format!("{}", System::new_all().used_memory());
 }
 
 #[op]
-pub fn op_totalmem() -> String {
+fn os_totalmem() -> String {
     return format!("{}", System::new_all().total_memory());
 }
 
 #[op]
-pub fn op_loadavg() -> String {
+fn os_loadavg() -> String {
     let load_avg = System::new_all().load_average();
     return format!("[{}, {}, {}]", load_avg.one, load_avg.five, load_avg.fifteen);
 }
 
 #[op]
-pub fn op_dirname() -> String {
+fn os_dirname() -> String {
     let dir = env::current_dir().unwrap();
     return format!("{}", dir.display());
 }
 
 #[op]
-pub fn op_exit(code: i32) {
+fn os_exit(code: i32) {
     process::exit(code);
 }

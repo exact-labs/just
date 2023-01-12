@@ -1,15 +1,11 @@
 use crate::helpers;
 use anyhow::Error;
-use engine::{op, OpDecl};
+use engine::op;
 use std::collections::HashMap;
 use std::str::from_utf8;
 
-pub fn init() -> Vec<OpDecl> {
-    vec![kv_get::decl(), kv_set::decl(), kv_remove::decl(), kv_range::decl()]
-}
-
 #[op]
-pub fn kv_get(path: String, key: String) -> Result<String, Error> {
+fn kv_get(path: String, key: String) -> Result<String, Error> {
     let db = sled::open(&path)?;
     let value = db.get(&key)?.unwrap();
     let utf8 = from_utf8(&value)?;
@@ -18,7 +14,7 @@ pub fn kv_get(path: String, key: String) -> Result<String, Error> {
 }
 
 #[op]
-pub fn kv_set(path: String, key: String, value: String) -> Result<(), Error> {
+fn kv_set(path: String, key: String, value: String) -> Result<(), Error> {
     let db = sled::open(&path)?;
     db.insert(&key, sled::IVec::from(helpers::string_to_static_str(value)))?;
     db.flush()?;
@@ -27,7 +23,7 @@ pub fn kv_set(path: String, key: String, value: String) -> Result<(), Error> {
 }
 
 #[op]
-pub fn kv_remove(path: String, key: String) -> Result<(), Error> {
+fn kv_remove(path: String, key: String) -> Result<(), Error> {
     let db = sled::open(&path)?;
     db.remove(&key)?;
     db.flush()?;
@@ -36,7 +32,7 @@ pub fn kv_remove(path: String, key: String) -> Result<(), Error> {
 }
 
 #[op]
-pub fn kv_range(path: String, start: String, end: String) -> Result<HashMap<String, String>, Error> {
+fn kv_range(path: String, start: String, end: String) -> Result<HashMap<String, String>, Error> {
     let db = sled::open(&path)?;
     let mut store: HashMap<String, String> = HashMap::new();
 

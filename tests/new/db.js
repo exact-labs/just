@@ -6,9 +6,9 @@ const db = new Database('versions');
 
 db.create('versions', 'id text primary key, version text');
 await cmd.spawn('rustc -V').then((output) => {
-	db.add('versions', { id: random.secure(), version: output });
+	db.insert('versions', { id: random.secure(), version: output });
 });
 
-console.json(db.get('versions', "where version = '%s'".format(cmd.exec('rustc -V'))), true);
+console.json(db.query('versions', "where version = '%s'".format(cmd.exec('rustc -V'))), true);
 
-db.rm('versions', '');
+db.remove('versions', '');

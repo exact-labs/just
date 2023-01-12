@@ -10,11 +10,7 @@ use std::process;
 
 static BINARY_EXTERNAL: &'static [u8] = include_bytes!("embed/external");
 
-fn string_to_static_str(s: String) -> &'static str {
-    Box::leak(s.into_boxed_str())
-}
-
-pub fn init() {
+pub fn init_paths() {
     match home::home_dir() {
         Some(path) => {
             let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir();
@@ -55,7 +51,7 @@ pub fn init() {
 
 #[op]
 pub fn external_function(name: String, args: String) -> String {
-    return match cmd!(string_to_static_str(format!("{}/.just/external {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
+    return match cmd!(helpers::string_to_static_str(format!("{}/.just/external {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
         Ok(output) => output,
         Err(err) => format!("{:?}", err),
     };

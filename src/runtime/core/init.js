@@ -5,14 +5,14 @@ Just.fn = ops;
 Just.env_store = {};
 Just.fn.async = Just.core.opAsync;
 Just.version = ops.runtime_version();
-Just.args = ops.op_env_get('_just_args') ? ops.op_env_get('_just_args').split(' ') : '';
+Just.args = ops.env_get('_just_args') ? ops.env_get('_just_args').split(' ') : '';
 
 const init_runtime_env = () => {
 	const env_file = Just.args ? Just.args[Just.args.findIndex((i) => i.includes('env='))] : 'env=find';
-	const env_object = parseBuffer(ops.local_env(env_file));
+	const env_object = parseBuffer(ops.env_local(env_file));
 
 	Object.keys(env_object || {}).map((key) => {
-		ops.op_env_set(key, env_object[key]);
+		ops.env_set(key, env_object[key]);
 		Object.defineProperty(Just.env_store, key, {
 			value: env_object[key],
 			enumerable: true,

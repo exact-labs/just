@@ -1,71 +1,24 @@
-use colored::Colorize;
-use engine::op;
-use iron::Iron;
-use mount::Mount;
-use staticfile::Static;
-use std::path::Path;
-use std::process::exit;
-use std::time::Instant;
+use engine::{op, OpDecl};
+use std::net::SocketAddr;
+use warp::{http::Response, Filter};
 
-#[op]
-pub fn op_static(port: u64, dir: String) {
-    let path: &Path = Path::new(&dir);
-
-    if !path.exists() {
-        println!("Path {:?} does not exist.", path);
-        exit(1)
-    }
-    if !path.is_dir() {
-        println!("Path {:?} is not a directory.", path);
-        exit(1)
-    }
-    let mut mount: Mount = Mount::new();
-    mount.mount("/", Static::new(path));
-
-    match Iron::new(mount).http(format!("0.0.0.0:{}", port)) {
-        Ok(_) => {
-            println!("serving path {:?} on :{}", path, port);
-        }
-        Err(err) => {
-            println!("{}", err);
-            exit(1)
-        }
-    }
-}
-
-async fn test_url(url: String) -> Result<String, anyhow::Error> {
-    println!("testing path {url}");
-    print!("result: ");
-    let resp = reqwest::get(url).await?.text().await?;
-    Ok(resp)
+pub fn init() -> Vec<OpDecl> {
+    vec![serve_directory::decl(), serve_string::decl()]
 }
 
 #[op]
-pub async fn op_static_test(port: u64, dir: String) {
-    let path: &Path = Path::new(&dir);
-    let start = Instant::now();
+async fn serve_directory(host: String, port: i32, path: String) {
+    let addr: SocketAddr = format!("{host}:{}", port).parse().expect("Invalid server address");
+    println!("serving path '{}' on http://{:?}", path, addr);
 
-    if !path.exists() {
-        println!("Path {:?} does not exist.", path);
-        exit(1)
-    }
-    if !path.is_dir() {
-        println!("Path {:?} is not a directory.", path);
-        exit(1)
-    }
-    let mut mount: Mount = Mount::new();
-    mount.mount("/", Static::new(path));
+    warp::serve(warp::fs::dir(path)).run(addr).await;
+}
 
-    match Iron::new(mount).http(format!("0.0.0.0:{}", port)) {
-        Ok(_) => {
-            println!("serving path {:?} on :{}", path, port);
-            println!("{:?}", test_url(format!("http://localhost:{}", port)).await.unwrap());
-            println!("\n{} took {}", format!("serve.rs").white(), format!("{:.2?}", start.elapsed()).yellow());
-            exit(1);
-        }
-        Err(err) => {
-            println!("{}", err);
-            exit(1);
-        }
-    }
+#[op]
+async fn serve_string(host: String, port: i32, string: String, content_type: String) {
+    let addr: SocketAddr = format!("{host}:{}", port).parse().expect("Invalid server address");
+    let route = warp::any().map(move || Response::builder().header("Content-Type", content_type.clone()).body(string.clone()));
+    println!("serving on http://{:?}", addr);
+
+    warp::serve(route).run(addr).await;
 }

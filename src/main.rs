@@ -90,12 +90,12 @@ enum Commands {
     },
     /// Static file serving
     Serve {
-        #[clap(short, long, default_value_t = String::from("localhost"))]
-        address: String,
+        #[clap(short, long, default_value_t = String::from("0.0.0.0"))]
+        host: String,
         #[clap(short, long, default_value_t = 3000)]
-        port: u64,
+        port: i32,
         #[command()]
-        dir_name: String,
+        path: String,
     },
 }
 
@@ -125,7 +125,7 @@ fn main() {
         Some(Commands::Task { task }) => cli::run_task(task),
 
         /* misc */
-        Some(Commands::Serve { address, port, dir_name }) => cli::serve(port, address, dir_name),
+        Some(Commands::Serve { host, port, path }) => cli::serve(host.clone(), port.clone(), path),
 
         /* testing */
         Some(Commands::Test { test }) => cli::run_test(test),

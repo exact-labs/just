@@ -2,24 +2,24 @@ use engine::op;
 use std::collections::HashMap;
 
 #[op]
-pub fn op_db_init(db_name: String) {
+fn sqlite_init(db_name: String) {
     sqlite::open(db_name).unwrap();
 }
 
 #[op]
-pub fn op_db_create(db_name: String, table: String, keys: String) {
+fn sqlite_create(db_name: String, table: String, keys: String) {
     let connection = sqlite::open(db_name).unwrap();
     connection.execute(format!("CREATE TABLE if not exists {table} ({keys})",)).unwrap();
 }
 
 #[op]
-pub fn op_db_insert(db_name: String, table: String, keys: String, value: String) {
+fn sqlite_insert(db_name: String, table: String, keys: String, value: String) {
     let connection = sqlite::open(db_name).unwrap();
     connection.execute(format!("INSERT INTO {table} ({keys}) VALUES({value})",)).unwrap();
 }
 
 #[op]
-pub fn op_db_query(db_name: String, table: String, query: String) -> String {
+fn sqlite_query(db_name: String, table: String, query: String) -> String {
     let connection = sqlite::open(db_name).unwrap();
     let mut rows: Vec<String> = Vec::new();
 
@@ -38,13 +38,13 @@ pub fn op_db_query(db_name: String, table: String, query: String) -> String {
 }
 
 #[op]
-pub fn op_db_delete(db_name: String, table: String, query: String) {
+fn sqlite_delete(db_name: String, table: String, query: String) {
     let connection = sqlite::open(db_name).unwrap();
     connection.execute(format!("DELETE FROM {table} {query}")).unwrap();
 }
 
 #[op]
-pub fn op_db_exec(db_name: String, query: String) {
+fn sqlite_exec(db_name: String, query: String) {
     let connection = sqlite::open(db_name).unwrap();
     connection.execute(format!("{query}")).unwrap();
 }

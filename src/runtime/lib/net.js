@@ -6,13 +6,14 @@ const parseBody = (p) => {
 };
 
 const http = {
-	get: (url, headers = { 'User-Agent': 'JustRuntime/' + Just.fn.runtime_version() }) => Just.fn.async('op_get', url, JSON.stringify(headers)),
+	get: (url, headers = { 'User-Agent': 'JustRuntime/' + Just.fn.runtime_version() }) => Just.fn.async('net_get', url, JSON.stringify(headers)),
 	post: (url, body = '', headers = { 'User-Agent': 'JustRuntime/' + Just.fn.runtime_version() }) =>
-		Just.fn.async('op_post', url, parseBody(body), JSON.stringify(headers)),
+		Just.fn.async('net_post', url, parseBody(body), JSON.stringify(headers)),
 };
 
 const server = {
-	static: (port = 8080, path) => Just.fn.op_static(port, path),
+	static: (path, host = '0.0.0.0', port = 3000) => Just.fn.async('serve_directory', host, port, path),
+	string: (string, type = 'text/plain; charset=UTF-8', host = '0.0.0.0', port = 3000) => Just.fn.async('serve_string', host, port, string, type),
 };
 
 export { server, http };

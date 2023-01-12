@@ -6,50 +6,31 @@ use crate::runtime;
 use crate::ternary;
 
 use colored::Colorize;
-use iron::Iron;
-use mount::Mount;
 use open::that;
 use question::{Answer, Question};
 use rustyline::{error::ReadlineError, Editor};
 use shell::cmd;
-use staticfile::Static;
 use std::env;
+use std::net::SocketAddr;
 use std::path::Path;
-use std::process::exit;
 use std::time::Instant;
 
-pub fn serve(port: &u64, addr: &str, dir: &str) {
-    let path: &Path = Path::new(dir);
+pub fn serve(host: String, port: i32, path: &String) {
+    let addr: SocketAddr = format!("{host}:{}", port).parse().expect("Invalid server address");
+    let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
 
-    if !path.exists() {
-        println!("Path {:?} does not exist.", path);
-        exit(1)
-    }
-    if !path.is_dir() {
-        println!("Path {:?} is not a directory.", path);
-        exit(1)
-    }
-    let mut mount: Mount = Mount::new();
-    mount.mount("/", Static::new(path));
+    println!("{} {}", "listening on".bright_blue(), format!("{:?}", addr).cyan());
+    println!("{} {}", "serving path".yellow(), format!("{path}").bright_yellow());
 
-    match Iron::new(mount).http(format!("{addr}:{port}")) {
-        Ok(_) => {
-            println!("{} {}", "listening on".bright_blue(), format!("{port}").cyan());
-            println!("{} {}", "serving path".yellow(), format!("{:?}", path).bright_yellow());
-            that(format!("http://{addr}:{port}")).unwrap_or_else(|e| eprintln!("Failed to open your default browser: {}", e));
-        }
-        Err(err) => {
-            println!("{}", err);
-            exit(1)
-        }
-    }
+    that(format!("http://{:?}", addr)).unwrap_or_else(|e| eprintln!("Failed to open your default browser: {}", e));
+    runtime.block_on(warp::serve(warp::fs::dir(path.clone())).run(addr));
 }
 
 pub fn setup() {
     let home_dir = home::home_dir().unwrap();
     let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/packages", home_dir.display()))).is_dir();
 
-    go::init();
+    go::init_paths();
 
     if !folder_exists {
         std::fs::create_dir_all(format!("{}/.just/packages", &home_dir.display())).unwrap();

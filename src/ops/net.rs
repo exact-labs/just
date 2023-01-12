@@ -1,7 +1,11 @@
 use crate::helpers;
-use engine::op;
+use engine::{op, OpDecl};
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde_json::Value;
+
+pub fn init() -> Vec<OpDecl> {
+    vec![net_get::decl(), net_post::decl()]
+}
 
 fn header_parse(headers: String) -> Result<HeaderMap, anyhow::Error> {
     let mut header_list = HeaderMap::new();
@@ -16,13 +20,13 @@ fn header_parse(headers: String) -> Result<HeaderMap, anyhow::Error> {
 }
 
 #[op]
-pub async fn op_get(url: String, headers: String) -> Result<String, anyhow::Error> {
+async fn net_get(url: String, headers: String) -> Result<String, anyhow::Error> {
     let client = reqwest::Client::new();
     Ok(client.get(url).headers(header_parse(headers).unwrap()).send().await?.text().await?)
 }
 
 #[op]
-pub async fn op_post(url: String, body: String, headers: String) -> Result<String, anyhow::Error> {
+async fn net_post(url: String, body: String, headers: String) -> Result<String, anyhow::Error> {
     let client = reqwest::Client::new();
     Ok(client.post(url).headers(header_parse(headers).unwrap()).body(body).send().await?.text().await?)
 }
