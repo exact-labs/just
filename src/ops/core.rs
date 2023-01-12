@@ -12,17 +12,18 @@ use v_htmlescape::escape;
 
 pub fn init() -> Vec<OpDecl> {
     vec![
-        uid::decl(),
         setup::decl(),
         sleep::decl(),
         print::decl(),
         log_info::decl(),
         to_bytes::decl(),
+        random_id::decl(),
         from_bytes::decl(),
         log_stderr::decl(),
         log_stdout::decl(),
         hex_encode::decl(),
         hex_decode::decl(),
+        random_uuid::decl(),
         get_package::decl(),
         base64_encode::decl(),
         base64_decode::decl(),
@@ -37,8 +38,13 @@ fn setup() {
 }
 
 #[op]
-fn uid(len: usize) -> String {
+fn random_id(len: usize) -> String {
     return nanoid!(len);
+}
+
+#[op]
+pub fn random_uuid() -> Result<String, Error> {
+    Ok(uuid::Uuid::new_v4().to_string())
 }
 
 #[op]

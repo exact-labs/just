@@ -1,8 +1,10 @@
 const Just = __bootstrap;
 const { ops } = Just.core;
 
-Just.env_store = {};
 Just.fn = ops;
+Just.env_store = {};
+Just.fn.async = Just.core.opAsync;
+Just.version = ops.runtime_version();
 Just.args = ops.op_env_get('_just_args') ? ops.op_env_get('_just_args').split(' ') : '';
 
 const init_runtime_env = () => {

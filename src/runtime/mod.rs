@@ -67,6 +67,8 @@ pub fn import_lib(lib_name: &str) -> &str {
         "io" => include_str!("lib/io.js"),
         "sys" => include_str!("lib/sys.js"),
         "net" => include_str!("lib/net.js"),
+        "crypto" => include_str!("lib/crypto.js"),
+        "crypto:enc" => include_str!("lib/enc.js"),
         _ => "",
     };
 }

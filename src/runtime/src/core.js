@@ -12,8 +12,4 @@
 		encode: (text) => ops.op_encode(text),
 		encode_fast: (text) => ops.op_encode_fast(text),
 	};
-
-	globalThis.runtime = {
-		version: () => ops.runtime_version(),
-	};
 })(globalThis);

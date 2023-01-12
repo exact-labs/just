@@ -55,17 +55,3 @@ Object.defineProperties(Object.prototype, {
 		},
 	},
 });
-
-((globalThis) => {
-	globalThis.Strings = {
-		hex: {
-			encode: (str) => ops.hex_encode(str),
-			decode: (str) => ops.hex_decode(str),
-		},
-		base64: {
-			encode: (str) => ops.base64_encode(str),
-			decode: (str) => ops.base64_decode(str),
-			test: (str) => /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/.test(str),
-		},
-	};
-})(globalThis);

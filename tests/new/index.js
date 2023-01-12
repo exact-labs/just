@@ -1,5 +1,7 @@
 import { fs } from 'just/io';
 import { os, cmd } from 'just/sys';
+import { uuid, random } from 'just/crypto';
+import { base64, hex } from 'just/crypto:enc';
 import { run } from './net.ts';
 
 console.fmt.hex.print('#D9A7F7', 'just_args: ');
@@ -26,6 +28,15 @@ await import(`data:text/javascript,${encodeURIComponent(process.env.DATA)}`).the
 	console.log(res.string);
 });
 
+console.fmt.hex.print('#D9A7F7', 'uuid_v4: ');
+console.log(uuid());
+
+console.fmt.hex.print('#D9A7F7', 'secure_id: ');
+console.log(random.secure());
+
+console.fmt.hex.print('#D9A7F7', 'basic_id: ');
+console.log(random.basic());
+
 console.fmt.hex.print('#D9A7F7', 'convert_to_bytes: ');
 console.log('hello world'.to_bytes());
 
@@ -39,16 +50,16 @@ console.fmt.hex.print('#D9A7F7', 'parse_memory_string: ');
 console.log('2147483648'.parse_memory());
 
 console.fmt.hex.print('#D9A7F7', 'encode_hex: ');
-console.log(Strings.hex.encode('hello world'));
+console.log(hex.encode('hello world'));
 
 console.fmt.hex.print('#D9A7F7', 'decode_hex: ');
-console.log(Strings.hex.decode('68656c6c6f20776f726c64'));
+console.log(hex.decode('68656c6c6f20776f726c64'));
 
 console.fmt.hex.print('#D9A7F7', 'encode_base64: ');
-console.log(Strings.base64.encode('hello world'));
+console.log(base64.encode('hello world'));
 
 console.fmt.hex.print('#D9A7F7', 'decode_base64: ');
-console.log(Strings.base64.decode('aGVsbG8gd29ybGQ='));
+console.log(base64.decode('aGVsbG8gd29ybGQ='));
 
 console.fmt.hex.print('#D9A7F7', 'os_platform: ');
 console.log(os.platform);
