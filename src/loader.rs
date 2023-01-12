@@ -166,13 +166,14 @@ impl ModuleLoader for RuntimeImport {
                         println!("created {}/.just/packages", &home_dir.display());
                     }
 
-                    if !helpers::Exists::file(package_directory.clone())? {
-                        let res = reqwest::get(module_specifier).await?;
+                    if module_prefix != "just" && !helpers::Exists::file(package_directory.clone())? {
+                        let res = reqwest::get(module_specifier.clone()).await?;
                         let res = res.error_for_status()?;
                         let download_path = format!("{}/.just/packages/{}/{}", &home_dir.display(), res.url().host().unwrap(), res.url().path());
 
                         println!("{} {}", "download".green(), res.url());
-                        if res.headers().get("Content-Type").unwrap() == "text/plain; charset=UTF-8" {
+
+                        if res.headers().get("Content-Type").unwrap().to_str().unwrap().contains(&"text/plain") {
                             tokio::fs::create_dir_all(&download_path).await?;
                             tokio::fs::remove_dir(&download_path).await?;
                             tokio::fs::write(&package_directory, res.bytes().await?).await?;
@@ -181,15 +182,20 @@ impl ModuleLoader for RuntimeImport {
                         }
                     }
 
-                    let (module_type, should_transpile) = match MediaType::from(Path::new(&package_directory)) {
-                        MediaType::TypeScript | MediaType::Mts | MediaType::Cts | MediaType::Dts | MediaType::Dmts | MediaType::Dcts | MediaType::Tsx => (ModuleType::JavaScript, true),
-                        MediaType::JavaScript | MediaType::Mjs | MediaType::Cjs => (ModuleType::JavaScript, false),
-                        MediaType::Jsx => (ModuleType::JavaScript, true),
-                        MediaType::Json => (ModuleType::Json, false),
-                        _ => bail!("Unknown file extension {:?}", Path::new(&package_directory).extension()),
+                    let bytes = ternary!(module_prefix == "just", runtime::import_lib(module_name).into(), tokio::fs::read(&package_directory).await?);
+                    let (module_type, should_transpile) = if module_prefix == "just" {
+                        (ModuleType::JavaScript, false)
+                    } else {
+                        match MediaType::from(Path::new(&package_directory)) {
+                            MediaType::TypeScript | MediaType::Mts | MediaType::Cts | MediaType::Dts | MediaType::Dmts | MediaType::Dcts | MediaType::Tsx => (ModuleType::JavaScript, true),
+                            MediaType::JavaScript | MediaType::Mjs | MediaType::Cjs => (ModuleType::JavaScript, false),
+                            MediaType::Jsx => (ModuleType::JavaScript, true),
+                            MediaType::Json => (ModuleType::Json, false),
+                            _ => bail!("Unknown file extension {:?}", Path::new(&package_directory).extension()),
+                        }
                     };
 
-                    (tokio::fs::read(&package_directory).await?, MediaType::from(&package_directory), module_type, should_transpile)
+                    (bytes, MediaType::from(&package_directory), module_type, should_transpile)
                 }
                 "file" => {
                     let path = module_specifier.to_file_path().map_err(|_| anyhow!("Only file: URLs are supported."))?;
