@@ -11,4 +11,4 @@ await cmd.spawn('rustc -V').then((output) => {
 
 console.json(db.query('versions', "where version = '%s'".format(cmd.exec('rustc -V'))), true);
 
-db.remove('versions', '');
+db.delete('versions', '');

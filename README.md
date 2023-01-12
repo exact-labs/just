@@ -76,7 +76,7 @@ await cmd.spawn('just -v').then((output) => {
 });
 
 console.json(db.query('versions', "where version = '%s'".format(cmd.exec('just -v'))), true);
-db.remove('versions', '');
+db.delete('versions', '');
 ```
 
 Just package registry can be located [here](https://justjs.dev/r/) ([api](https://r.justjs.dev)).
