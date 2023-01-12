@@ -17,4 +17,12 @@ const cmd = {
 	spawn: async (cmd) => Just.core.opAsync('op_spawn', cmd),
 };
 
-export { os, cmd };
+const env = {
+	get: (value) => Just.core.ops.op_env_get(value),
+	set: (key, value) => {
+		Just.core.ops.op_env_set(key, value);
+		Object.defineProperty(Just.env_store, key, { value });
+	},
+};
+
+export { env, os, cmd };

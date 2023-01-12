@@ -1,10 +1,11 @@
 ((globalThis) => {
-	globalThis.require = (package, version = '') => import('file:///' + ops.get_package(package, version));
+	globalThis.Just = Just;
 	globalThis.__dirname = ops.op_dirname();
 	globalThis.sleep = (ms) => ops.sleep(ms);
+	globalThis.require = (package, version = '') => import('file:///' + ops.get_package(package, version));
 
 	globalThis.core = {
-      setup: () => ops.setup(),
+		setup: () => ops.setup(),
 		print: (text) => ops.print(text),
 		println: (text) => ops.print(`${text}\n`),
 		escape: (text) => ops.escape_string(text),
@@ -14,6 +15,5 @@
 
 	globalThis.runtime = {
 		version: () => ops.runtime_version(),
-		internal: __bootstrap,
 	};
 })(globalThis);

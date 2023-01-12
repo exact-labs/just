@@ -19,6 +19,7 @@ fn extensions() -> Extension {
         ops::cmd::op_spawn::decl(),
         ops::os::op_env_get::decl(),
         ops::os::op_env_set::decl(),
+        ops::os::local_env::decl(),
         ops::os::op_machine::decl(),
         ops::os::op_hostname::decl(),
         ops::os::op_homedir::decl(),
@@ -47,13 +48,14 @@ fn extensions() -> Extension {
     return Extension::builder()
         .js(include_js_files!(
           prefix "[exec:runtime]",
-          "main.js",
-          "helpers.js",
-          "core/core.js",
-          "core/log.js",
-          "core/go.js",
-          "core/system.js",
-          "core/format.js",
+          "core/helpers.js",
+          "core/init.js",
+          "mod.js",
+          "src/core.js",
+          "src/process.js",
+          "src/log.js",
+          "src/go.js",
+          "src/format.js",
         ))
         .ops(ops)
         .ops(ops::core::init())

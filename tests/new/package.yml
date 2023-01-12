@@ -1,0 +1,15 @@
+info:
+  name: testing
+  description: basic justjs testing
+  version: 0.0.1
+  author: exact
+  url: ''
+  repository: ''
+  license: mit
+  index: index.js
+registry:
+  public: true
+tasks: {}
+tests: {}
+dependencies:
+  sqlite: 0.0.1,0.0.2

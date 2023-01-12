@@ -1,6 +1,7 @@
 target/*
 .nova/*
 just
-tests/files/*.db
 src/go/embed/external
 testing
+*.db
+tests/new/packages/*

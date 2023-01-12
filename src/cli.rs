@@ -108,7 +108,9 @@ pub fn create_project_yml() {
     }
 }
 
-pub fn run_exec(path: &str, silent: bool, code: &str) {
+pub fn run_exec(path: &str, silent: bool, code: &str, args: &str) {
+    env::set_var("_just_args", args);
+
     let exists: bool = std::path::Path::new("package.yml").exists();
     let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
 

@@ -69,18 +69,22 @@ enum Commands {
     Start {
         #[arg(short, long)]
         silent: bool,
+        #[arg(short, long)]
+        args: String,
     },
     /// Eval a JavaScript string
     Eval {
-        #[arg(short, long)]
-        silent: bool,
         #[command()]
         code_content: String,
+        #[arg(short, long, default_value_t = String::from(""))]
+        args: String,
     },
     /// Run a JavaScript program
     Run {
         #[arg(short, long)]
         silent: bool,
+        #[arg(short, long, default_value_t = String::from(""))]
+        args: String,
         #[command()]
         file_name: String,
     },
@@ -134,9 +138,9 @@ fn main() {
         Some(Commands::Remove { name }) => registry::manager::remove(name),
 
         /* runtime */
-        Some(Commands::Run { silent, file_name }) => cli::run_exec(file_name, *silent, ""),
-        Some(Commands::Eval { silent, code_content }) => cli::run_exec("", *silent, code_content),
-        Some(Commands::Start { silent }) => cli::run_exec(&project::package::read().info.index, *silent, ""),
+        Some(Commands::Run { silent, file_name, args }) => cli::run_exec(file_name, *silent, "", args),
+        Some(Commands::Eval { code_content, args }) => cli::run_exec("", true, code_content, args),
+        Some(Commands::Start { silent, args }) => cli::run_exec(&project::package::read().info.index, *silent, "", args),
 
         None => cli::run_repl(),
     }
