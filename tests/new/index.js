@@ -2,7 +2,7 @@ import { fs } from 'just/io';
 import { os, cmd } from 'just/sys';
 import { uuid, random } from 'just/crypto';
 import { base64, hex } from 'just/crypto:enc';
-// import { run } from './net.ts';
+import { run } from './net.ts';
 
 console.fmt.hex.print('#D9A7F7', 'just_args: ');
 console.log(Just.args);
@@ -67,5 +67,5 @@ console.log(os.platform);
 console.fmt.hex.print('#D9A7F7', 'command_exec: ');
 console.log(cmd.exec('rustc --version'));
 
-// console.fmt.hex.print('#D9A7F7', 'import_ts_net: ');
-// run();
+console.fmt.hex.print('#D9A7F7', 'import_ts_net: ');
+run();
