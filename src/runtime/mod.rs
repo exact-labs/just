@@ -59,6 +59,7 @@ fn extensions() -> Extension {
         ))
         .ops(ops)
         .ops(ops::core::init())
+        .ops(ops::kv::init())
         .build();
 }
 
@@ -67,8 +68,10 @@ pub fn import_lib(lib_name: &str) -> &str {
         "io" => include_str!("lib/io.js"),
         "sys" => include_str!("lib/sys.js"),
         "net" => include_str!("lib/net.js"),
-        "crypto" => include_str!("lib/crypto.js"),
-        "crypto:enc" => include_str!("lib/enc.js"),
+        "crypto" => include_str!("lib/crypto/index.js"),
+        "crypto:enc" => include_str!("lib/crypto/enc.js"),
+        "db:kv" => include_str!("lib/db/kv.js"),
+        "db:sqlite" => include_str!("lib/db/sqlite.js"),
         _ => "",
     };
 }

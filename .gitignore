@@ -5,3 +5,4 @@ src/go/embed/external
 testing
 *.db
 tests/new/packages/*
+tests/new/ver_db/*
