@@ -22,6 +22,10 @@ const Headers = ({ styles, children }) => (
 	<html>
 		<style>{styles}</style>
 		<body>{children}</body>
+		<p>
+			current location: <span id='path' />
+		</p>
+		<script>document.getElementById('path').innerHTML = window.location.pathname;</script>
 	</html>
 );
 
