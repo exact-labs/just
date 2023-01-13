@@ -29,7 +29,6 @@ pub fn init() -> Vec<OpDecl> {
         base64_encode::decl(),
         base64_decode::decl(),
         escape_string::decl(),
-        runtime_version::decl(),
     ]
 }
 
@@ -51,11 +50,6 @@ fn random_id(len: usize) -> String {
 #[op]
 pub fn random_uuid() -> Result<String, Error> {
     Ok(uuid::Uuid::new_v4().to_string())
-}
-
-#[op]
-fn runtime_version() -> String {
-    return format!("{}", env!("CARGO_PKG_VERSION"));
 }
 
 #[op]

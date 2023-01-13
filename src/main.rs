@@ -5,6 +5,7 @@ mod loader;
 mod logger;
 mod macros;
 mod ops;
+mod permissions;
 mod project;
 mod registry;
 mod runtime;
@@ -68,26 +69,64 @@ enum Commands {
     Tests,
     /// Start the index script
     Start {
-        #[arg(short, long)]
-        silent: bool,
-        #[arg(short, long)]
+        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
         args: String,
+        #[arg(short = 'A', long, default_value_t = false, help = "Allow all permissions")]
+        allow_all: bool,
+        #[arg(long, default_value_t = false, help = "Allow environment access")]
+        allow_env: bool,
+        #[arg(long, default_value_t = false, help = "Allow network access")]
+        allow_net: bool,
+        #[arg(long, default_value_t = false, help = "Allow file system read access")]
+        allow_read: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow file system write access")]
+        allow_write: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow running subprocesses")]
+        allow_cmd: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow access to system info")]
+        allow_sys: bool,
     },
     /// Eval a JavaScript string
     Eval {
         #[command()]
-        code_content: String,
-        #[arg(short, long, default_value_t = String::from(""))]
+        code: String,
+        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
         args: String,
+        #[arg(short = 'A', long, default_value_t = false, help = "Allow all permissions")]
+        allow_all: bool,
+        #[arg(long, default_value_t = false, help = "Allow environment access")]
+        allow_env: bool,
+        #[arg(long, default_value_t = false, help = "Allow network access")]
+        allow_net: bool,
+        #[arg(long, default_value_t = false, help = "Allow file system read access")]
+        allow_read: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow file system write access")]
+        allow_write: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow running subprocesses")]
+        allow_cmd: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow access to system info")]
+        allow_sys: bool,
     },
     /// Run a JavaScript program
     Run {
-        #[arg(short, long)]
-        silent: bool,
-        #[arg(short, long, default_value_t = String::from(""))]
+        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
         args: String,
         #[command()]
-        file_name: String,
+        path: String,
+        #[arg(short = 'A', long, default_value_t = false, help = "Allow all permissions")]
+        allow_all: bool,
+        #[arg(long, default_value_t = false, help = "Allow environment access")]
+        allow_env: bool,
+        #[arg(long, default_value_t = false, help = "Allow network access")]
+        allow_net: bool,
+        #[arg(long, default_value_t = false, help = "Allow file system read access")]
+        allow_read: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow file system write access")]
+        allow_write: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow running subprocesses")]
+        allow_cmd: bool,
+        #[arg(short, long, default_value_t = false, help = "Allow access to system info")]
+        allow_sys: bool,
     },
     /// Static file serving
     Serve {
@@ -136,9 +175,50 @@ fn main() {
         Some(Commands::Remove { name }) => registry::manager::remove(name),
 
         /* runtime */
-        Some(Commands::Run { silent, file_name, args }) => cli::run_exec(file_name, *silent, "", args),
-        Some(Commands::Eval { code_content, args }) => cli::run_exec("", true, code_content, args),
-        Some(Commands::Start { silent, args }) => cli::run_exec(&project::package::read().info.index, *silent, "", args),
+        Some(Commands::Run {
+            path,
+            args,
+            allow_all,
+            allow_env,
+            allow_net,
+            allow_read,
+            allow_write,
+            allow_cmd,
+            allow_sys,
+        }) => {
+            std::env::set_var("_just_args", args);
+            permissions::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            cli::run_exec(path, cli.verbose.is_silent(), "");
+        }
+        Some(Commands::Eval {
+            code,
+            args,
+            allow_all,
+            allow_env,
+            allow_net,
+            allow_read,
+            allow_write,
+            allow_cmd,
+            allow_sys,
+        }) => {
+            std::env::set_var("_just_args", args);
+            permissions::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            cli::run_exec("", cli.verbose.is_silent(), code);
+        }
+        Some(Commands::Start {
+            args,
+            allow_all,
+            allow_env,
+            allow_net,
+            allow_read,
+            allow_write,
+            allow_cmd,
+            allow_sys,
+        }) => {
+            std::env::set_var("_just_args", args);
+            permissions::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            cli::run_exec(&project::package::read().info.index, cli.verbose.is_silent(), "");
+        }
 
         None => cli::run_repl(),
     }

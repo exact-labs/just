@@ -1,5 +1,6 @@
 use crate::loader;
 use crate::ops;
+use crate::permissions::Permissions;
 use engine::{include_js_files, serde_json, serde_json::json, v8, Extension, JsRuntime, RuntimeOptions};
 use std::rc::Rc;
 use std::thread;
@@ -9,6 +10,8 @@ pub struct BootstrapOptions {
     pub cpu_count: usize,
     pub runtime_version: String,
     pub user_agent: String,
+    pub seed: String,
+    pub permissions: Permissions,
 }
 
 impl Default for BootstrapOptions {
@@ -21,6 +24,15 @@ impl Default for BootstrapOptions {
             runtime_version,
             user_agent,
             cpu_count,
+            seed: String::from(env!("GIT_HASH_FULL")),
+            permissions: Permissions {
+                allow_env: Permissions::allow_env(),
+                allow_net: Permissions::allow_net(),
+                allow_read: Permissions::allow_read(),
+                allow_write: Permissions::allow_write(),
+                allow_cmd: Permissions::allow_cmd(),
+                allow_sys: Permissions::allow_sys(),
+            },
         }
     }
 }
@@ -28,13 +40,14 @@ impl Default for BootstrapOptions {
 impl BootstrapOptions {
     pub fn as_json(&self) -> String {
         let payload = json!({
+          "seed": self.seed,
           "cpuCount": self.cpu_count,
           "justVersion": self.runtime_version,
           "pid": std::process::id(),
           "target": env!("TARGET"),
           "v8Version": engine::v8_version(),
           "userAgent": self.user_agent,
-
+          "permissions": self.permissions,
         });
         serde_json::to_string_pretty(&payload).unwrap()
     }

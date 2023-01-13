@@ -149,6 +149,7 @@ impl ModuleLoader for RuntimeImport {
             let module_array = module_specifier.path().split("/").collect::<Vec<&str>>();
             let module_prefix = module_array[module_array.len() - 2];
             let module_name = module_array.last().context("Unable to find module name.")?;
+            let env_args = std::env::var("_just_args")?;
 
             let (bytes, media_type, module_type, should_transpile) = match module_specifier.scheme() {
                 "http" | "https" => {
@@ -173,7 +174,7 @@ impl ModuleLoader for RuntimeImport {
                         println!("created {}/.just/packages", &home_dir.display());
                     }
 
-                    if module_prefix != "just" && !helpers::Exists::file(package_directory.clone())? {
+                    if module_prefix != "just" && (!helpers::Exists::file(package_directory.clone())? || env_args.contains("cache=skip")) {
                         let res = reqwest::get(module_specifier.clone()).await?;
                         let res = res.error_for_status()?;
                         let content_type = res.headers().get("Content-Type").unwrap().to_str().unwrap();

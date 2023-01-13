@@ -1,6 +1,6 @@
 const http = {
-	get: (url, headers = { 'User-Agent': 'JustRuntime/' + Just.fn.runtime_version() }) => Just.fn.async('net_get', url, JSON.stringify(headers)),
-	post: (url, body = '', headers = { 'User-Agent': 'JustRuntime/' + Just.fn.runtime_version() }) =>
+	get: (url, headers = { 'User-Agent': Just.options.userAgent }) => Just.fn.async('net_get', url, JSON.stringify(headers)),
+	post: (url, body = '', headers = { 'User-Agent': Just.options.userAgent }) =>
 		Just.fn.async('net_post', url, parseObject(body), JSON.stringify(headers)),
 };
 
