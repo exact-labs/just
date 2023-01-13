@@ -10,7 +10,6 @@ info:
 registry:
   public: true
 tasks:
-  serve: '../../just run serve.ts'
   test: '../../just start'
   kv: '../../just run kv.js'
   db: '../../just run db.js'

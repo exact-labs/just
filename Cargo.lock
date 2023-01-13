@@ -255,6 +255,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "clap-verbosity-flag"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23e2b6c3dcdb73299f48ae05b294da14e2f560b3ed2c09e742269eb1b22af231"
+dependencies = [
+ "clap",
+ "log 0.4.17",
+]
+
+[[package]]
 name = "clap_derive"
 version = "4.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -764,6 +774,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "env_logger"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
+dependencies = [
+ "humantime",
+ "is-terminal",
+ "log 0.4.17",
+ "regex 1.7.0",
+ "termcolor",
+]
+
+[[package]]
 name = "errno"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1173,6 +1196,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4a1e36c821dbe04574f602848a19f742f4fb3c98d40449f11bcad18d6b17421"
 
 [[package]]
+name = "humantime"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
+
+[[package]]
 name = "hyper"
 version = "0.14.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1369,6 +1398,7 @@ dependencies = [
  "brown",
  "chrono",
  "clap",
+ "clap-verbosity-flag",
  "colored",
  "console",
  "data-encoding",
@@ -1377,16 +1407,17 @@ dependencies = [
  "deno_core",
  "dirs",
  "duration-string",
+ "env_logger 0.10.0",
  "exact-panic",
  "flate2",
  "futures-util",
  "hex",
  "home",
  "hostname",
- "hyper",
  "indicatif",
  "inquire",
  "libc",
+ "log 0.4.17",
  "nanoid",
  "once_cell",
  "open",
@@ -2273,7 +2304,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fe96238927a56c408907a0c56cc7574cb198a462b4dd8c79169b98d9d5831460"
 dependencies = [
- "env_logger",
+ "env_logger 0.4.3",
  "errno",
  "lazy_static",
  "libc",

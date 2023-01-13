@@ -13,8 +13,11 @@ pub fn task_list(tasks: BTreeMap<String, String>) {
             let key = helpers::trim_start_end(task.split(":").collect::<Vec<_>>()[0]);
             println!("\n{} task {}", "running".green(), key.bold());
             println!("{} {}\n", "»".white(), tasks[key]);
-            if let Err(error) = cmd!(&tasks[key]).run() {
-                logger::error(format!("{:?}", error));
+
+            for command in &tasks[key].split("&&").collect::<Vec<&str>>() {
+                if let Err(error) = cmd!(command.trim()).run() {
+                    logger::error(format!("{:?}", error));
+                }
             }
         }
         Err(_) => println!("{}", "Aborting...".white()),

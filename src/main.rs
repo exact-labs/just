@@ -10,15 +10,16 @@ mod registry;
 mod runtime;
 
 use clap::{Parser, Subcommand};
+use clap_verbosity_flag::Verbosity;
 use exact_panic::setup_panic;
 
 #[derive(Parser)]
+#[command(version = helpers::string_to_static_str(cli::get_version(false)))]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
-    /// Print version information
-    #[arg(short, long)]
-    version: bool,
+    #[clap(flatten)]
+    verbose: Verbosity,
 }
 
 #[derive(Subcommand)]
@@ -103,10 +104,7 @@ fn main() {
     setup_panic!();
 
     let cli = Cli::parse();
-    if cli.version {
-        println!("{}", cli::get_version(false));
-        std::process::exit(0);
-    }
+    env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
 
     match &cli.command {
         /* essentials */

@@ -155,10 +155,17 @@ impl ModuleLoader for RuntimeImport {
                     let home_dir = helpers::get_home_dir()?;
                     let folder_exists: bool = helpers::Exists::folder(format!("{}/.just/packages", home_dir.display()))?;
 
-                    let package_directory: String = if module_specifier.path().ends_with(".js") {
+                    let package_directory: String = if module_specifier.path().ends_with(".js")
+                        || module_specifier.path().ends_with(".ts")
+                        || module_specifier.path().ends_with(".jsx")
+                        || module_specifier.path().ends_with(".tsx")
+                        || module_specifier.path().ends_with(".cjs")
+                        || module_specifier.path().ends_with(".mjs")
+                        || module_specifier.path().ends_with("json")
+                    {
                         format!("{}/.just/packages/{}{}", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path())
                     } else {
-                        format!("{}/.just/packages/{}{}/mod.js", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path())
+                        format!("{}/.just/packages/{}{}/mod.ts", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path(),)
                     };
 
                     if !folder_exists {
@@ -173,6 +180,11 @@ impl ModuleLoader for RuntimeImport {
                         let download_path = format!("{}/.just/packages/{}{}", &home_dir.display(), res.url().host().unwrap(), res.url().path());
 
                         println!("{} {}", "download".green(), res.url());
+
+                        log::debug!("content_type: {}", content_type);
+                        log::debug!("download_path: {}", download_path);
+                        log::debug!("package_directory: {}", package_directory);
+                        log::debug!("module_specifier: {}", module_specifier);
 
                         if content_type.contains(&"text/plain")
                             || content_type.contains(&"text/jsx")
@@ -196,8 +208,11 @@ impl ModuleLoader for RuntimeImport {
                             || content_type.contains(&"application/x-javascript")
                             || content_type.contains(&"application/x-typescript")
                         {
-                            tokio::fs::create_dir_all(&download_path).await?;
-                            tokio::fs::remove_dir(&download_path).await?;
+                            let mut trimmed_path = package_directory.split("/").collect::<Vec<&str>>();
+                            trimmed_path.pop();
+
+                            log::debug!("trimmed_path: {}", trimmed_path.join("/"));
+                            tokio::fs::create_dir_all(trimmed_path.join("/")).await?;
                             tokio::fs::write(&package_directory, res.bytes().await?).await?;
                         } else {
                             tokio::fs::create_dir_all(&download_path).await?;
