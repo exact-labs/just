@@ -1,10 +1,29 @@
 const Just = __bootstrap;
 const { ops } = Just.core;
 
+const build = {
+	target: 'unknown',
+	arch: 'unknown',
+	os: 'unknown',
+	vendor: 'unknown',
+};
+
+const set_build_info = (target) => {
+	const [arch, vendor, os] = target.split('-', 3);
+
+	build.target = target;
+	build.arch = arch;
+	build.vendor = vendor;
+	build.os = os;
+
+	Object.freeze(build);
+};
+
 Just.fn = ops;
+Just.build = build;
 Just.env_store = {};
 Just.fn.async = Just.core.opAsync;
-Just.version = ops.runtime_version();
+Just.options = JSON.parse(ops.options());
 Just.args = ops.env_get('_just_args') ? ops.env_get('_just_args').split(' ') : '';
 
 const init_runtime_env = () => {
@@ -25,6 +44,7 @@ const init_runtime_env = () => {
 const init_runtime_global = () => {
 	Just.core.initializeAsyncOps();
 	init_runtime_env();
+	set_build_info(Just.options.target);
 
 	delete Object.prototype.__proto__;
 	delete Intl.v8BreakIterator;

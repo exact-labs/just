@@ -4,6 +4,7 @@ use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::{fs, fs::File};
 
 #[derive(Debug, Deserialize)]
@@ -82,4 +83,14 @@ pub fn trim_start_end(value: &str) -> &str {
     chars.next();
     chars.next_back();
     chars.as_str()
+}
+
+pub fn to_msec(maybe_time: Result<SystemTime, std::io::Error>) -> (u64, bool) {
+    match maybe_time {
+        Ok(time) => (
+            time.duration_since(UNIX_EPOCH).map(|t| t.as_millis() as u64).unwrap_or_else(|err| err.duration().as_millis() as u64),
+            true,
+        ),
+        Err(_) => (0, false),
+    }
 }

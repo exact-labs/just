@@ -15,6 +15,7 @@ pub fn init() -> Vec<OpDecl> {
         setup::decl(),
         sleep::decl(),
         print::decl(),
+        options::decl(),
         log_info::decl(),
         to_bytes::decl(),
         random_id::decl(),
@@ -30,6 +31,11 @@ pub fn init() -> Vec<OpDecl> {
         escape_string::decl(),
         runtime_version::decl(),
     ]
+}
+
+#[op]
+fn options() -> String {
+    return crate::runtime::BootstrapOptions::as_json(&crate::runtime::BootstrapOptions::default());
 }
 
 #[op]

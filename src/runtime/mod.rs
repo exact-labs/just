@@ -1,7 +1,44 @@
 use crate::loader;
 use crate::ops;
-use engine::{include_js_files, v8, Extension, JsRuntime, RuntimeOptions};
+use engine::{include_js_files, serde_json, serde_json::json, v8, Extension, JsRuntime, RuntimeOptions};
 use std::rc::Rc;
+use std::thread;
+
+#[derive(Clone)]
+pub struct BootstrapOptions {
+    pub cpu_count: usize,
+    pub runtime_version: String,
+    pub user_agent: String,
+}
+
+impl Default for BootstrapOptions {
+    fn default() -> Self {
+        let cpu_count = thread::available_parallelism().map(|p| p.get()).unwrap_or(1);
+        let runtime_version = env!("CARGO_PKG_VERSION").into();
+        let user_agent = format!("JustRuntime/{}", runtime_version);
+
+        Self {
+            runtime_version,
+            user_agent,
+            cpu_count,
+        }
+    }
+}
+
+impl BootstrapOptions {
+    pub fn as_json(&self) -> String {
+        let payload = json!({
+          "cpuCount": self.cpu_count,
+          "justVersion": self.runtime_version,
+          "pid": std::process::id(),
+          "target": env!("TARGET"),
+          "v8Version": engine::v8_version(),
+          "userAgent": self.user_agent,
+
+        });
+        serde_json::to_string_pretty(&payload).unwrap()
+    }
+}
 
 fn extensions() -> Extension {
     return Extension::builder()

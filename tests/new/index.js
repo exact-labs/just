@@ -11,9 +11,14 @@ console.log(Just.args);
 console.fmt.hex.print('#D9A7F7', 'has_arg: ');
 console.log(Just.args.includes('show_this'));
 
-await fs.read.file('main.go').then((code) => {
+await fs.stat('index.js').then((info) => {
+	console.fmt.hex.print('#D9A7F7', 'stat_of_file: ');
+	console.log(info);
+});
+
+await fs.file.read('main.go').then((code) => {
 	console.fmt.hex.print('#D9A7F7', 'sha_of_file: ');
-	console.log(fs.sha('main.go'));
+	console.log(fs.file.sha('main.go'));
 
 	console.fmt.hex.print('#D9A7F7', 'eval_go_code: ');
 	go.eval(code);

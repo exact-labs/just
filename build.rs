@@ -1,5 +1,6 @@
 use chrono::Datelike;
 use sha2::{Digest, Sha256};
+use std::env;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
@@ -31,5 +32,6 @@ fn main() {
 
     println!("cargo:rustc-env=FILE_SHA={}", sha256_digest(&PathBuf::from("src/go/embed/external")).unwrap());
     println!("cargo:rustc-env=GIT_HASH={}", git_hash);
+    println!("cargo:rustc-env=TARGET={}", env::var("TARGET").unwrap());
     println!("cargo:rustc-env=BUILD_DATE={}-{}-{}", date.year(), date.month(), date.day());
 }

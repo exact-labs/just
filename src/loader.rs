@@ -165,7 +165,7 @@ impl ModuleLoader for RuntimeImport {
                     {
                         format!("{}/.just/packages/{}{}", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path())
                     } else {
-                        format!("{}/.just/packages/{}{}/mod.ts", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path(),)
+                        format!("{}/.just/packages/{}{}/mod.js", &home_dir.display(), module_specifier.domain().unwrap(), module_specifier.path(),)
                     };
 
                     if !folder_exists {

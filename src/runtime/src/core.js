@@ -1,7 +1,7 @@
 ((globalThis) => {
 	globalThis.Just = Just;
 	globalThis.__dirname = ops.os_dirname();
-	globalThis.sleep = (ms) => ops.sleep(ms);
+	globalThis.sleep = (time) => ops.sleep(typeof time === 'number' ? `${time}ms` : time);
 	globalThis.require = (package, version = '') => import('file:///' + ops.get_package(package, version));
 
 	globalThis.core = {
