@@ -2,6 +2,7 @@ import { fs } from 'just/io';
 import { os, cmd } from 'just/sys';
 import { uuid, random } from 'just/crypto';
 import { base64, hex } from 'just/crypto:enc';
+import { Open } from 'just/db:kv';
 import { run } from './net.ts';
 
 console.fmt.hex.print('#D9A7F7', 'just_args: ');
@@ -63,6 +64,22 @@ console.log(base64.decode('aGVsbG8gd29ybGQ='));
 
 console.fmt.hex.print('#D9A7F7', 'os_platform: ');
 console.log(os.platform);
+
+const db = new Open('ver_db');
+console.fmt.hex.print('#D9A7F7', 'kv_set_str: ');
+db.set('str', 'hello world');
+console.log(db.get('str'));
+db.remove('str');
+
+console.fmt.hex.print('#D9A7F7', 'kv_set_json: ');
+db.set('json', { hello: 'world' });
+console.log(db.get('json'));
+db.remove('json');
+
+console.fmt.hex.print('#D9A7F7', 'kv_set_int: ');
+db.set('number', 500);
+console.log(db.get('number'));
+db.remove('number');
 
 console.fmt.hex.print('#D9A7F7', 'command_exec: ');
 console.log(cmd.exec('rustc --version'));

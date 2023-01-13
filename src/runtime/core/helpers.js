@@ -65,6 +65,13 @@ const NEWLINE = '\n';
 const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/;
 const RE_NEWLINES = /\\n/g;
 
+const parseObject = (p) => {
+	if (Array.isArray(p)) return JSON.stringify(p);
+	else if (typeof p == 'string') return p;
+	else if (p != null && typeof p == 'object') return JSON.stringify(p);
+	else return String(p);
+};
+
 const parseBuffer = (src) => {
 	const obj = {};
 	src
