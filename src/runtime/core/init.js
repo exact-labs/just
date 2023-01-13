@@ -8,8 +8,9 @@ Just.version = ops.runtime_version();
 Just.args = ops.env_get('_just_args') ? ops.env_get('_just_args').split(' ') : '';
 
 const init_runtime_env = () => {
-	const env_file = Just.args ? Just.args[Just.args.findIndex((i) => i.includes('env='))] : 'env=find';
-	const env_object = parseBuffer(ops.env_local(env_file));
+	const env_index = Just.args ? Just.args.findIndex((i) => i.includes('env=')) : -1;
+	const env_path = env_index != -1 ? Just.args[env_index] : 'env=find';
+	const env_object = parseBuffer(ops.env_local(env_path));
 
 	Object.keys(env_object || {}).map((key) => {
 		ops.env_set(key, env_object[key]);

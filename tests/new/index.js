@@ -8,6 +8,9 @@ import { run } from './net.ts';
 console.fmt.hex.print('#D9A7F7', 'just_args: ');
 console.log(Just.args);
 
+console.fmt.hex.print('#D9A7F7', 'has_arg: ');
+console.log(Just.args.includes('show_this'));
+
 await fs.read.file('main.go').then((code) => {
 	console.fmt.hex.print('#D9A7F7', 'sha_of_file: ');
 	console.log(fs.sha('main.go'));
