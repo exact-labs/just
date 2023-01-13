@@ -13,15 +13,15 @@ static BINARY_EXTERNAL: &'static [u8] = include_bytes!("embed/external");
 pub fn init_paths() {
     match home::home_dir() {
         Some(path) => {
-            let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir();
-            let binary_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/external", path.display()))).is_file();
+            let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/bin", path.display()))).is_dir();
+            let binary_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/bin/lib_ext.bin", path.display()))).is_file();
 
             if !folder_exists {
-                std::fs::create_dir_all(format!("{}/.just", path.display())).unwrap();
-                println!("created {}/.just", path.display());
+                std::fs::create_dir_all(format!("{}/.just/bin", path.display())).unwrap();
+                println!("created {}/.just/bin", path.display());
             }
 
-            let external_runtime = format!("{}/.just/external", path.display());
+            let external_runtime = format!("{}/.just/bin/lib_ext.bin", path.display());
 
             let write_file = || {
                 let mut file = File::create(external_runtime.clone()).unwrap();
@@ -51,7 +51,7 @@ pub fn init_paths() {
 
 #[op]
 pub fn external_function(name: String, args: String) -> String {
-    return match cmd!(helpers::string_to_static_str(format!("{}/.just/external {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
+    return match cmd!(helpers::string_to_static_str(format!("{}/.just/bin/lib_ext.bin {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
         Ok(output) => output,
         Err(err) => format!("{:?}", err),
     };

@@ -81,6 +81,11 @@ db.set('number', 500);
 console.log(db.get('number'));
 db.remove('number');
 
+console.fmt.hex.print('#D9A7F7', 'kv_set_arr: ');
+db.set('arr', [1, 2, 3, 4, 5]);
+console.log(db.get('arr'));
+db.remove('arr');
+
 console.fmt.hex.print('#D9A7F7', 'command_exec: ');
 console.log(cmd.exec('rustc --version'));
 

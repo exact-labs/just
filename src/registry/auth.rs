@@ -63,7 +63,7 @@ pub fn login() {
                 Ok(response) => {
                     match serde_json::from_str::<Response>(&response.text().unwrap()) {
                         Ok(json) => {
-                            let mut file = std::fs::File::create(format!("{}/.just/.token", path.display())).unwrap();
+                            let mut file = std::fs::File::create(format!("{}/.just/credentials.json", path.display())).unwrap();
                             file.write_all(format!("{{\"token\":\"{}\",\"access\":\"{}\"}}", json.token, json.record.id).as_bytes()).unwrap();
                             pb.finish_with_message(format!("\x08{} {} {}", "✔".green(), "logged in".bright_green(), format!("({})", json.record.id).white()));
                         }
@@ -90,7 +90,7 @@ pub fn verify() {
 pub fn logout() {
     match home::home_dir() {
         Some(path) => {
-            if let Err(_) = std::fs::remove_file(format!("{}/.just/.token", path.display())) {
+            if let Err(_) = std::fs::remove_file(format!("{}/.just/credentials.json", path.display())) {
                 eprintln!("{} {}", "unable to logout, no token file".red(), "(are you logged in?)".bright_red());
             } else {
                 println!("{}", "logged out".green())

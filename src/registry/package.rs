@@ -51,7 +51,7 @@ pub fn publish() {
                 remove_tar(&file_name);
             }
 
-            let auth = match std::fs::read_to_string(format!("{}/.just/.token", path.display())) {
+            let auth = match std::fs::read_to_string(format!("{}/.just/credentials.json", path.display())) {
                 Ok(content) => match serde_json::from_str::<AuthFile>(&content) {
                     Ok(json) => json,
                     Err(_) => {
@@ -114,10 +114,19 @@ pub fn publish() {
                     match serde_json::from_str::<Response>(&response.text().unwrap()) {
                         Ok(json) => {
                             if &json.message["created"].to_string() == "null" {
+                                let error = json.message["error"].to_string().clone();
                                 pb.finish_with_message(format!(
                                     "\x08{} {}",
                                     "✖".red(),
-                                    format!("unable to publish package\n - {}", helpers::trim_start_end(&json.message["error"].to_string())).bright_red()
+                                    format!(
+                                        "unable to publish package\n - {}",
+                                        ternary!(
+                                            helpers::trim_start_end(&error) == "ul",
+                                            "your token might be expired, please login again with 'just login'",
+                                            helpers::trim_start_end(&error)
+                                        )
+                                    )
+                                    .bright_red()
                                 ));
                                 remove_tar(&file_name);
                                 std::process::exit(1);
