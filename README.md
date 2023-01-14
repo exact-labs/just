@@ -8,11 +8,10 @@ Just is a _simple_, and _modern_ runtime for **JavaScript** that uses V8 and is 
 
 ### Features
 
-- Multiple ways to import files.
-- External language support [like go](https://github.com/exact-rs/just/tree/master/src/go).
+- Use your preferred import style. Local, web, package.
 - Secure by default. No file, network, or environment access, unless explicitly enabled.
-- Builds a self-contained executable.
-- Useful [built-in](https://justjs.dev/docs/tools) utilities.
+- External language support, for example [golang](https://github.com/exact-rs/just/tree/master/src/go).
+- Useful and extensive [built-in](https://justjs.dev/docs/tools) utilities.
 - Includes a set of standard modules for [Just](https://justjs.dev/r/std).
 
 ### Install
