@@ -1,3 +1,8 @@
+use crate::fn_name;
+use crate::state;
+use crate::state::Permissions;
+use crate::state_err;
+
 use dirs;
 use engine::op;
 use std::{env, process};
@@ -5,6 +10,8 @@ use sysinfo::{System, SystemExt};
 
 #[op]
 fn os_release() -> String {
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+
     #[cfg(target_os = "linux")]
     {
         match std::fs::read_to_string("/proc/sys/kernel/osrelease") {
@@ -47,54 +54,62 @@ fn os_release() -> String {
 
 #[op]
 fn os_platform() -> String {
-    return format!("{}", env::consts::OS);
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{}", env::consts::OS)
 }
 
 #[op]
 fn os_machine() -> String {
-    return format!("{}", env::consts::ARCH);
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{}", env::consts::ARCH)
 }
 
 #[op]
 fn os_hostname() -> String {
-    return format!("{:?}", hostname::get().unwrap());
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{:?}", hostname::get().unwrap())
 }
 
 #[op]
 fn os_homedir() -> String {
-    return format!("{}", dirs::home_dir().unwrap().display());
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{}", dirs::home_dir().unwrap().display())
 }
 
 #[op]
 fn os_uptime() -> String {
-    return format!("{}", System::new_all().uptime());
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{}", System::new_all().uptime())
 }
 
 #[op]
 fn os_cpus() -> String {
-    return format!("{}", System::new_all().cpus().len());
+    format!("{}", System::new_all().cpus().len())
 }
 
 #[op]
 fn os_freemem() -> String {
-    return format!("{}", System::new_all().used_memory());
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{}", System::new_all().used_memory())
 }
 
 #[op]
 fn os_totalmem() -> String {
-    return format!("{}", System::new_all().total_memory());
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    format!("{}", System::new_all().total_memory())
 }
 
 #[op]
 fn os_loadavg() -> String {
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
     let load_avg = System::new_all().load_average();
-    return format!("[{}, {}, {}]", load_avg.one, load_avg.five, load_avg.fifteen);
+    format!("[{}, {}, {}]", load_avg.one, load_avg.five, load_avg.fifteen)
 }
 
 #[op]
 fn os_dirname() -> String {
     let dir = env::current_dir().unwrap();
-    return format!("{}", dir.display());
+    format!("{}", dir.display())
 }
 
 #[op]

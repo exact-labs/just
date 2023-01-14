@@ -1,10 +1,31 @@
 #[macro_export]
+macro_rules! fn_name {
+    () => {{
+        fn f() {}
+        fn type_name_of<T>(_: T) -> &'static str {
+            std::any::type_name::<T>()
+        }
+        let name = type_name_of(f);
+        &name[..name.len() - 3]
+    }};
+}
+
+#[macro_export]
 macro_rules! ternary {
     ($c:expr, $v:expr, $v1:expr) => {
         if $c {
             $v
         } else {
             $v1
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! state_err {
+    ($c:expr, $v:expr) => {
+        if !$c {
+            $v
         }
     };
 }

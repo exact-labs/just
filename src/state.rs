@@ -1,6 +1,9 @@
 use crate::ternary;
+
+use colored::Colorize;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
+use std::process::exit;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -33,6 +36,7 @@ impl Permissions {
         ALLOW_READ.store(allow_read.clone(), Ordering::Relaxed);
         ALLOW_WRITE.store(allow_write.clone(), Ordering::Relaxed);
     }
+
     pub fn allow_env() -> bool {
         ternary!(ALLOW_ALL.load(Ordering::Relaxed), true, ALLOW_ENV.load(Ordering::Relaxed))
     }
@@ -51,4 +55,53 @@ impl Permissions {
     pub fn allow_write() -> bool {
         ternary!(ALLOW_ALL.load(Ordering::Relaxed), true, ALLOW_WRITE.load(Ordering::Relaxed))
     }
+}
+
+pub fn error_env(path: &str) {
+    eprintln!(
+        "{} {}",
+        format!("({path})").bright_red(),
+        "[ENV] Uncaught Permission Denied: to access system env, please run again with the --allow-env flag".red()
+    );
+    exit(1)
+}
+pub fn error_net(path: &str) {
+    eprintln!(
+        "{} {}",
+        format!("({path})").bright_red(),
+        "[NETWORK] Permission Denied: to access the internet, please run again with the --allow-net flag".red()
+    );
+    exit(1)
+}
+pub fn error_cmd(path: &str) {
+    eprintln!(
+        "{} {}",
+        format!("({path})").bright_red(),
+        "[SPAWN] Permission Denied: to run a subprocess, please run again with the --allow-cmd flag".red()
+    );
+    exit(1)
+}
+pub fn error_sys(path: &str) {
+    eprintln!(
+        "{} {}",
+        format!("({path})").bright_red(),
+        "[SYSTEM] Permission Denied: to allow system functions, please run again with the --allow-sys flag".red()
+    );
+    exit(1)
+}
+pub fn error_read(path: &str) {
+    eprintln!(
+        "{} {}",
+        format!("({path})").bright_red(),
+        "[READ] Permission Denied: to read a file, please run again with the --allow-read flag".red()
+    );
+    exit(1)
+}
+pub fn error_write(path: &str) {
+    eprintln!(
+        "{} {}",
+        format!("({path})").bright_red(),
+        "[WRITE] Permission Denied: to write a file, please run again with the --allow-write flag".red()
+    );
+    exit(1)
 }

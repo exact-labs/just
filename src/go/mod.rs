@@ -1,4 +1,9 @@
+use crate::fn_name;
 use crate::helpers;
+use crate::state;
+use crate::state::Permissions;
+use crate::state_err;
+
 use colored::Colorize;
 use engine::op;
 use shell::cmd;
@@ -51,6 +56,8 @@ pub fn init_paths() {
 
 #[op]
 pub fn external_function(name: String, args: String) -> String {
+    state_err!(Permissions::allow_cmd(), state::error_cmd(fn_name!()));
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
     return match cmd!(helpers::string_to_static_str(format!("{}/.just/bin/lib_ext.bin {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
         Ok(output) => output,
         Err(err) => format!("{:?}", err),

@@ -5,10 +5,10 @@ mod loader;
 mod logger;
 mod macros;
 mod ops;
-mod permissions;
 mod project;
 mod registry;
 mod runtime;
+mod state;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
@@ -187,7 +187,7 @@ fn main() {
             allow_sys,
         }) => {
             std::env::set_var("_just_args", args);
-            permissions::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            state::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
             cli::run_exec(path, cli.verbose.is_silent(), "");
         }
         Some(Commands::Eval {
@@ -202,7 +202,7 @@ fn main() {
             allow_sys,
         }) => {
             std::env::set_var("_just_args", args);
-            permissions::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            state::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
             cli::run_exec("", cli.verbose.is_silent(), code);
         }
         Some(Commands::Start {
@@ -216,7 +216,7 @@ fn main() {
             allow_sys,
         }) => {
             std::env::set_var("_just_args", args);
-            permissions::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            state::Permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
             cli::run_exec(&project::package::read().info.index, cli.verbose.is_silent(), "");
         }
 

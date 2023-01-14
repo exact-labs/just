@@ -1,6 +1,11 @@
+use crate::fn_name;
 use crate::helpers;
 use crate::project;
+use crate::state;
+use crate::state::Permissions;
+use crate::state_err;
 use crate::ternary;
+
 use anyhow::Error;
 use colored::Colorize;
 use duration_string::DurationString;
@@ -39,6 +44,8 @@ fn options() -> String {
 
 #[op]
 fn setup() {
+    state_err!(Permissions::allow_sys(), state::error_sys(fn_name!()));
+    state_err!(Permissions::allow_write(), state::error_write(fn_name!()));
     crate::cli::setup();
 }
 
