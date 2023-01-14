@@ -1416,6 +1416,7 @@ dependencies = [
  "hostname",
  "indicatif",
  "inquire",
+ "lazy_static",
  "libc",
  "log 0.4.17",
  "nanoid",

@@ -112,7 +112,6 @@ pub fn run_exec(path: &str, silent: bool, code: &str) {
 
 pub fn run_repl() {
     let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
-
     let mut readline_editor = Editor::<()>::new();
     let mut exit_value = 0;
 

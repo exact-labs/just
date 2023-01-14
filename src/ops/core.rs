@@ -64,8 +64,7 @@ fn to_bytes(string: String) -> Result<Vec<u8>, Error> {
 
 #[op]
 fn from_bytes(bytes: Vec<u8>) -> Result<String, Error> {
-    let decoded = String::from_utf8(bytes)?;
-    Ok(decoded)
+    Ok(String::from_utf8(bytes)?)
 }
 
 #[op]
@@ -80,14 +79,12 @@ fn base64_encode(string: String) -> Result<String, Error> {
 
 #[op]
 fn hex_decode(string: String) -> Result<String, Error> {
-    let decoded = hex::decode(string)?;
-    Ok(String::from_utf8(decoded).unwrap())
+    Ok(String::from_utf8(hex::decode(string)?).unwrap())
 }
 
 #[op]
 fn base64_decode(string: String) -> Result<String, Error> {
-    let decoded = base64::decode(string)?;
-    Ok(String::from_utf8(decoded).unwrap())
+    Ok(String::from_utf8(base64::decode(string)?).unwrap())
 }
 
 #[op]

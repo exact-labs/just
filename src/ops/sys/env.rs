@@ -31,8 +31,11 @@ fn env_local(env_name: String) -> String {
 }
 
 #[op]
-fn env_get(var: String) -> Result<String, anyhow::Error> {
-    Ok(env::var(var)?)
+fn env_get(var: String) -> String {
+    match env::var(var) {
+        Ok(val) => val,
+        Err(_e) => "".to_string(),
+    }
 }
 
 #[op]

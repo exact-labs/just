@@ -26,8 +26,7 @@ fn file_sha(path: String) -> Result<String, AnyError> {
 
 #[op]
 async fn read_file(path: String) -> Result<String, AnyError> {
-    let contents = tokio::fs::read_to_string(path).await?;
-    Ok(contents)
+    Ok(tokio::fs::read_to_string(path).await?)
 }
 
 #[op]
