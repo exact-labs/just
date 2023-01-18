@@ -1,9 +1,7 @@
-use crate::fn_name;
-use crate::state;
-use crate::state::Permissions;
-use crate::state_err;
+use crate::{state, state::Permissions};
 
 use engine::{op, OpDecl};
+use macros::function_path;
 use std::net::SocketAddr;
 use warp::{http::Response, Filter};
 
@@ -13,8 +11,8 @@ pub fn init() -> Vec<OpDecl> {
 
 #[op]
 async fn serve_directory(host: String, port: i32, path: String) {
-    state_err!(Permissions::allow_net(), state::error_net(fn_name!()));
-    state_err!(Permissions::allow_read(), state::error_read(fn_name!()));
+    state::error!(Permissions::allow_net(), state::error_net(function_path!()));
+    state::error!(Permissions::allow_read(), state::error_read(function_path!()));
     let addr: SocketAddr = format!("{host}:{}", port).parse().expect("Invalid server address");
     println!("serving path '{}' on http://{:?}", path, addr);
 
@@ -23,7 +21,7 @@ async fn serve_directory(host: String, port: i32, path: String) {
 
 #[op]
 async fn serve_string(host: String, port: i32, string: String, content_type: String) {
-    state_err!(Permissions::allow_net(), state::error_net(fn_name!()));
+    state::error!(Permissions::allow_net(), state::error_net(function_path!()));
     let addr: SocketAddr = format!("{host}:{}", port).parse().expect("Invalid server address");
     let route = warp::any().map(move || Response::builder().header("Content-Type", content_type.clone()).body(string.clone()));
     println!("serving on http://{:?}", addr);

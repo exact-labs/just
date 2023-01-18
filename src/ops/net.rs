@@ -1,10 +1,8 @@
-use crate::fn_name;
 use crate::helpers;
-use crate::state;
-use crate::state::Permissions;
-use crate::state_err;
+use crate::{state, state::Permissions};
 
 use engine::{op, OpDecl};
+use macros::function_path;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde_json::Value;
 
@@ -26,14 +24,14 @@ fn header_parse(headers: String) -> Result<HeaderMap, anyhow::Error> {
 
 #[op]
 async fn net_get(url: String, headers: String) -> Result<String, anyhow::Error> {
-    state_err!(Permissions::allow_net(), state::error_net(fn_name!()));
+    state::error!(Permissions::allow_net(), state::error_net(function_path!()));
     let client = reqwest::Client::new();
     Ok(client.get(url).headers(header_parse(headers).unwrap()).send().await?.text().await?)
 }
 
 #[op]
 async fn net_post(url: String, body: String, headers: String) -> Result<String, anyhow::Error> {
-    state_err!(Permissions::allow_net(), state::error_net(fn_name!()));
+    state::error!(Permissions::allow_net(), state::error_net(function_path!()));
     let client = reqwest::Client::new();
     Ok(client.post(url).headers(header_parse(headers).unwrap()).body(body).send().await?.text().await?)
 }

@@ -3,9 +3,9 @@ use crate::helpers;
 use crate::logger;
 use crate::project;
 use crate::runtime;
-use crate::ternary;
 
 use colored::Colorize;
+use macros::ternary;
 use open::that;
 use question::{Answer, Question};
 use rustyline::{error::ReadlineError, Editor};

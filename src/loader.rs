@@ -1,18 +1,14 @@
-use std::pin::Pin;
-
 use crate::helpers;
 use crate::runtime;
-use crate::ternary;
+
 use anyhow::{anyhow, bail, Context};
 use ast::{parse_module, MediaType, ParseParams, SourceTextInfo};
 use colored::Colorize;
 use data_url::DataUrl;
 use engine::{futures::FutureExt, ModuleLoader, ModuleSource, ModuleSourceFuture, ModuleSpecifier, ModuleType};
-use std::error::Error;
-use std::fmt;
-use std::{path::Component, path::Path, path::PathBuf};
-use url::ParseError;
-use url::Url;
+use macros::ternary;
+use std::{error::Error, fmt, path::Component, path::Path, path::PathBuf, pin::Pin};
+use url::{ParseError, Url};
 use ModuleResolutionError::*;
 
 pub struct RuntimeImport;

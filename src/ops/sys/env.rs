@@ -1,9 +1,7 @@
-use crate::fn_name;
-use crate::state;
-use crate::state::Permissions;
-use crate::state_err;
+use crate::{state, state::Permissions};
 
 use engine::op;
+use macros::function_path;
 use std::{env, fs};
 
 #[op]
@@ -53,6 +51,6 @@ fn env_get(var: String) -> String {
 
 #[op]
 fn env_set(key: String, var: String) {
-    state_err!(Permissions::allow_env(), state::error_env(fn_name!()));
+    state::error!(Permissions::allow_env(), state::error_env(function_path!()));
     env::set_var(key, var);
 }

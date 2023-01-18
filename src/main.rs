@@ -3,7 +3,6 @@ mod go;
 mod helpers;
 mod loader;
 mod logger;
-mod macros;
 mod ops;
 mod project;
 mod registry;

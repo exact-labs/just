@@ -1,7 +1,6 @@
-use crate::ternary;
-
 use colored::Colorize;
 use lazy_static::lazy_static;
+use macros::ternary;
 use serde::{Deserialize, Serialize};
 use std::process::exit;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -105,3 +104,13 @@ pub fn error_write(path: &str) {
     );
     exit(1)
 }
+
+macro_rules! error {
+    ($c:expr, $v:expr) => {
+        if !$c {
+            $v
+        }
+    };
+}
+
+pub(crate) use error;

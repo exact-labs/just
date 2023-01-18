@@ -1,12 +1,13 @@
 use crate::helpers;
 use crate::project;
-use crate::ternary;
+
 use anyhow::Context;
 use brown;
 use colored::Colorize;
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
 use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
+use macros::ternary;
 use std::cmp::min;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};

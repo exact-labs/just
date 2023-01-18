@@ -57,6 +57,9 @@ engine = { package = "deno_core", version = "0.160.0" }
 ast = { package = "deno_ast", version = "0.21.0", features = ["transpiling"] }
 reqwest = { version = "0.11.12", features = ["blocking", "json", "multipart", "stream"] }
 
+# local
+macros = { path = "./crates/macros" }
+
 # unused for now
 termcolor = "1.0.4"
 uuid = { version = "0.8.0", features = ["v4"], default-features = false }

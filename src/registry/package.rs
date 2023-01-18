@@ -1,10 +1,11 @@
 use crate::helpers;
 use crate::project;
-use crate::ternary;
+
 use colored::Colorize;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use indicatif::{ProgressBar, ProgressStyle};
+use macros::ternary;
 use std::fs::File;
 
 #[derive(Debug, serde::Deserialize)]
