@@ -1,0 +1,10 @@
+[package]
+name = "state"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+colored = "2.0.0"
+lazy_static = "1.4.0"
+macros = { path = "../macros" }
+serde = "1.0.152"

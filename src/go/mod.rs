@@ -1,9 +1,8 @@
 use crate::helpers;
-use crate::{state, state::Permissions};
 
 use colored::Colorize;
 use engine::op;
-use macros::function_path;
+use macros::function_path as fnp;
 use shell::cmd;
 use std::fs::File;
 use std::io::Write;
@@ -54,8 +53,8 @@ pub fn init_paths() {
 
 #[op]
 pub fn external_function(name: String, args: String) -> String {
-    state::error!(Permissions::allow_cmd(), state::error_cmd(function_path!()));
-    state::error!(Permissions::allow_sys(), state::error_sys(function_path!()));
+    state::get::cmd(fnp!());
+    state::get::sys(fnp!());
     return match cmd!(helpers::string_to_static_str(format!("{}/.just/bin/lib_ext.bin {name} {args}", home::home_dir().unwrap().display()))).stdout_utf8() {
         Ok(output) => output,
         Err(err) => format!("{:?}", err),

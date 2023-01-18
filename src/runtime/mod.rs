@@ -1,8 +1,8 @@
 use crate::loader;
 use crate::ops;
-use crate::state::Permissions;
 
 use engine::{include_js_files, serde_json, serde_json::json, v8, Extension, JsRuntime, RuntimeOptions};
+use state::{permissions, permissions::Permissions};
 use std::rc::Rc;
 use std::thread;
 
@@ -27,12 +27,12 @@ impl Default for BootstrapOptions {
             cpu_count,
             seed: String::from(env!("GIT_HASH_FULL")),
             permissions: Permissions {
-                allow_env: Permissions::allow_env(),
-                allow_net: Permissions::allow_net(),
-                allow_read: Permissions::allow_read(),
-                allow_write: Permissions::allow_write(),
-                allow_cmd: Permissions::allow_cmd(),
-                allow_sys: Permissions::allow_sys(),
+                allow_env: permissions::env(),
+                allow_net: permissions::net(),
+                allow_read: permissions::read(),
+                allow_write: permissions::write(),
+                allow_cmd: permissions::cmd(),
+                allow_sys: permissions::sys(),
             },
         }
     }

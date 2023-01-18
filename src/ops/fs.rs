@@ -1,9 +1,8 @@
 use crate::helpers;
-use crate::{state, state::Permissions};
 
 use anyhow::Error as AnyError;
 use engine::{op, OpDecl};
-use macros::{function_path, scaffold};
+use macros::{function_path as fnp, scaffold};
 use serde::{Deserialize, Serialize};
 use std::io::Error;
 use std::{fs, path::PathBuf};
@@ -23,19 +22,19 @@ pub fn init() -> Vec<OpDecl> {
 
 #[op]
 fn file_sha(path: String) -> Result<String, AnyError> {
-    state::error!(Permissions::allow_read(), state::error_read(function_path!()));
+    state::get::read(fnp!());
     Ok(helpers::sha256_digest(&PathBuf::from(path.clone()))?)
 }
 
 #[op]
 async fn read_file(path: String) -> Result<String, AnyError> {
-    state::error!(Permissions::allow_read(), state::error_read(function_path!()));
+    state::get::read(fnp!());
     Ok(tokio::fs::read_to_string(path).await?)
 }
 
 #[op]
 async fn write_file(path: String, contents: String) -> Result<(), AnyError> {
-    state::error!(Permissions::allow_write(), state::error_write(function_path!()));
+    state::get::write(fnp!());
     tokio::fs::write(path, contents).await?;
     Ok(())
 }
@@ -66,7 +65,7 @@ scaffold! {
 
 #[inline(always)]
 fn get_stat(metadata: std::fs::Metadata) -> FsStat {
-    state::error!(Permissions::allow_read(), state::error_read(function_path!()));
+    state::get::read(fnp!());
     macro_rules! usm {
         ($member:ident) => {{
             #[cfg(unix)]
@@ -118,7 +117,7 @@ pub struct StatArgs {
 
 #[op]
 async fn file_stat(args: StatArgs) -> Result<FsStat, AnyError> {
-    state::error!(Permissions::allow_read(), state::error_read(function_path!()));
+    state::get::read(fnp!());
     let path = PathBuf::from(&args.path);
     let lstat = args.lstat;
 
@@ -138,14 +137,14 @@ async fn file_stat(args: StatArgs) -> Result<FsStat, AnyError> {
 
 #[op]
 async fn remove_file(path: String) -> Result<(), AnyError> {
-    state::error!(Permissions::allow_write(), state::error_write(function_path!()));
+    state::get::write(fnp!());
     tokio::fs::remove_file(path).await?;
     Ok(())
 }
 
 #[op]
 fn dir_list(path: String) -> Vec<String> {
-    state::error!(Permissions::allow_read(), state::error_read(function_path!()));
+    state::get::read(fnp!());
     let mut vec = Vec::new();
     let paths = fs::read_dir(path).unwrap();
 
@@ -158,14 +157,14 @@ fn dir_list(path: String) -> Vec<String> {
 
 #[op]
 async fn make_dir(path: String) -> Result<(), AnyError> {
-    state::error!(Permissions::allow_write(), state::error_write(function_path!()));
+    state::get::write(fnp!());
     tokio::fs::create_dir_all(path).await?;
     Ok(())
 }
 
 #[op]
 async fn remove_dir(path: String) -> Result<(), AnyError> {
-    state::error!(Permissions::allow_write(), state::error_write(function_path!()));
+    state::get::write(fnp!());
     tokio::fs::remove_dir(path).await?;
     Ok(())
 }

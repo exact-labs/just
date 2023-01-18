@@ -1,12 +1,11 @@
 use crate::helpers;
 use crate::project;
-use crate::{state, state::Permissions};
 
 use anyhow::Error;
 use colored::Colorize;
 use duration_string::DurationString;
 use engine::{op, OpDecl};
-use macros::{function_path, ternary};
+use macros::{function_path as fnp, ternary};
 use nanoid::nanoid;
 use std::io::{stdout, Write};
 use std::{env, thread};
@@ -41,8 +40,8 @@ fn options() -> String {
 
 #[op]
 fn setup() {
-    state::error!(Permissions::allow_sys(), state::error_sys(function_path!()));
-    state::error!(Permissions::allow_write(), state::error_write(function_path!()));
+    state::get::sys(fnp!());
+    state::get::write(fnp!());
     crate::cli::setup();
 }
 

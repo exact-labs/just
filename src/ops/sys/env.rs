@@ -1,12 +1,11 @@
-use crate::{state, state::Permissions};
-
 use engine::op;
-use macros::function_path;
+use macros::function_path as fnp;
+use state::permissions;
 use std::{env, fs};
 
 #[op]
 fn env_local(env_name: String) -> String {
-    if Permissions::allow_env() {
+    if permissions::env() {
         let mut path = env::current_dir().unwrap();
 
         if env_name != "env=find" {
@@ -39,7 +38,7 @@ fn env_local(env_name: String) -> String {
 
 #[op]
 fn env_get(var: String) -> String {
-    if Permissions::allow_env() {
+    if permissions::env() {
         return match env::var(var) {
             Ok(val) => val,
             Err(_e) => "".to_string(),
@@ -51,6 +50,6 @@ fn env_get(var: String) -> String {
 
 #[op]
 fn env_set(key: String, var: String) {
-    state::error!(Permissions::allow_env(), state::error_env(function_path!()));
+    state::get::env(fnp!());
     env::set_var(key, var);
 }
