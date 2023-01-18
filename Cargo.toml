@@ -60,6 +60,7 @@ reqwest = { version = "0.11.12", features = ["blocking", "json", "multipart", "s
 # local
 macros = { path = "./crates/macros" }
 state = { path = "./crates/state" }
+go = { path = "./crates/go" }
 
 # unused for now
 termcolor = "1.0.4"
@@ -79,7 +80,4 @@ log = "0.4.17"
 lazy_static = "1.4.0"
 
 [build-dependencies]
-sha2 = "0.10.6"
 chrono = "0.4.23"
-anyhow = "1.0.66"
-data-encoding = "2.3.2"

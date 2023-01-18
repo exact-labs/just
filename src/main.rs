@@ -1,5 +1,4 @@
 mod cli;
-mod go;
 mod helpers;
 mod loader;
 mod logger;

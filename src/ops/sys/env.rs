@@ -1,5 +1,5 @@
 use engine::op;
-use macros::function_path as fnp;
+use macros::function_name;
 use state::permissions;
 use std::{env, fs};
 
@@ -50,6 +50,6 @@ fn env_get(var: String) -> String {
 
 #[op]
 fn env_set(key: String, var: String) {
-    state::get::env(fnp!());
+    state::get::env(function_name!());
     env::set_var(key, var);
 }

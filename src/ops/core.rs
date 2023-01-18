@@ -5,7 +5,7 @@ use anyhow::Error;
 use colored::Colorize;
 use duration_string::DurationString;
 use engine::{op, OpDecl};
-use macros::{function_path as fnp, ternary};
+use macros::{function_name, ternary};
 use nanoid::nanoid;
 use std::io::{stdout, Write};
 use std::{env, thread};
@@ -40,8 +40,8 @@ fn options() -> String {
 
 #[op]
 fn setup() {
-    state::get::sys(fnp!());
-    state::get::write(fnp!());
+    state::get::sys(function_name!());
+    state::get::write(function_name!());
     crate::cli::setup();
 }
 

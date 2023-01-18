@@ -1,12 +1,12 @@
 use dirs;
 use engine::op;
-use macros::function_path as fnp;
+use macros::function_name;
 use std::{env, process};
 use sysinfo::{System, SystemExt};
 
 #[op]
 fn os_release() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
 
     #[cfg(target_os = "linux")]
     {
@@ -50,31 +50,31 @@ fn os_release() -> String {
 
 #[op]
 fn os_platform() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{}", env::consts::OS)
 }
 
 #[op]
 fn os_machine() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{}", env::consts::ARCH)
 }
 
 #[op]
 fn os_hostname() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{:?}", hostname::get().unwrap())
 }
 
 #[op]
 fn os_homedir() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{}", dirs::home_dir().unwrap().display())
 }
 
 #[op]
 fn os_uptime() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{}", System::new_all().uptime())
 }
 
@@ -85,19 +85,19 @@ fn os_cpus() -> String {
 
 #[op]
 fn os_freemem() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{}", System::new_all().used_memory())
 }
 
 #[op]
 fn os_totalmem() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     format!("{}", System::new_all().total_memory())
 }
 
 #[op]
 fn os_loadavg() -> String {
-    state::get::sys(fnp!());
+    state::get::sys(function_name!());
     let load_avg = System::new_all().load_average();
     format!("[{}, {}, {}]", load_avg.one, load_avg.five, load_avg.fifteen)
 }

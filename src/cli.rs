@@ -1,4 +1,3 @@
-use crate::go;
 use crate::helpers;
 use crate::logger;
 use crate::project;

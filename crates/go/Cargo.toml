@@ -1,0 +1,16 @@
+[package]
+name = "go"
+version = "0.5.1"
+edition = "2021"
+
+[dependencies]
+home = "0.5.4"
+sha2 = "0.10.6"
+colored = "2.0.0"
+anyhow = "1.0.66"
+data-encoding = "2.3.2"
+
+[build-dependencies]
+sha2 = "0.10.6"
+anyhow = "1.0.66"
+data-encoding = "2.3.2"
