@@ -1,5 +1,5 @@
 [package]
-name = "state"
+name = "just_state"
 version = "0.1.3"
 edition = "2021"
 
