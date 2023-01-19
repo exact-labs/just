@@ -12,8 +12,10 @@ const os = {
 };
 
 const cmd = {
-	exec: (cmd) => Just.fn.cmd_exec(cmd),
-	spawn: async (cmd) => Just.fn.async('cmd_spawn', cmd),
+	exec: (name, args = null, path = Just.fn.os_dirname()) =>
+		args == null ? Just.fn.cmd_exec(name.split(' ')[0], name.split(' ').slice(1), path) : Just.fn.cmd_exec(name, args, path),
+	spawn: async (name, args = null, path = Just.fn.os_dirname()) =>
+		args == null ? Just.fn.async('cmd_spawn', name.split(' ')[0], name.split(' ').slice(1), path) : Just.fn.async('cmd_spawn', name, args, path),
 };
 
 const env = {

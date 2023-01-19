@@ -5,10 +5,12 @@ use engine::{op, OpDecl};
 use macros::{function_name, scaffold};
 use serde::{Deserialize, Serialize};
 use std::io::Error;
+use std::os::unix::fs::PermissionsExt;
 use std::{fs, path::PathBuf};
 
 pub fn init() -> Vec<OpDecl> {
     vec![
+        chmod::decl(),
         read_file::decl(),
         write_file::decl(),
         remove_file::decl(),
@@ -21,21 +23,27 @@ pub fn init() -> Vec<OpDecl> {
 }
 
 #[op]
+fn chmod(path: String, mode: i32) -> Result<(), AnyError> {
+    state::get::write(function_name!());
+    Ok(fs::set_permissions(path, fs::Permissions::from_mode(mode as u32))?)
+}
+
+#[op]
 fn file_sha(path: String) -> Result<String, AnyError> {
     state::get::read(function_name!());
     Ok(helpers::sha256_digest(&PathBuf::from(path.clone()))?)
 }
 
 #[op]
-async fn read_file(path: String) -> Result<String, AnyError> {
+async fn read_file(path: String) -> Result<Vec<u8>, AnyError> {
     state::get::read(function_name!());
-    Ok(tokio::fs::read_to_string(path).await?)
+    Ok(tokio::fs::read(path).await?)
 }
 
 #[op]
-async fn write_file(path: String, contents: String) -> Result<(), AnyError> {
+async fn write_file(path: String, bytes: Vec<u8>) -> Result<(), AnyError> {
     state::get::write(function_name!());
-    tokio::fs::write(path, contents).await?;
+    tokio::fs::write(path, bytes).await?;
     Ok(())
 }
 

@@ -1,3 +1,10 @@
+class EncodingError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = 'EncodingError';
+	}
+}
+
 const parseFileInfo = (response) => {
 	const unix = Just.build.os === 'darwin' || Just.build.os === 'linux';
 	return {
@@ -28,10 +35,38 @@ const file_stat = async (path) => {
 	return parseFileInfo(res);
 };
 
+const read_file = async (path, encoding) => {
+	return Just.fn.async('read_file', path).then((contents) => {
+		switch (encoding.toLowerCase()) {
+			case 'utf-8':
+			case 'utf8':
+				return contents.from_bytes();
+			case 'bytes':
+			case 'u8':
+				return contents;
+			default:
+				throw new EncodingError('please supply proper encoding format');
+		}
+	});
+};
+
+const write_file = async (path, contents, encoding) => {
+	switch (encoding.toLowerCase()) {
+		case 'utf-8':
+		case 'utf8':
+			return Just.fn.async('write_file', path, contents.to_bytes());
+		case 'bytes':
+		case 'u8':
+			return Just.fn.async('write_file', path, contents);
+		default:
+			throw new EncodingError('please supply proper encoding format');
+	}
+};
+
 const fs = {
 	file: {
-		read: (path) => Just.fn.async('read_file', path),
-		write: (path, contents) => Just.fn.async('write_file', path, contents),
+		read: (path, encoding = '') => read_file(path, encoding),
+		write: (path, contents, encoding = '') => write_file(path, contents, encoding),
 		remove: (path) => Just.fn.async('remove_file', path),
 		sha: (path) => Just.fn.file_sha(path),
 	},
@@ -41,6 +76,7 @@ const fs = {
 		remove: (path) => Just.fn.async('remove_dir', path),
 	},
 	stat: (path) => file_stat(path),
+	chmod: (path, mode) => Just.fn.chmod(path, mode),
 };
 
 export { fs };
