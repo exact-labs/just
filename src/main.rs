@@ -1,7 +1,6 @@
 mod cli;
 mod helpers;
 mod loader;
-mod logger;
 mod ops;
 mod project;
 mod registry;

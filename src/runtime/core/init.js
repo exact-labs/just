@@ -25,6 +25,7 @@ Just.env_store = {};
 Just.fn.async = Just.core.opAsync;
 Just.options = JSON.parse(ops.options());
 Just.args = ops.env_get('_just_args') ? ops.env_get('_just_args').split(' ') : '';
+Just.mem = () => ops.runtime_memory();
 
 const init_runtime_env = () => {
 	const env_index = Just.args ? Just.args.findIndex((i) => i.includes('env=')) : -1;

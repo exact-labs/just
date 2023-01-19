@@ -1,7 +1,7 @@
 use crate::helpers;
-use crate::logger;
 use colored::Colorize;
 use inquire::Select;
+use macros::error;
 use shell::cmd;
 use std::collections::BTreeMap;
 
@@ -16,7 +16,7 @@ pub fn task_list(tasks: BTreeMap<String, String>) {
 
             for command in &tasks[key].split("&&").collect::<Vec<&str>>() {
                 if let Err(error) = cmd!(command.trim()).run() {
-                    logger::error(format!("{:?}", error));
+                    error!("{:?}", error);
                 }
             }
         }

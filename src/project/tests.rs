@@ -1,7 +1,7 @@
 use crate::helpers;
-use crate::logger;
 use colored::Colorize;
 use inquire::Select;
+use macros::error;
 use shell::cmd;
 use std::collections::BTreeMap;
 
@@ -14,7 +14,7 @@ pub fn test_list(tasks: BTreeMap<String, String>) {
             println!("\n{} test {}", "running".green(), key.bold());
             println!("{} {}\n", "»".white(), tasks[key]);
             if let Err(error) = cmd!(&tasks[key]).run() {
-                logger::error(format!("{:?}", error));
+                error!("{:?}", error);
             }
         }
         Err(_) => println!("{}", "Aborting...".white()),

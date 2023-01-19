@@ -13,6 +13,7 @@ tasks:
   test: '../../just start'
   kv: '../../just run kv.js'
   db: '../../just run db.js'
+  bad: 'eeee'
 tests: {}
 dependencies:
   sqlite: 0.0.1,0.0.2

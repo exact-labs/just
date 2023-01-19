@@ -1,5 +1,5 @@
-use crate::logger;
 use anyhow::{Context, Error};
+use macros::crash;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::io::{BufReader, Read};
@@ -21,8 +21,7 @@ pub fn read_index(dir: std::path::Display, package: &String, version: &str) -> P
     let contents = match fs::read_to_string(format!("{dir}/packages/{package}/{version}/package.yml")) {
         Ok(text) => text,
         Err(_) => {
-            logger::error(format!("{package}@{version} not found. Did you run 'just install'"));
-            std::process::exit(1);
+            crash!("{package}@{version} not found. Did you run 'just install'");
         }
     };
 
@@ -31,8 +30,7 @@ pub fn read_index(dir: std::path::Display, package: &String, version: &str) -> P
     let parsed = match yaml_file {
         Ok(project) => project,
         Err(error) => {
-            logger::error(format!("{} in package.yml", error));
-            std::process::exit(1);
+            crash!("{} in package.yml", error);
         }
     };
 
@@ -92,5 +90,79 @@ pub fn to_msec(maybe_time: Result<SystemTime, std::io::Error>) -> (u64, bool) {
             true,
         ),
         Err(_) => (0, false),
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub fn rss() -> usize {
+    fn scan_int(string: &str) -> (usize, usize) {
+        let mut out = 0;
+        let mut idx = 0;
+        let mut chars = string.chars().peekable();
+        while let Some(' ') = chars.next_if_eq(&' ') {
+            idx += 1;
+        }
+        for n in chars {
+            idx += 1;
+            if ('0'..='9').contains(&n) {
+                out *= 10;
+                out += n as usize - '0' as usize;
+            } else {
+                break;
+            }
+        }
+        (out, idx)
+    }
+
+    let statm_content = if let Ok(c) = std::fs::read_to_string("/proc/self/statm") {
+        c
+    } else {
+        return 0;
+    };
+
+    let page_size = unsafe { libc::sysconf(libc::_SC_PAGESIZE) };
+    if page_size < 0 {
+        return 0;
+    }
+
+    let (_total_size_pages, idx) = scan_int(&statm_content);
+    let (total_rss_pages, _) = scan_int(&statm_content[idx..]);
+
+    total_rss_pages * page_size as usize
+}
+
+#[cfg(target_os = "macos")]
+pub fn rss() -> usize {
+    let mut task_info = std::mem::MaybeUninit::<libc::mach_task_basic_info_data_t>::uninit();
+    let mut count = libc::MACH_TASK_BASIC_INFO_COUNT;
+    let r = unsafe {
+        libc::task_info(
+            libc::mach_task_self(),
+            libc::MACH_TASK_BASIC_INFO,
+            task_info.as_mut_ptr() as libc::task_info_t,
+            &mut count as *mut libc::mach_msg_type_number_t,
+        )
+    };
+    assert_eq!(r, libc::KERN_SUCCESS);
+    let task_info = unsafe { task_info.assume_init() };
+    task_info.resident_size as usize
+}
+
+#[cfg(windows)]
+pub fn rss() -> usize {
+    use winapi::shared::minwindef::DWORD;
+    use winapi::shared::minwindef::FALSE;
+    use winapi::um::processthreadsapi::GetCurrentProcess;
+    use winapi::um::psapi::GetProcessMemoryInfo;
+    use winapi::um::psapi::PROCESS_MEMORY_COUNTERS;
+
+    unsafe {
+        let current_process = GetCurrentProcess();
+        let mut pmc: PROCESS_MEMORY_COUNTERS = std::mem::zeroed();
+        if GetProcessMemoryInfo(current_process, &mut pmc, std::mem::size_of::<PROCESS_MEMORY_COUNTERS>() as DWORD) != FALSE {
+            pmc.WorkingSetSize
+        } else {
+            0
+        }
     }
 }

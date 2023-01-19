@@ -4,7 +4,7 @@ use crate::project;
 use anyhow::Error;
 use colored::Colorize;
 use duration_string::DurationString;
-use engine::{op, OpDecl};
+use engine::{op, v8, OpDecl};
 use macros::{function_name, ternary};
 use nanoid::nanoid;
 use std::io::{stdout, Write};
@@ -30,6 +30,7 @@ pub fn init() -> Vec<OpDecl> {
         base64_encode::decl(),
         base64_decode::decl(),
         escape_string::decl(),
+        runtime_memory::decl(),
     ]
 }
 
@@ -134,4 +135,25 @@ fn log_info(msg: String) -> Result<(), Error> {
 fn sleep(ms: String) -> Result<(), Error> {
     thread::sleep(DurationString::from_string(ms).unwrap().into());
     Ok(())
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MemoryUsage {
+    rss: usize,
+    heap_total: usize,
+    heap_used: usize,
+    external: usize,
+}
+
+#[op(v8)]
+fn runtime_memory(scope: &mut v8::HandleScope) -> MemoryUsage {
+    let mut s = v8::HeapStatistics::default();
+    scope.get_heap_statistics(&mut s);
+    MemoryUsage {
+        rss: helpers::rss(),
+        heap_total: s.total_heap_size(),
+        heap_used: s.used_heap_size(),
+        external: s.external_memory(),
+    }
 }

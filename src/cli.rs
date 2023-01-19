@@ -1,10 +1,9 @@
 use crate::helpers;
-use crate::logger;
 use crate::project;
 use crate::runtime;
 
 use colored::Colorize;
-use macros::ternary;
+use macros::{error, ternary};
 use open::that;
 use question::{Answer, Question};
 use rustyline::{error::ReadlineError, Editor};
@@ -54,7 +53,7 @@ pub fn run_task(task: &str) {
     println!("\n{} task {}", "running".green(), task.bold());
     println!("{} {}\n", "»".white(), tasks[task]);
     if let Err(error) = cmd!(&tasks[task]).run() {
-        logger::error(format!("{:?}", error));
+        error!("{:?}", error);
     }
 }
 
@@ -63,7 +62,7 @@ pub fn run_test(task: &str) {
     println!("\n{} test {}", "running".green(), task.bold());
     println!("{} {}\n", "»".white(), tasks[task]);
     if let Err(error) = cmd!(&tasks[task]).run() {
-        logger::error(format!("{:?}", error));
+        error!("{:?}", error);
     }
 }
 
