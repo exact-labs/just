@@ -2,6 +2,8 @@
 name = "just_go"
 version = "0.5.2"
 edition = "2021"
+license = "MIT"
+description = "yaegi for justjs"
 
 [dependencies]
 home = "0.5.4"

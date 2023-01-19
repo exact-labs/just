@@ -2,5 +2,7 @@
 name = "just_macros"
 version = "0.1.1"
 edition = "2021"
+license = "MIT"
+description = "macros for justjs"
 
 [dependencies]

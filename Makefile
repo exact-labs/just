@@ -6,7 +6,12 @@ build:
 	cd crates/go/src/embed && go mod tidy && go build .
 	cargo build --release
 	mv target/release/just .
-   
+
+publish:
+	cd crates/go && cargo publish --no-verify
+	cd crates/macros && cargo publish --no-verify
+	cd crates/state && cargo publish --no-verify
+
 test:
 	cd crates/go/src/embed && go mod tidy && go build .
 	cd tests/javascript && cargo run run $(run).js
