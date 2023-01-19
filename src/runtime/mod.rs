@@ -64,11 +64,9 @@ fn extensions() -> Extension {
           "src/core.js",
           "src/process.js",
           "src/log.js",
-          "src/go.js",
           "src/format.js",
         ))
         .ops(ops::fs::init())
-        .ops(ops::go::init())
         .ops(ops::db::init())
         .ops(ops::sys::init())
         .ops(ops::net::init())

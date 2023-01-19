@@ -6,7 +6,10 @@ license = "MIT"
 description = "justjs state manager"
 
 [dependencies]
+# local
+macros = { package = "just_macros", path = "../macros", version = "0.1.1" }
+
+# ext
 colored = "2.0.0"
 lazy_static = "1.4.0"
 serde = "1.0.152"
-macros = { path = "../macros" }

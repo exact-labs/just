@@ -26,11 +26,7 @@ pub fn serve(host: String, port: i32, path: &String) {
 
 pub fn setup() {
     let home_dir = home::home_dir().unwrap();
-    let folder_exists: bool = Path::new(helpers::string_to_static_str(format!("{}/.just/packages", home_dir.display()))).is_dir();
-
-    go::init_paths();
-
-    if !folder_exists {
+    if !Path::new(helpers::string_to_static_str(format!("{}/.just/packages", home_dir.display()))).is_dir() {
         std::fs::create_dir_all(format!("{}/.just/packages", &home_dir.display())).unwrap();
         println!("created {}/.just/packages", &home_dir.display());
     }

@@ -16,13 +16,13 @@ await fs.stat('index.js').then((info) => {
 	console.log(info);
 });
 
-await fs.file.read('main.go').then((code) => {
-	console.fmt.hex.print('#D9A7F7', 'sha_of_file: ');
-	console.log(fs.file.sha('main.go'));
-
-	console.fmt.hex.print('#D9A7F7', 'eval_go_code: ');
-	go.eval(code);
-});
+// await fs.file.read('main.go').then((code) => {
+// 	console.fmt.hex.print('#D9A7F7', 'sha_of_file: ');
+// 	console.log(fs.file.sha('main.go'));
+//
+// 	console.fmt.hex.print('#D9A7F7', 'eval_go_code: ');
+// 	go.eval(code);
+// });
 
 console.fmt.hex.print('#D9A7F7', 'base64_import: ');
 const base64_import = await import(process.env.BASE64);
