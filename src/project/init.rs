@@ -1,5 +1,5 @@
 use colored::Colorize;
-use inquire::{Confirm, Text};
+use inquire::{Confirm, Select, Text};
 use std::fs::File;
 use std::io::Write;
 
@@ -25,6 +25,7 @@ pub fn create_project() {
     let author = Text::new("author:").prompt();
     let license = Text::new("license:").with_default("MIT").prompt();
     let public = Confirm::new("public:").with_default(true).prompt();
+    let group = Select::new("group:", vec!["local", "net", "both"]).prompt();
 
     match name {
         Ok(name) => writeln!(&mut file, "  name: {name}").unwrap(),
@@ -60,7 +61,7 @@ pub fn create_project() {
         Err(_) => create_error("author"),
     }
     match license {
-        Ok(license) => writeln!(&mut file, "  license: {license}\n").unwrap(),
+        Ok(license) => writeln!(&mut file, "  license: {license}").unwrap(),
         Err(_) => create_error("license"),
     }
     match public {
@@ -68,7 +69,11 @@ pub fn create_project() {
         Ok(false) => writeln!(&mut file, "registry:\n  public: false").unwrap(),
         Err(_) => create_error("public"),
     }
+    match group {
+        Ok(group) => writeln!(&mut file, "  group: {group}").unwrap(),
+        Err(_) => create_error("group"),
+    }
 
-    writeln!(&mut file, "\ntasks:\ntests:\ndependencies:").unwrap();
+    writeln!(&mut file, "tasks:\ntests:\ndependencies:").unwrap();
     println!("{}", "\n✨ success, saved package.yml".yellow())
 }

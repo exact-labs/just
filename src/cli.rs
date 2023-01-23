@@ -10,7 +10,6 @@ use rustyline::{error::ReadlineError, Editor};
 use shell::cmd;
 use std::env;
 use std::net::SocketAddr;
-use std::path::Path;
 use std::time::Instant;
 
 pub fn serve(host: String, port: i32, path: &String) {
@@ -26,9 +25,22 @@ pub fn serve(host: String, port: i32, path: &String) {
 
 pub fn setup() {
     let home_dir = home::home_dir().unwrap();
-    if !Path::new(helpers::string_to_static_str(format!("{}/.just/packages", home_dir.display()))).is_dir() {
-        std::fs::create_dir_all(format!("{}/.just/packages", &home_dir.display())).unwrap();
+    let package_dir = format!("{}/.just/packages", home_dir.display());
+
+    if !helpers::Exists::folder(package_dir.clone()).unwrap() {
+        std::fs::create_dir_all(package_dir.clone()).unwrap();
         println!("created {}/.just/packages", &home_dir.display());
+    }
+}
+
+pub fn cache_clean() {
+    let home_dir = home::home_dir().unwrap();
+    let package_dir = format!("{}/.just/packages", home_dir.display());
+
+    if helpers::Exists::folder(package_dir.clone()).unwrap() {
+        std::fs::remove_dir_all(package_dir.clone()).unwrap();
+        std::fs::create_dir_all(package_dir.clone()).unwrap();
+        println!("removed cached packages");
     }
 }
 

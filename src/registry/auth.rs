@@ -15,15 +15,20 @@ struct Response {
     record: Record,
 }
 
-pub fn login() {
+pub fn login(registry_link: &String) {
     match home::home_dir() {
         Some(path) => {
-            if !std::path::Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir() {
+            if !helpers::Exists::folder(format!("{}/.just", path.display())).unwrap() {
                 std::fs::create_dir_all(format!("{}/.just", path.display())).unwrap();
-                println!("created {}/.just", path.display());
+                println!("created {}/.just", &path.display());
             }
 
-            println!("logging into r.justjs.dev");
+            if !helpers::Exists::folder(format!("{}/.just/credentials", path.display())).unwrap() {
+                std::fs::create_dir_all(format!("{}/.just/credentials", path.display())).unwrap();
+                println!("created {}/.just/credentials", &path.display());
+            }
+
+            println!("logging into {registry_link}");
 
             let identity_string: String;
             let password_string: String;
@@ -54,7 +59,7 @@ pub fn login() {
             pb.set_message("logging in...");
 
             let response = client
-                .post("https://r.justjs.dev/api/collections/just_auth_system/auth-with-password")
+                .post(format!("{registry_link}/api/collections/just_auth_system/auth-with-password"))
                 .body(format!("{{\"identity\":\"{identity_string}\",\"password\":\"{password_string}\"}}"))
                 .header(reqwest::header::CONTENT_TYPE, reqwest::header::HeaderValue::from_static("application/json"))
                 .send();
@@ -63,7 +68,7 @@ pub fn login() {
                 Ok(response) => {
                     match serde_json::from_str::<Response>(&response.text().unwrap()) {
                         Ok(json) => {
-                            let mut file = std::fs::File::create(format!("{}/.just/credentials.json", path.display())).unwrap();
+                            let mut file = std::fs::File::create(format!("{}/.just/credentials/{}].json", path.display(), registry_link.replace("://", "["))).unwrap();
                             file.write_all(format!("{{\"token\":\"{}\",\"access\":\"{}\"}}", json.token, json.record.id).as_bytes()).unwrap();
                             pb.finish_with_message(format!("\x08{} {} {}", "✔".green(), "logged in".bright_green(), format!("({})", json.record.id).white()));
                         }
@@ -83,8 +88,8 @@ pub fn login() {
     }
 }
 
-pub fn verify() {
-    println!("verify");
+pub fn verify(registry_link: &String) {
+    println!("{registry_link}");
 }
 
 pub fn logout() {

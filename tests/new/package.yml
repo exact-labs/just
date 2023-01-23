@@ -9,6 +9,7 @@ info:
   index: index.js
 registry:
   public: true
+  group: both
 tasks:
   test: '../../just start'
   kv: '../../just run kv.js'

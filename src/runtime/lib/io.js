@@ -69,11 +69,13 @@ const fs = {
 		write: (path, contents, encoding = '') => write_file(path, contents, encoding),
 		remove: (path) => Just.fn.async('remove_file', path),
 		sha: (path) => Just.fn.file_sha(path),
+		exists: (path) => Just.fn.file_exists(path),
 	},
 	dir: {
 		read: (path = './') => Just.fn.dir_list(path),
 		create: (path) => Just.fn.async('make_dir', path),
 		remove: (path) => Just.fn.async('remove_dir', path),
+		exists: (path) => Just.fn.dir_exists(path),
 	},
 	stat: (path) => file_stat(path),
 	chmod: (path, mode) => Just.fn.chmod(path, mode),

@@ -112,18 +112,18 @@ pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_i
     return Ok(());
 }
 
-pub fn install() {
+pub fn install(registry: &String) {
     let started = Instant::now();
     let packages = project::package::read().dependencies;
     for (name, versions) in &packages {
         for ver in versions.split(",").collect::<Vec<&str>>() {
-            add(&format!("{}@{}", name, ver.trim_matches(' ')), false)
+            add(&format!("{}@{}", name, ver.trim_matches(' ')), false, registry)
         }
     }
     println!("{}", format!("✨ done in {}", HumanDuration(started.elapsed())).yellow());
 }
 
-pub fn add(input: &str, timer: bool) {
+pub fn add(input: &str, timer: bool, registry: &String) {
     let version;
     let started = Instant::now();
     let name = input.split("@").collect::<Vec<&str>>()[0];
@@ -144,7 +144,7 @@ pub fn add(input: &str, timer: bool) {
     pb.set_style(style.clone());
     pb.set_message("locating...");
 
-    match client.get(format!("https://r.justjs.dev/{package_info}")).send() {
+    match client.get(format!("{registry}/{package_info}")).send() {
         Ok(res) => {
             match serde_json::from_str::<Response>(&res.text().unwrap()) {
                 Ok(json) => {
@@ -176,7 +176,7 @@ pub fn add(input: &str, timer: bool) {
         }
     };
 
-    match reqwest::blocking::get(format!("https://r.justjs.dev/dependencies/{}", input.split("@").collect::<Vec<&str>>()[0].to_string())) {
+    match reqwest::blocking::get(format!("{registry}/dependencies/{}", input.split("@").collect::<Vec<&str>>()[0].to_string())) {
         Ok(res) => {
             match serde_json::from_str::<HashMap<String, Vec<String>>>(&res.text().unwrap()) {
                 Ok(json) => {

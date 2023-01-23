@@ -20,6 +20,7 @@ pub struct Info {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Registry {
     pub public: bool,
+    pub group: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -6,7 +6,7 @@ use macros::{function_name, scaffold};
 use serde::{Deserialize, Serialize};
 use std::io::Error;
 use std::os::unix::fs::PermissionsExt;
-use std::{fs, path::PathBuf};
+use std::{fs, path::Path, path::PathBuf};
 
 pub fn init() -> Vec<OpDecl> {
     vec![
@@ -19,13 +19,25 @@ pub fn init() -> Vec<OpDecl> {
         remove_dir::decl(),
         file_sha::decl(),
         file_stat::decl(),
+        file_exists::decl(),
+        dir_exists::decl(),
     ]
 }
 
 #[op]
-fn chmod(path: String, mode: i32) -> Result<(), AnyError> {
+fn file_exists(file_name: String) -> Result<bool, AnyError> {
+    Ok(Path::new(helpers::string_to_static_str(file_name)).exists())
+}
+
+#[op]
+fn dir_exists(dir_name: String) -> Result<bool, AnyError> {
+    Ok(Path::new(helpers::string_to_static_str(dir_name)).is_dir())
+}
+
+#[op]
+fn chmod(path: String, mode: u32) -> Result<(), AnyError> {
     state::get::write(function_name!());
-    Ok(fs::set_permissions(path, fs::Permissions::from_mode(mode as u32))?)
+    Ok(fs::set_permissions(path, fs::Permissions::from_mode(mode))?)
 }
 
 #[op]
@@ -173,6 +185,6 @@ async fn make_dir(path: String) -> Result<(), AnyError> {
 #[op]
 async fn remove_dir(path: String) -> Result<(), AnyError> {
     state::get::write(function_name!());
-    tokio::fs::remove_dir(path).await?;
+    tokio::fs::remove_dir_all(path).await?;
     Ok(())
 }

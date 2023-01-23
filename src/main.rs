@@ -20,25 +20,56 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+enum Cache {
+    /// Remove the Just package cache
+    Clean,
+}
+
+#[derive(Subcommand)]
+enum Registry {
+    /// Set the default registry
+    Set {
+        #[command()]
+        url: String,
+    },
+    /// Reset to standard registry [r.justjs.dev]
+    Clear,
+}
+
+#[derive(Subcommand)]
 enum Commands {
     /// Setup for executing external modules
     Setup,
     /// Initialize a new package.yml
     Init,
     /// Save an auth token for the registry locally
-    Login,
+    Login {
+        #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
+        registry: String,
+    },
     /// Remove the local auth token for the registry
     Logout,
     /// Verify account on registry to publish
-    Verify,
+    Verify {
+        #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
+        registry: String,
+    },
     /// Package and upload this package to the registry
-    Publish,
+    Publish {
+        #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
+        registry: String,
+    },
     /// Install all dependencies defined in package.yml
-    Install,
+    Install {
+        #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
+        registry: String,
+    },
     /// Add a new dependency
     Add {
         #[command()]
         name: String,
+        #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
+        registry: String,
     },
     /// Remove a dependency
     Remove {
@@ -47,6 +78,16 @@ enum Commands {
     },
     /// Remove unused dependencies
     Clean,
+    /// Manage the Just package cache
+    Cache {
+        #[command(subcommand)]
+        command: Cache,
+    },
+    /// Manage registry settings
+    Registry {
+        #[command(subcommand)]
+        command: Registry,
+    },
     /// Initialize a new project
     Create,
     /// Run a task defined in project.yml
@@ -139,7 +180,12 @@ fn main() {
     setup_panic!();
 
     let cli = Cli::parse();
+
     env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
+
+    if registry::get_default() == "" {
+        registry::set_default(&String::from("https://r.justjs.dev"), true)
+    }
 
     match &cli.command {
         /* essentials */
@@ -148,10 +194,10 @@ fn main() {
         Some(Commands::Create) => project::create::download_template(),
 
         /* registry */
-        Some(Commands::Login) => registry::auth::login(),
+        Some(Commands::Login { registry }) => registry::auth::login(registry),
         Some(Commands::Logout) => registry::auth::logout(),
-        Some(Commands::Verify) => registry::auth::verify(),
-        Some(Commands::Publish) => registry::package::publish(),
+        Some(Commands::Verify { registry }) => registry::auth::verify(registry),
+        Some(Commands::Publish { registry }) => registry::package::publish(registry),
 
         /* task runner */
         Some(Commands::Tasks) => cli::list_tasks(),
@@ -166,9 +212,20 @@ fn main() {
 
         /* package management */
         Some(Commands::Clean) => registry::manager::clean(),
-        Some(Commands::Install) => registry::manager::install(),
-        Some(Commands::Add { name }) => registry::manager::add(name, true),
+        Some(Commands::Install { registry }) => registry::manager::install(registry),
+        Some(Commands::Add { name, registry }) => registry::manager::add(name, true, registry),
         Some(Commands::Remove { name }) => registry::manager::remove(name),
+
+        /* cache management */
+        Some(Commands::Cache { command }) => match command {
+            Cache::Clean => cli::cache_clean(),
+        },
+
+        /* registry management */
+        Some(Commands::Registry { command }) => match command {
+            Registry::Set { url } => registry::set_default(url, false),
+            Registry::Clear => registry::set_default(&String::from("https://r.justjs.dev"), false),
+        },
 
         /* runtime */
         Some(Commands::Run {
