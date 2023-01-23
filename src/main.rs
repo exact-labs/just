@@ -179,13 +179,12 @@ enum Commands {
 fn main() {
     setup_panic!();
 
-    let cli = Cli::parse();
-
-    env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
-
     if registry::get_default() == "" {
         registry::set_default(&String::from("https://r.justjs.dev"), true)
     }
+
+    let cli = Cli::parse();
+    env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
 
     match &cli.command {
         /* essentials */

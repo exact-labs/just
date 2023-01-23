@@ -6,7 +6,7 @@ use std::{fs::File, io::Write};
 pub fn set_default(registry_url: &String, silent: bool) {
     match home::home_dir() {
         Some(path) => {
-            let mut file = File::create(format!("{}/.just/default.json", path.display())).unwrap();
+            let mut file = File::create(format!("{}/.just/default.d", path.display())).unwrap();
             file.write_all(registry_url.as_bytes()).unwrap();
             log::debug!("set default: {registry_url}");
             if !silent {
@@ -23,12 +23,12 @@ pub fn set_default(registry_url: &String, silent: bool) {
 pub fn get_default() -> String {
     match home::home_dir() {
         Some(path) => {
-            if !helpers::Exists::file(format!("{}/.just/default.json", path.display())).unwrap() {
-                File::create(format!("{}/.just/default.json", path.display())).unwrap();
-                log::debug!("created {}/.just/default.json", &path.display());
+            if !helpers::Exists::file(format!("{}/.just/default.d", path.display())).unwrap() {
+                File::create(format!("{}/.just/default.d", path.display())).unwrap();
+                log::debug!("created {}/.just/default.d", &path.display());
             }
 
-            match std::fs::read_to_string(format!("{}/.just/default.json", path.display())) {
+            match std::fs::read_to_string(format!("{}/.just/default.d", path.display())) {
                 Ok(content) => {
                     log::debug!("got default: {content}");
                     return content;
