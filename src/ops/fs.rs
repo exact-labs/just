@@ -142,7 +142,7 @@ async fn file_stat(args: StatArgs) -> Result<FsStat, AnyError> {
     let lstat = args.lstat;
 
     tokio::task::spawn_blocking(move || {
-        log::debug!("op_stat_async {} {}", path.display(), lstat);
+        log::info!("op_stat_async {} {}", path.display(), lstat);
         let err_mapper = |err: Error| Error::new(err.kind(), format!("{}, stat '{}'", err, path.display()));
         let metadata = if lstat {
             std::fs::symlink_metadata(&path).map_err(err_mapper)?

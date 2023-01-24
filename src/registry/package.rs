@@ -28,7 +28,7 @@ fn remove_tar(file: &str) {
 
 fn write_tar(file_name: &String) -> Result<(), std::io::Error> {
     let current_dir = std::env::current_dir().expect("cannot retrive current directory");
-    log::debug!("creating file: {}", file_name);
+    log::info!("creating file: {}", file_name);
     let tar_gz = File::create(file_name)?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(enc);
