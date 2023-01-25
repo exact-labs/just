@@ -3,7 +3,7 @@ use crate::project;
 use crate::runtime;
 
 use colored::Colorize;
-use macros::{error, ternary};
+use macros::{crashln, error, ternary};
 use open::that;
 use question::{Answer, Question};
 use rustyline::{error::ReadlineError, Editor};
@@ -58,19 +58,35 @@ pub fn project_meta() {
 
 pub fn run_task(task: &str) {
     let tasks = project::package::read().tasks;
+    if tasks.get(task).is_none() {
+        crashln!("The task '{task}' could not be found. Does it exist?");
+    }
+
+    log::debug!("{:?}", tasks.get(task));
     println!("\n{} task {}", "running".green(), task.bold());
     println!("{} {}\n", "»".white(), tasks[task]);
-    if let Err(error) = cmd!(&tasks[task]).run() {
-        error!("{:?}", error);
+
+    for command in &tasks[task].split("&&").collect::<Vec<&str>>() {
+        if let Err(error) = cmd!(command.trim()).run() {
+            error!("{:?}", error);
+        }
     }
 }
 
-pub fn run_test(task: &str) {
-    let tasks = project::package::read().tests;
-    println!("\n{} test {}", "running".green(), task.bold());
-    println!("{} {}\n", "»".white(), tasks[task]);
-    if let Err(error) = cmd!(&tasks[task]).run() {
-        error!("{:?}", error);
+pub fn run_test(test: &str) {
+    let tests = project::package::read().tests;
+    if tests.get(test).is_none() {
+        crashln!("The test '{test}' could not be found. Does it exist?");
+    }
+
+    log::debug!("{:?}", tests.get(test));
+    println!("\n{} test {}", "running".green(), test.bold());
+    println!("{} {}\n", "»".white(), tests[test]);
+
+    for command in &tests[test].split("&&").collect::<Vec<&str>>() {
+        if let Err(error) = cmd!(command.trim()).run() {
+            error!("{:?}", error);
+        }
     }
 }
 

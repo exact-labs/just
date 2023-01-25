@@ -1,0 +1,17 @@
+JUST_PATH = "/Developer/rust/js_runtime/"
+
+[tasks._publish_macros]
+info = "helper for publish"
+path = "crates/macros"
+script = "cargo publish --no-verify"
+
+[tasks._publish_state]
+info = "helper for publish"
+path = "crates/state"
+script = "cargo publish --no-verify"
+
+[tasks]
+clean = { info = "remove binary", path = "", script = "rm just" }
+build = { info = "build just", path = "", script = ["cargo build --release", "mv {{HOME}}{{JUST_PATH}}target/release/just {{HOME}}{{JUST_PATH}}"] }
+publish = { info = "publish crates", path = "", script = ["maid _publish_macros", "maid _publish_state"] }
+test = { info = "run js tests", path = "tests/new", script = ["maid build", "{{HOME}}{{JUST_PATH}}/just run {{$1}} -A"] }

@@ -15,6 +15,20 @@ use exact_panic::setup_panic;
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
+    #[arg(global = true, short = 'A', long, default_value_t = false, help = "Allow all permissions")]
+    allow_all: bool,
+    #[arg(global = true, long, default_value_t = false, help = "Allow environment access")]
+    allow_env: bool,
+    #[arg(global = true, long, default_value_t = false, help = "Allow network access")]
+    allow_net: bool,
+    #[arg(global = true, long, default_value_t = false, help = "Allow file system read access")]
+    allow_read: bool,
+    #[arg(global = true, long, default_value_t = false, help = "Allow file system write access")]
+    allow_write: bool,
+    #[arg(global = true, long, default_value_t = false, help = "Allow running subprocesses")]
+    allow_cmd: bool,
+    #[arg(global = true, long, default_value_t = false, help = "Allow access to system info")]
+    allow_sys: bool,
     #[clap(flatten)]
     verbose: Verbosity,
 }
@@ -108,20 +122,6 @@ enum Commands {
     Start {
         #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
         args: String,
-        #[arg(short = 'A', long, default_value_t = false, help = "Allow all permissions")]
-        allow_all: bool,
-        #[arg(long, default_value_t = false, help = "Allow environment access")]
-        allow_env: bool,
-        #[arg(long, default_value_t = false, help = "Allow network access")]
-        allow_net: bool,
-        #[arg(long, default_value_t = false, help = "Allow file system read access")]
-        allow_read: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow file system write access")]
-        allow_write: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow running subprocesses")]
-        allow_cmd: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow access to system info")]
-        allow_sys: bool,
     },
     /// Eval a JavaScript string
     Eval {
@@ -129,20 +129,6 @@ enum Commands {
         code: String,
         #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
         args: String,
-        #[arg(short = 'A', long, default_value_t = false, help = "Allow all permissions")]
-        allow_all: bool,
-        #[arg(long, default_value_t = false, help = "Allow environment access")]
-        allow_env: bool,
-        #[arg(long, default_value_t = false, help = "Allow network access")]
-        allow_net: bool,
-        #[arg(long, default_value_t = false, help = "Allow file system read access")]
-        allow_read: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow file system write access")]
-        allow_write: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow running subprocesses")]
-        allow_cmd: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow access to system info")]
-        allow_sys: bool,
     },
     /// Run a JavaScript program
     Run {
@@ -150,20 +136,6 @@ enum Commands {
         args: String,
         #[command()]
         path: String,
-        #[arg(short = 'A', long, default_value_t = false, help = "Allow all permissions")]
-        allow_all: bool,
-        #[arg(long, default_value_t = false, help = "Allow environment access")]
-        allow_env: bool,
-        #[arg(long, default_value_t = false, help = "Allow network access")]
-        allow_net: bool,
-        #[arg(long, default_value_t = false, help = "Allow file system read access")]
-        allow_read: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow file system write access")]
-        allow_write: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow running subprocesses")]
-        allow_cmd: bool,
-        #[arg(short, long, default_value_t = false, help = "Allow access to system info")]
-        allow_sys: bool,
     },
     /// Static file serving
     Serve {
@@ -227,48 +199,19 @@ fn main() {
         },
 
         /* runtime */
-        Some(Commands::Run {
-            path,
-            args,
-            allow_all,
-            allow_env,
-            allow_net,
-            allow_read,
-            allow_write,
-            allow_cmd,
-            allow_sys,
-        }) => {
+        Some(Commands::Run { path, args }) => {
             std::env::set_var("_just_args", args);
-            state::permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            state::permissions::set(&cli.allow_all, &cli.allow_env, &cli.allow_net, &cli.allow_read, &cli.allow_write, &cli.allow_cmd, &cli.allow_sys);
             cli::run_exec(path, cli.verbose.is_silent(), "");
         }
-        Some(Commands::Eval {
-            code,
-            args,
-            allow_all,
-            allow_env,
-            allow_net,
-            allow_read,
-            allow_write,
-            allow_cmd,
-            allow_sys,
-        }) => {
+        Some(Commands::Eval { code, args }) => {
             std::env::set_var("_just_args", args);
-            state::permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            state::permissions::set(&cli.allow_all, &cli.allow_env, &cli.allow_net, &cli.allow_read, &cli.allow_write, &cli.allow_cmd, &cli.allow_sys);
             cli::run_exec("", cli.verbose.is_silent(), code);
         }
-        Some(Commands::Start {
-            args,
-            allow_all,
-            allow_env,
-            allow_net,
-            allow_read,
-            allow_write,
-            allow_cmd,
-            allow_sys,
-        }) => {
+        Some(Commands::Start { args }) => {
             std::env::set_var("_just_args", args);
-            state::permissions::set(allow_all, allow_env, allow_net, allow_read, allow_write, allow_cmd, allow_sys);
+            state::permissions::set(&cli.allow_all, &cli.allow_env, &cli.allow_net, &cli.allow_read, &cli.allow_write, &cli.allow_cmd, &cli.allow_sys);
             cli::run_exec(&project::package::read().info.index, cli.verbose.is_silent(), "");
         }
 
