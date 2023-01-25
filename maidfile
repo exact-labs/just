@@ -20,4 +20,5 @@ clean = { info = "remove binary", path = "", script = "rm just" }
 build = { info = "build just", path = "", script = ["cargo arg:build arg:--release", "mv arg:{{HOME}}{{JUST_PATH}}/target/release/just arg:{{HOME}}{{JUST_PATH}}"] }
 publish = { info = "publish crates", path = "", script = ["maid arg:_publish_macros", "maid arg:_publish_state"] }
 test = { info = "run js tests", path = "tests/new", script = ["maid arg:build", "{{HOME}}{{JUST_PATH}}/just arg:run arg:{{$1}} arg:-A"] }
-test-all = { info = "run all js tests", path = "", script = ["bash arg:-c arg:for file in tests/new/*.js; do maid _test_no-verify ${file#*/*/} -vvv; done"] }
+test-all = { info = "run all js tests", path = "", script = "bash arg:-c arg:for file in tests/new/*.js; do maid _test_no-verify ${file#*/*/} -q; done" }
+test-all-build = { info = "run all js tests", path = "", script = ["maid arg:build", "bash arg:-c arg:for file in tests/new/*.js; do maid _test_no-verify ${file#*/*/} -q; done"] }
