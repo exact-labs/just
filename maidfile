@@ -1,4 +1,4 @@
-JUST_PATH = "/Developer/rust/js_runtime/"
+JUST_PATH = "/Developer/rust/js_runtime"
 
 [tasks._publish_macros]
 info = "helper for publish"
@@ -10,8 +10,14 @@ info = "helper for publish"
 path = "crates/state"
 script = "cargo publish --no-verify"
 
+[tasks._test_no-verify]
+info = "helper for test-all"
+path = "tests/new"
+script = "{{HOME}}{{JUST_PATH}}/just arg:run arg:{{$1}} arg:-A"
+
 [tasks]
 clean = { info = "remove binary", path = "", script = "rm just" }
-build = { info = "build just", path = "", script = ["cargo build --release", "mv {{HOME}}{{JUST_PATH}}target/release/just {{HOME}}{{JUST_PATH}}"] }
-publish = { info = "publish crates", path = "", script = ["maid _publish_macros", "maid _publish_state"] }
-test = { info = "run js tests", path = "tests/new", script = ["maid build", "{{HOME}}{{JUST_PATH}}/just run {{$1}} -A"] }
+build = { info = "build just", path = "", script = ["cargo arg:build arg:--release", "mv arg:{{HOME}}{{JUST_PATH}}/target/release/just arg:{{HOME}}{{JUST_PATH}}"] }
+publish = { info = "publish crates", path = "", script = ["maid arg:_publish_macros", "maid arg:_publish_state"] }
+test = { info = "run js tests", path = "tests/new", script = ["maid arg:build", "{{HOME}}{{JUST_PATH}}/just arg:run arg:{{$1}} arg:-A"] }
+test-all = { info = "run all js tests", path = "", script = ["bash arg:-c arg:for file in tests/new/*.js; do maid _test_no-verify ${file#*/*/} -vvv; done"] }
