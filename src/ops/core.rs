@@ -5,7 +5,7 @@ use anyhow::Error;
 use colored::Colorize;
 use duration_string::DurationString;
 use engine::{op, v8, OpDecl};
-use macros::{function_name, ternary};
+use macros::{crashln, function_name, ternary};
 use nanoid::nanoid;
 use std::io::{stdout, Write};
 use std::{env, thread};
@@ -132,9 +132,16 @@ fn log_info(msg: String) -> Result<(), Error> {
 }
 
 #[op]
-fn sleep(ms: String) -> Result<(), Error> {
-    thread::sleep(DurationString::from_string(ms).unwrap().into());
-    Ok(())
+fn sleep(time: String) -> Result<(), Error> {
+    let duration_string = match DurationString::from_string(time) {
+        Ok(duration) => duration.into(),
+        Err(error) => {
+            log::warn!("{error}");
+            crashln!("Invalid Duration: must be [0-9]+(ns|us|ms|[smhdwy]");
+        }
+    };
+
+    Ok(thread::sleep(duration_string))
 }
 
 #[derive(serde::Serialize)]
