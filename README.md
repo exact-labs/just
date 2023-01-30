@@ -56,7 +56,9 @@ cargo install justjs --locked
 Try running a simple program:
 
 ```sh
-just run https://r.justjs.dev/std/examples/welcome.js
+$ just run https://justjs.dev/r/std/examples/welcome.js
+# or the direct source link
+$ just run https://r.justjs.dev/source/std/0.0.4/examples/welcome.js
 ```
 
 Or a more complex one:

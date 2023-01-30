@@ -6,3 +6,4 @@ testing
 *.db
 tests/new/packages/*
 tests/new/ver_db/*
+todo
