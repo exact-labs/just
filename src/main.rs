@@ -107,6 +107,13 @@ enum Commands {
         #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
         registry: String,
     },
+    /// Run esbuild on your project
+    Build {
+        #[command()]
+        entry: String,
+        #[arg(short, long, default_value_t = String::from("build"), help = "Bundle output dir")]
+        bundle: String,
+    },
     /// Run a task defined in project.yml
     Task {
         #[command()]
@@ -166,6 +173,7 @@ fn main() {
         Some(Commands::Setup) => cli::setup(),
         Some(Commands::Init) => cli::create_project_yml(),
         Some(Commands::Create { registry }) => project::create::download_template(registry),
+        Some(Commands::Build { entry, bundle }) => cli::build(entry, bundle),
 
         /* registry */
         Some(Commands::Login { registry }) => registry::auth::login(registry),

@@ -47,9 +47,11 @@ serde_yaml = "0.9.14"
 zip-extract = "0.1.1"
 exact-panic = "0.0.6"
 env_logger = "0.10.0"
+esbuild-rs = "0.13.8"
 futures-util = "0.3.25"
 v_htmlescape = "0.15.8"
 data-encoding = "2.3.2"
+async-process = "1.6.0"
 duration-string = "0.1.1" 
 clap-verbosity-flag = "2.0.0"
 tokio = { version = "1.24.2", features = ["full"] }
@@ -59,7 +61,6 @@ engine = { package = "deno_core", version = "0.160.0" }
 uuid = { version = "0.8.0", features = ["v4"], default-features = false }
 ast = { package = "deno_ast", version = "0.21.0", features = ["transpiling"] }
 reqwest = { version = "0.11.12", features = ["blocking", "json", "multipart", "stream"] }
-async-process = "1.6.0"
 
 [build-dependencies]
 chrono = "0.4.23"
