@@ -4,9 +4,9 @@ use std::io::Cursor;
 use std::path::PathBuf;
 use zip_extract::extract;
 
-fn create_template(name: &str) {
+fn create_template(name: &str, registry: &String) {
     let target_dir = PathBuf::from(name);
-    match reqwest::blocking::get(format!("https://r.justjs.dev/templates/{name}.zip")) {
+    match reqwest::blocking::get(format!("{registry}/api/{}/templates/{name}.zip", env!("CARGO_PKG_VERSION").split(".").collect::<Vec<&str>>().join(""))) {
         Ok(res) => {
             if let Err(_) = extract(Cursor::new(&res.bytes().unwrap()), &target_dir, true) {
                 eprintln!("{} {}", "✖".red(), "unable create template, please try again".bright_red());
@@ -20,7 +20,7 @@ fn create_template(name: &str) {
     };
 }
 
-pub fn download_template() {
+pub fn download_template(registry: &String) {
     let options = vec![
         "basic_example",
         "advanced_example",
@@ -36,7 +36,7 @@ pub fn download_template() {
     ];
 
     match Select::new("Select a template:", options).prompt() {
-        Ok(choice) => create_template(choice),
+        Ok(choice) => create_template(choice, registry),
         Err(_) => println!("{}", "Aborting...".white()),
     }
 }

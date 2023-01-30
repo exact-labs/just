@@ -87,7 +87,6 @@ pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_i
     pb.set_style(ProgressStyle::with_template("{msg}: [{bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})").unwrap());
     pb.set_message(format!("{}", format!("+ {package_info}").bright_cyan()));
 
-    // let mut lockfile = project::package::lock();
     let mut file = File::create(path).or(Err(format!("Failed to create file '{}'", path)))?;
     let mut downloaded: u64 = 0;
     let mut stream = res.bytes_stream();
@@ -99,14 +98,6 @@ pub async fn download(client: &reqwest::Client, url: &str, path: &str, package_i
         downloaded = new;
         pb.set_position(new);
     }
-
-    //     lockfile.version = env!("CARGO_PKG_VERSION").to_string();
-    //     lockfile.remotes.insert(url.to_string(), package_info.clone());
-    //
-    //     if let Err(_) = File::create("just.lock").unwrap().write_all(serde_json::to_string_pretty(&lockfile).unwrap().as_bytes()) {
-    //         eprintln!("{} {}", "✖".red(), format!("unable to add").bright_red());
-    //         std::process::exit(1);
-    //     };
 
     pb.finish_with_message(format!("{}", format!("+ {package_info}").bright_cyan()));
     return Ok(());
@@ -176,7 +167,11 @@ pub fn add(input: &str, timer: bool, registry: &String) {
         }
     };
 
-    match reqwest::blocking::get(format!("{registry}/dependencies/{}", input.split("@").collect::<Vec<&str>>()[0].to_string())) {
+    match reqwest::blocking::get(format!(
+        "{registry}/api/v{}/dependencies/{}",
+        env!("CARGO_PKG_VERSION").split(".").collect::<Vec<&str>>().join(""),
+        input.split("@").collect::<Vec<&str>>()[0].to_string()
+    )) {
         Ok(res) => {
             match serde_json::from_str::<HashMap<String, Vec<String>>>(&res.text().unwrap()) {
                 Ok(json) => {

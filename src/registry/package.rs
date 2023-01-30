@@ -40,14 +40,14 @@ fn write_tar(file_name: &String) -> Result<(), std::io::Error> {
 pub fn publish(registry_link: &String) {
     match home::home_dir() {
         Some(path) => {
-            if !std::path::Path::new(helpers::string_to_static_str(format!("{}/.just", path.display()))).is_dir() {
-                std::fs::create_dir_all(format!("{}/.just", path.display())).unwrap();
+            if !std::path::Path::new(helpers::string_to_static_str(format!("{}/.just/temp", path.display()))).is_dir() {
+                std::fs::create_dir_all(format!("{}/.just/temp", path.display())).unwrap();
                 println!("created {}/.just", path.display());
             }
 
             let package = project::package::read();
             let client = reqwest::blocking::Client::new();
-            let file_name = format!("{}/.just/{}.tgz", path.display(), package.info.name);
+            let file_name = format!("{}/.just/temp/{}.tgz", path.display(), package.info.name.replace("/", ":"));
 
             if std::path::Path::new(&file_name).is_file() {
                 remove_tar(&file_name);
@@ -105,7 +105,7 @@ pub fn publish(registry_link: &String) {
                 .unwrap();
 
             let response = client
-                .post(format!("{registry_link}/create"))
+                .post(format!("{registry_link}/api/v{}/create", env!("CARGO_PKG_VERSION").split(".").collect::<Vec<&str>>().join("")))
                 .multipart(form)
                 .header(
                     reqwest::header::AUTHORIZATION,

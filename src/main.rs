@@ -103,7 +103,10 @@ enum Commands {
         command: Registry,
     },
     /// Initialize a new project
-    Create,
+    Create {
+        #[arg(short, long, default_value_t = registry::get_default(), help = "Package registry url")]
+        registry: String,
+    },
     /// Run a task defined in project.yml
     Task {
         #[command()]
@@ -162,7 +165,7 @@ fn main() {
         /* essentials */
         Some(Commands::Setup) => cli::setup(),
         Some(Commands::Init) => cli::create_project_yml(),
-        Some(Commands::Create) => project::create::download_template(),
+        Some(Commands::Create { registry }) => project::create::download_template(registry),
 
         /* registry */
         Some(Commands::Login { registry }) => registry::auth::login(registry),
