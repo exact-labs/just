@@ -18,7 +18,7 @@ script = "{{JUST_PATH}}/just run {{$1}} -A"
 [tasks]
 clean = { info = "remove binary", path = "", script = "rm just" }
 build = { info = "build just", path = "", script = ["cargo build --release", "mv {{JUST_PATH}}/target/release/just {{JUST_PATH}}"] }
-publish = { info = "publish crates", path = "", script = ["maid _publish_macros", "maid _publish_state"] }
+publish = { info = "publish crates", path = "", script = ["maid _publish_macros -q", "maid _publish_state -q"] }
 test = { info = "run js tests", path = "tests/new", script = ["maid build", "{{JUST_PATH}}/just run {{$1}} -A"] }
 test-all = { info = "run all js tests", path = "", script = "bash -c 'for file in tests/new/*.js; do maid _test_no-verify ${file#*/*/} -q; done'" }
 test-all-build = { info = "run all js tests", path = "", script = ["maid build", "bash -c 'for file in tests/new/*.js; do maid _test_no-verify ${file#*/*/} -q; done'"] }
