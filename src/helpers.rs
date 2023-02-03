@@ -1,5 +1,5 @@
 use anyhow::{Context, Error};
-use macros::crash;
+use macros::{crash, str};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::io::{BufReader, Read};
@@ -56,10 +56,6 @@ pub fn sha256_digest(path: &PathBuf) -> Result<String, Error> {
     Ok(data_encoding::HEXLOWER.encode(digest.as_ref()))
 }
 
-pub fn string_to_static_str(s: String) -> &'static str {
-    Box::leak(s.into_boxed_str())
-}
-
 pub fn get_home_dir() -> Result<PathBuf, Error> {
     let home_dir = home::home_dir().context("Unable to find home directory.")?;
 
@@ -69,10 +65,10 @@ pub fn get_home_dir() -> Result<PathBuf, Error> {
 pub struct Exists;
 impl Exists {
     pub fn folder(dir_name: String) -> Result<bool, Error> {
-        Ok(Path::new(string_to_static_str(dir_name)).is_dir())
+        Ok(Path::new(str!(dir_name)).is_dir())
     }
     pub fn file(file_name: String) -> Result<bool, Error> {
-        Ok(Path::new(string_to_static_str(file_name)).exists())
+        Ok(Path::new(str!(file_name)).exists())
     }
 }
 

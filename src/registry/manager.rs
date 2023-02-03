@@ -1,4 +1,3 @@
-use crate::helpers;
 use crate::project;
 
 use anyhow::Context;
@@ -7,7 +6,7 @@ use colored::Colorize;
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
 use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
-use macros::ternary;
+use macros::{fmtstr, ternary};
 use std::cmp::min;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
@@ -36,8 +35,9 @@ fn move_package(file: &str, name: &str, version: &str) {
     let mut package = project::package::read();
     let dependencies = package.dependencies.clone();
 
-    if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages", current_dir.display()))).is_dir() {
+    if !std::path::Path::new(fmtstr!("{}/packages", current_dir.display())).is_dir() {
         std::fs::create_dir_all(format!("{}/packages", current_dir.display())).unwrap();
+        log::debug!("created {}/packages", current_dir.display())
     }
 
     match File::open(file) {
@@ -140,7 +140,7 @@ pub fn add(input: &str, timer: bool, registry: &String) {
             match serde_json::from_str::<Response>(&res.text().unwrap()) {
                 Ok(json) => {
                     version = json.dist.version.clone();
-                    if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages/{name}/{version}", current_dir.display()))).is_dir() {
+                    if !std::path::Path::new(fmtstr!("{}/packages/{name}/{version}", current_dir.display())).is_dir() {
                         pb.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located package {name}@{}", json.dist.version).green()));
 
                         let runtime = tokio::runtime::Runtime::new().unwrap();
@@ -184,7 +184,7 @@ pub fn add(input: &str, timer: bool, registry: &String) {
                         pb_dep.set_style(style.clone());
                         pb_dep.set_message("locating...");
 
-                        if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages/{name}/{version}", current_dir.display()))).is_dir() {
+                        if !std::path::Path::new(fmtstr!("{}/packages/{name}/{version}", current_dir.display())).is_dir() {
                             pb_dep.finish_with_message(format!("\x08{} {}", "✔".green(), format!("located dependency {name}@{}", &version).bright_green()));
                         } else {
                             pb_dep.finish_with_message(format!("\x08{} {}", "ℹ".magenta(), format!("skipped installed dependency {name}@{}", &version).bright_magenta()));
@@ -195,7 +195,7 @@ pub fn add(input: &str, timer: bool, registry: &String) {
                         let name = link.split("/").collect::<Vec<&str>>()[3];
                         let version = link.split("/").collect::<Vec<&str>>()[5];
                         let runtime = tokio::runtime::Runtime::new().unwrap();
-                        if !std::path::Path::new(helpers::string_to_static_str(format!("{}/packages/{name}/{version}", current_dir.display()))).is_dir() {
+                        if !std::path::Path::new(fmtstr!("{}/packages/{name}/{version}", current_dir.display())).is_dir() {
                             match runtime.block_on(download(&reqwest::Client::new(), link, &format!("{name}.tgz"), format!("{name}@{}", version))) {
                                 Ok(_) => move_package(&format!("{name}.tgz"), &name, &version),
                                 Err(err) => {

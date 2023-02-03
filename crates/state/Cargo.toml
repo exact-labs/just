@@ -13,3 +13,4 @@ macros = { package = "just_macros", path = "../macros", version = "0.1.1" }
 colored = "2.0.0"
 lazy_static = "1.4.0"
 serde = "1.0.152"
+clap = "4.1.4"

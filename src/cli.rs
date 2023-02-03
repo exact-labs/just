@@ -26,6 +26,7 @@ pub fn serve(host: String, port: i32, path: &String) {
 }
 
 pub fn setup() {
+    log::info!("setup has been ran");
     let home_dir = home::home_dir().unwrap();
     let package_dir = format!("{}/.just/packages", home_dir.display());
 

@@ -6,7 +6,7 @@ use ast::{parse_module, MediaType, ParseParams, SourceTextInfo};
 use colored::Colorize;
 use data_url::DataUrl;
 use engine::{futures::FutureExt, ModuleLoader, ModuleSource, ModuleSourceFuture, ModuleSpecifier, ModuleType};
-use macros::ternary;
+use macros::{str, ternary};
 use std::{error::Error, fmt, path::Component, path::Path, path::PathBuf, pin::Pin};
 use url::{ParseError, Url};
 use ModuleResolutionError::*;
@@ -254,7 +254,7 @@ impl ModuleLoader for RuntimeImport {
                     let (bytes, _) = data_url.decode_to_vec().map_err(|e| anyhow!("Unable to parse data url {:?}.", e))?;
                     let mime_type = data_url.mime_type().subtype.clone();
 
-                    let (module_type, should_transpile) = match helpers::string_to_static_str(mime_type.clone()) {
+                    let (module_type, should_transpile) = match str!(mime_type.clone()) {
                         "javascript" | "ecmascript" | "x-javascript" | "node" => (ModuleType::JavaScript, false),
                         "typescript" | "x-typescript" | "tsx" => (ModuleType::JavaScript, true),
                         "jsx" | "jscript" => (ModuleType::JavaScript, true),

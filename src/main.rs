@@ -9,26 +9,15 @@ mod runtime;
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
 use exact_panic::setup_panic;
+use macros::{str, string};
+use state::permissions;
+use std::env;
 
 #[derive(Parser)]
-#[command(version = helpers::string_to_static_str(cli::get_version(false)))]
+#[command(version = str!(cli::get_version(false)))]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
-    #[arg(global = true, short = 'A', long, default_value_t = false, help = "Allow all permissions")]
-    allow_all: bool,
-    #[arg(global = true, long, default_value_t = false, help = "Allow environment access")]
-    allow_env: bool,
-    #[arg(global = true, long, default_value_t = false, help = "Allow network access")]
-    allow_net: bool,
-    #[arg(global = true, long, default_value_t = false, help = "Allow file system read access")]
-    allow_read: bool,
-    #[arg(global = true, long, default_value_t = false, help = "Allow file system write access")]
-    allow_write: bool,
-    #[arg(global = true, long, default_value_t = false, help = "Allow running subprocesses")]
-    allow_cmd: bool,
-    #[arg(global = true, long, default_value_t = false, help = "Allow access to system info")]
-    allow_sys: bool,
     #[clap(flatten)]
     verbose: Verbosity,
 }
@@ -130,22 +119,28 @@ enum Commands {
     Tests,
     /// Start the index script
     Start {
-        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
+        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments", hide_default_value = true)]
         args: String,
+        #[clap(flatten)]
+        state: permissions::Builder,
     },
     /// Eval a JavaScript string
     Eval {
         #[command()]
         code: String,
-        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
+        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments", hide_default_value = true)]
         args: String,
+        #[clap(flatten)]
+        state: permissions::Builder,
     },
     /// Run a JavaScript program
     Run {
-        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments")]
+        #[arg(short, long, default_value_t = String::from(""), help = "Runtime arguments", hide_default_value = true)]
         args: String,
         #[command()]
         path: String,
+        #[clap(flatten)]
+        state: permissions::Builder,
     },
     /// Static file serving
     Serve {
@@ -162,7 +157,7 @@ fn main() {
     setup_panic!();
 
     if registry::get_default() == "" {
-        registry::set_default(&String::from("https://r.justjs.dev"), true)
+        registry::set_default(&string!("https://r.justjs.dev"), true)
     }
 
     let cli = Cli::parse();
@@ -210,19 +205,19 @@ fn main() {
         },
 
         /* runtime */
-        Some(Commands::Run { path, args }) => {
-            std::env::set_var("_just_args", args);
-            state::permissions::set(&cli.allow_all, &cli.allow_env, &cli.allow_net, &cli.allow_read, &cli.allow_write, &cli.allow_cmd, &cli.allow_sys);
+        Some(Commands::Run { path, args, state }) => {
+            env::set_var("_just_args", args);
+            permissions::set(state);
             cli::run_exec(path, cli.verbose.is_silent(), "");
         }
-        Some(Commands::Eval { code, args }) => {
-            std::env::set_var("_just_args", args);
-            state::permissions::set(&cli.allow_all, &cli.allow_env, &cli.allow_net, &cli.allow_read, &cli.allow_write, &cli.allow_cmd, &cli.allow_sys);
+        Some(Commands::Eval { code, args, state }) => {
+            env::set_var("_just_args", args);
+            permissions::set(state);
             cli::run_exec("", cli.verbose.is_silent(), code);
         }
-        Some(Commands::Start { args }) => {
-            std::env::set_var("_just_args", args);
-            state::permissions::set(&cli.allow_all, &cli.allow_env, &cli.allow_net, &cli.allow_read, &cli.allow_write, &cli.allow_cmd, &cli.allow_sys);
+        Some(Commands::Start { args, state }) => {
+            env::set_var("_just_args", args);
+            permissions::set(state);
             cli::run_exec(&project::package::read().info.index, cli.verbose.is_silent(), "");
         }
 

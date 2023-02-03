@@ -5,7 +5,7 @@ use colored::Colorize;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use indicatif::{ProgressBar, ProgressStyle};
-use macros::ternary;
+use macros::{fmtstr, str, ternary};
 use std::fs::File;
 
 #[derive(Debug, serde::Deserialize)]
@@ -40,7 +40,7 @@ fn write_tar(file_name: &String) -> Result<(), std::io::Error> {
 pub fn publish(registry_link: &String) {
     match home::home_dir() {
         Some(path) => {
-            if !std::path::Path::new(helpers::string_to_static_str(format!("{}/.just/temp", path.display()))).is_dir() {
+            if !std::path::Path::new(fmtstr!("{}/.just/temp", path.display())).is_dir() {
                 std::fs::create_dir_all(format!("{}/.just/temp", path.display())).unwrap();
                 println!("created {}/.just", path.display());
             }
@@ -107,10 +107,7 @@ pub fn publish(registry_link: &String) {
             let response = client
                 .post(format!("{registry_link}/api/v{}/create", env!("CARGO_PKG_VERSION").split(".").collect::<Vec<&str>>().join("")))
                 .multipart(form)
-                .header(
-                    reqwest::header::AUTHORIZATION,
-                    reqwest::header::HeaderValue::from_static(helpers::string_to_static_str(auth.token.clone())),
-                )
+                .header(reqwest::header::AUTHORIZATION, reqwest::header::HeaderValue::from_static(str!(auth.token.clone())))
                 .send();
 
             match response {

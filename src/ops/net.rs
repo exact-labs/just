@@ -1,7 +1,5 @@
-use crate::helpers;
-
 use engine::{op, OpDecl};
-use macros::function_name;
+use macros::{function_name, str};
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde_json::Value;
 
@@ -15,7 +13,7 @@ fn header_parse(headers: String) -> Result<HeaderMap, anyhow::Error> {
     let parse_header = |val: &str| HeaderValue::from_str(&val[1..val.len() - 1]).unwrap();
 
     for (key, value) in headers_parsed.as_object().unwrap() {
-        header_list.insert(helpers::string_to_static_str(key.to_string()), parse_header(&value.to_string()));
+        header_list.insert(str!(key.to_string()), parse_header(&value.to_string()));
     }
 
     Ok(header_list)

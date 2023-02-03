@@ -2,7 +2,7 @@ use crate::helpers;
 
 use anyhow::Error as AnyError;
 use engine::{op, OpDecl};
-use macros::{function_name, scaffold};
+use macros::{function_name, scaffold, str};
 use serde::{Deserialize, Serialize};
 use std::io::Error;
 use std::os::unix::fs::PermissionsExt;
@@ -26,12 +26,12 @@ pub fn init() -> Vec<OpDecl> {
 
 #[op]
 fn file_exists(file_name: String) -> Result<bool, AnyError> {
-    Ok(Path::new(helpers::string_to_static_str(file_name)).exists())
+    Ok(Path::new(str!(file_name)).exists())
 }
 
 #[op]
 fn dir_exists(dir_name: String) -> Result<bool, AnyError> {
-    Ok(Path::new(helpers::string_to_static_str(dir_name)).is_dir())
+    Ok(Path::new(str!(dir_name)).is_dir())
 }
 
 #[op]
