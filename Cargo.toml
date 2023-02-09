@@ -13,8 +13,8 @@ path = "src/main.rs"
 
 [dependencies]
 # local
-state = { package = "just_state", path = "./crates/state", version = "0.1.3" }
-macros = { package = "just_macros", path = "./crates/macros", version = "0.1.1" }
+state = { package = "just_state", path = "./crates/state", version = "0.2.0" }
+macros = { package = "just_macros", path = "./crates/macros", version = "0.2.0" }
 
 # remote
 colored = "2"
