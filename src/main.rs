@@ -154,7 +154,12 @@ enum Commands {
 }
 
 fn main() {
-    setup_panic!();
+    setup_panic!(Metadata {
+        name: "The justjs runtime",
+        short_name: "justjs",
+        version: env!("CARGO_PKG_VERSION"),
+        repository: "https://github.com/exact-rs/just"
+    });
 
     if registry::get_default() == "" {
         registry::set_default(&string!("https://r.justjs.dev"), true)

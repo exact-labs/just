@@ -410,6 +410,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "concolor"
+version = "0.0.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "318d6c16e73b3a900eb212ad6a82fc7d298c5ab8184c7a9998646455bc474a16"
+dependencies = [
+ "bitflags",
+ "concolor-query",
+ "is-terminal",
+]
+
+[[package]]
+name = "concolor-query"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "82a90734b3d5dcf656e7624cca6bce9c3a90ee11f900e80141a7427ccfb3d317"
+
+[[package]]
 name = "concurrent-queue"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -915,11 +932,12 @@ checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
 
 [[package]]
 name = "exact-panic"
-version = "0.0.6"
+version = "0.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6631529a392826de6ce19393f3934ff710acad56c528e006a70ad3807fbf466"
+checksum = "54062f4664839ede6432a023a6afedb1f4c0162a77896d83f2e8c3d76f4b5bc8"
 dependencies = [
  "backtrace",
+ "concolor",
  "os_info",
  "serde",
  "serde_derive",
@@ -1489,11 +1507,11 @@ dependencies = [
 
 [[package]]
 name = "just_macros"
-version = "0.1.2"
+version = "0.2.0"
 
 [[package]]
 name = "just_state"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "clap",
  "colored",
