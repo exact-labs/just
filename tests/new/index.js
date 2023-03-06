@@ -71,7 +71,7 @@ console.fmt.hex.print('#D9A7F7', 'decode_base64: ');
 console.log(base64.decode('aGVsbG8gd29ybGQ='));
 
 console.fmt.hex.print('#D9A7F7', 'os_platform: ');
-console.log(os.platform);
+console.log(os.platform());
 
 const db = new Open('ver_db');
 console.fmt.hex.print('#D9A7F7', 'kv_set_str: ');
