@@ -7,7 +7,7 @@
 			ops.log_stdout(logWithoutObject(...args));
 		},
 		json: (string, format) => {
-			ops.log_stdout(formatChain(string, format));
+			ops.object_print(formatChain(string, format));
 		},
 		info: (...args) => {
 			ops.log_info(logWithoutObject(...args));

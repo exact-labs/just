@@ -24,3 +24,13 @@ macro_rules! scaffold {
     }
   };
 }
+
+#[macro_export]
+macro_rules! derive {
+  (pub struct $name:ident { $($field:ident: $type:ty),* $(,)? }) => {
+    #[derive(Clone, Debug, serde_derive::Deserialize, serde_derive::Serialize)]
+    struct $name {
+      $($field: $type),*
+    }
+  };
+}

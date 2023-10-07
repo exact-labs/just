@@ -6,6 +6,7 @@ license = "MIT"
 homepage = "https://justjs.dev"
 repository = "https://github.com/exact-rs/just"
 description = "A modern runtime for javascript."
+rust-version = "1.71.0"
 
 [[bin]]
 name = "just"
@@ -14,7 +15,7 @@ path = "src/main.rs"
 [dependencies]
 # local
 state = { package = "just_state", path = "./crates/state", version = "0.2.0" }
-macros = { package = "just_macros", path = "./crates/macros", version = "0.2.0" }
+macros = { package = "macros-rs", path = "./crates/macros", version = "0.4.0" }
 
 # remote
 colored = "2"
@@ -26,6 +27,7 @@ home = "0.5.4"
 open = "3.2.0"
 warp = "0.3.3"
 log = "0.4.17"
+http = "0.2.9"
 sha2 = "0.10.6"
 brown = "0.2.0"
 sled = "0.34.7"
@@ -48,6 +50,7 @@ zip-extract = "0.1.1"
 exact-panic = "0.0.7"
 env_logger = "0.10.0"
 esbuild-rs = "0.13.8"
+colored_json = "3.1.0"
 futures-util = "0.3.25"
 v_htmlescape = "0.15.8"
 data-encoding = "2.3.2"

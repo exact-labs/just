@@ -1,14 +1,15 @@
+[env]
 JUST_PATH = "%{dir.home}/Developer/rust/js_runtime"
 
 [tasks._publish_macros]
 info = "helper for publish"
 path = "crates/macros"
-script = "cargo publish --no-verify"
+script = "cargo publish --no-verify --allow-dirty"
 
 [tasks._publish_state]
 info = "helper for publish"
 path = "crates/state"
-script = "cargo publish --no-verify"
+script = "cargo publish --no-verify --allow-dirty"
 
 [tasks._test_no-verify]
 info = "helper for test-all"

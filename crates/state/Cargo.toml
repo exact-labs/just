@@ -7,7 +7,7 @@ description = "justjs state manager"
 
 [dependencies]
 # local
-macros = { package = "just_macros", path = "../macros", version = "0.2.0" }
+macros = { package = "macros-rs", path = "../macros", version = "0.4.0" }
 
 # ext
 colored = "2.0.0"

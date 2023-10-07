@@ -3,6 +3,7 @@ use crate::project;
 
 use anyhow::Error;
 use colored::Colorize;
+use colored_json::prelude::*;
 use duration_string::DurationString;
 use engine::{op, v8, OpDecl};
 use macros::{crashln, function_name, ternary};
@@ -27,6 +28,7 @@ pub fn init() -> Vec<OpDecl> {
         hex_decode::decl(),
         random_uuid::decl(),
         get_package::decl(),
+        object_print::decl(),
         base64_encode::decl(),
         base64_decode::decl(),
         escape_string::decl(),
@@ -104,6 +106,13 @@ fn get_package(package: String, version: String) -> String {
     // insert error handler ^
 
     return format!("{}/packages/{package}/{}/{package_index}", dir.display(), &package_version);
+}
+
+#[op]
+fn object_print(msg: String) -> Result<(), Error> {
+    stdout().write_all(msg.to_colored_json_auto()?.as_bytes())?;
+    stdout().flush().unwrap();
+    Ok(())
 }
 
 #[op]
